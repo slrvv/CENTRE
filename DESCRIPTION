@@ -1,0 +1,22 @@
+Package: EPI
+Title: Enhancer Promoter Interaction Predictor
+Version: 0.0.0.9000
+Authors@R:
+    person(given = "Trisevgeni",
+           family = "Rapakoulia",
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person(given = "Sara",
+           family = "Lopez Ruiz de Vargas",
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Prediction of Enhancer Promoter Interaction.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
+Depends: 
+    R (>= 2.10)

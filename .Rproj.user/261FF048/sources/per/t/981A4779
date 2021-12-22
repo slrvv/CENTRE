@@ -1,0 +1,26 @@
+{
+    "id": "981A4779",
+    "path": "/project/CRUP_scores/EPI/DESCRIPTION",
+    "project_path": "DESCRIPTION",
+    "type": "dcf",
+    "hash": "2974094617",
+    "contents": "",
+    "dirty": false,
+    "created": 1638803332345.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "14,57",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1638805748,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1638805748,
+    "read_only": false,
+    "read_only_alternatives": []
+}
