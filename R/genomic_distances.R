@@ -37,6 +37,7 @@ distances_gene_enhancer <- function(x) {
 #'
 #'
 distances <- function(x) {
+  load("sysdata.rda")
   ccres <- unfactorize(ccres)
   gencode <- unfactorize(gencode)
   chromosomes <- unfactorize(chromosomes)
