@@ -39,7 +39,7 @@ distances_gene_enhancer <- function(x) {
 #'
 #'
 distances <- function(x) {
-  x <- as.data.frame(x)
+  x <- unfactorize(x)
   gencode <- as.data.frame(gencode)
   ccres_enhancer <- as.data.frame(ccres_enhancer)
   if (ncol(x) == 2) {
