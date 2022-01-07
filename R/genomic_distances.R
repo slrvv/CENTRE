@@ -10,16 +10,16 @@ unfactorize <- function(df) {
 
 distances_gene_enhancer <- function(x) {
   x <- unfactorize(x)
+  gencode <- unfactorize(gencode)
   distances <- c()
   for (i in 1:nrow(x)) {
-    stopifnot(ccres[ccres$V5 == x[i, 2], 1] == gencode[gencode$gene_id == x[i, 1], 1])
-
     eldist <- abs(ccres[ccres$V5 == x[i, 2], 11]
                   - gencode[gencode$gene_id == x[i, 1], 10])
 
     distances <- c(distances, eldist)
   }
   final <- as.data.frame(cbind(x[, 1], x[, 2], distances))
+  final <- unfactorize(final)
   return(final)
 }
 
@@ -39,13 +39,9 @@ distances_gene_enhancer <- function(x) {
 #'
 #'
 distances <- function(x) {
-  load("~/Documentos/EPI/R/sysdata.rda") # this needs to be changed
-  ccres <- unfactorize(ccres)
-  gencode <- unfactorize(gencode)
-  chromosomes <- unfactorize(chromosomes)
-  ccres_enhancer <- unfactorize(ccres_enhancer)
-  x <- unfactorize(x)
-
+  x <- as.data.frame(x)
+  gencode <- as.data.frame(gencode)
+  ccres_enhancer <- as.data.frame(ccres_enhancer)
   if (ncol(x) == 2) {
     distance_dataframe <- distances_gene_enhancer(x)
     return(distance_dataframe)
@@ -98,7 +94,3 @@ distances <- function(x) {
   }
 
 }
-
-
-
-
