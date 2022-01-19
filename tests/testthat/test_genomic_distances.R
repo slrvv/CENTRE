@@ -19,7 +19,7 @@ test_that("distances are correct for the input with just genes", {
 })
 
 
-test_that("error when computing distances between differet chromosomes", {
-   example <- as.data.frame(c("ENSG00000286832.1", "EH38E2776520"))
-   expect_error(distances(example))
+test_that("warning when computing distances between differet chromosomes", {
+   example <- as.data.frame(cbind("ENSG00000286832.1", "EH38E2776520"))
+   expect_warning(distances(example))
 })

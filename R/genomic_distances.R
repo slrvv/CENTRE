@@ -13,10 +13,16 @@ distances_gene_enhancer <- function(x) {
   gencode <- unfactorize(gencode)
   distances <- c()
   for (i in 1:nrow(x)) {
-    eldist <- abs(ccres[ccres$V5 == x[i, 2], 11]
-                  - gencode[gencode$gene_id == x[i, 1], 10])
+    if(ccres[ccres$V5 == x[i, 2], 1] != gencode[gencode$gene_id == x[i, 1], 1] ){
+      warning("Gene and enhancer are not in the same chromosome, distance will not be computed")
+    }
+    else {
+      eldist <- abs(ccres[ccres$V5 == x[i, 2], 11]
+                    - gencode[gencode$gene_id == x[i, 1], 10])
 
-    distances <- c(distances, eldist)
+      distances <- c(distances, eldist)
+    }
+
   }
   final <- as.data.frame(cbind(x[, 1], x[, 2], distances))
   final <- unfactorize(final)
