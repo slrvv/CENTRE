@@ -1,4 +1,15 @@
 
+#' Compute crup
+#'
+#' @param input matrix of enhancers and promoters
+#' @param crupinput metaData matrix as defined in the crupR documentation
+#' @param cores number of cores
+#'
+#' @return dataframe with the crup score computed for each region
+#' @export
+#' @import crupR
+#'
+#' @examples
 compute_crup <- function(input, crupinput, cores){
 
   normalized <- crupR::normalize(metaData = crupinput, condition = 1, replicate = 1,
