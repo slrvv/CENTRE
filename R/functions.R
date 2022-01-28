@@ -38,6 +38,7 @@ distances_gene_enhancer <- function(x) {
 # to overlapping enhancers
 ###############################################################################
 
+### this can be done in a much nicer way
 map_genes_to_chromosomes <- function(x){
   start <- c()
   end <- c()
