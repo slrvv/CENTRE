@@ -26,3 +26,29 @@ compute_crup_EP_enhancer <- function(input, crupinput, cores){
 
 }
 
+
+compute_crup_EP_promoter <- function(input, crupinput, cores){
+
+  normalized <- crupR::normalize(metaData = crupinput, condition = 1, replicate = 1,
+                                 genome = "hg38", sequencing = "single",
+                                 chroms = c("chr1"), cores = cores) ##call normalization outside of function??
+  crup_scores <- crupR::getEnhancers(data = normalized, cores = cores)
+
+  crup_scores <- crup_scores$data_matrix
+
+  gencode <- as.data.frame(gencode)
+
+  regions <- subset(gencode, gencode$gene_id %in% input[,1], select = c(chr,gene_id,new_start, new_end))
+
+  genes_ranges <- with(regions, GenomicRanges::GRanges(chr, IRanges::IRanges(start=new_start,end=new_end)))
+
+  hits_crup<- GenomicRanges::findOverlaps(genes_ranges,crup_scores)
+  cres_EP<-data.frame(promoter=hits_crup@from,EP=hits_crup@to)
+  cres_EP$gene_name <-gencode$gene_id[cres_EP$promoter]
+  cres_EP$EP_prob<-GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
+  normilized_score<-aggregate(EP_prob ~ gene_name, cres_EP, sum)
+
+  return(normilized_score)
+
+
+}
