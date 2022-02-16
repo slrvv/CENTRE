@@ -178,12 +178,12 @@ compute_features_crup_scores <- function(input, crupinput, cores, chromosome){
   crup_scores_prom <- crupR::getEnhancers(data = normalized, cores = cores, promprob = T)
   crup_scores_prom <- crup_scores_prom$data_matrix
 
-  crup_EP_enh <- compute_crup_EP_enhancer(input, crupinput, cores, crup_scores_enh)
-  crup_EP_prom <- compute_crup_EP_promoter(input, crupinput, cores, crup_scores_enh)
-  crup_EP_reg <- compute_crup_EP_reg_distance(input, crupinput, cores, crup_scores_enh)
-  crup_PP_enh <- compute_crup_EP_enhancer(input, crupinput, cores, crup_scores_prom)
-  crup_PP_prom <- compute_crup_EP_promoter(input, crupinput, cores, crup_scores_prom)
-  crup_PP_reg <- compute_crup_EP_reg_distance(input, crupinput, cores, crup_scores_prom)
+  crup_EP_enh <- compute_crup_EP_enhancer(input, crup_scores_enh)
+  crup_EP_prom <- compute_crup_EP_promoter(input, crup_scores_enh)
+  crup_EP_reg <- compute_crup_EP_reg_distance(input, crup_scores_enh)
+  crup_PP_enh <- compute_crup_PP_enhancer(input, crup_scores_prom)
+  crup_PP_prom <- compute_crup_PP_promoter(input, crup_scores_prom)
+  crup_PP_reg <- compute_crup_PP_reg_distance(input, crup_scores_prom)
 
   input$EP_enh <- crup_EP_enh$EP_prob
   input$EP_prom <- crup_EP_prom$EP_prob
