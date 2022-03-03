@@ -1,0 +1,26 @@
+{
+    "id": "A30D02B0",
+    "path": "/project/CRUP_scores/toSara/new_datasets.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1646313139081.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "171,45",
+        "scrollLine": "150"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1643297468,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1643297468,
+    "read_only": false,
+    "read_only_alternatives": []
+}

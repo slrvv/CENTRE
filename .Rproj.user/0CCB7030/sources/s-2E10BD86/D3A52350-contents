@@ -1,0 +1,653 @@
+setwd(dir='/home/rapakoul/BENGI/');
+
+library(GenomicRanges)
+library(data.table)
+
+map19_38<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/Annotations/hg19-cCREstoGRCh38.bed',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+
+length(unique(map19_38$symbol19))
+[1] 732642
+length(unique(map19_38$symbol38))
+[1] 816950
+
+
+
+dir<-list.dirs(path = "/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/",full.names = TRUE, recursive = TRUE)
+b<-list.files(path =dir)
+
+benchmark<-list()
+
+for (j in 1:length(b)){
+	benchmark[[b[j]]]<-read.table(file=paste0(dir,'/',b[j]),header=F,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+}
+
+
+
+sapply(benchmark,nrow)
+#             CD34.CHiC-Benchmark.v3.txt             Colon.GTEx-Benchmark.v3.txt 
+#                                 195865                                   35511 
+#          GM12878.CHiC-Benchmark.v3.txt   GM12878.CTCF-ChIAPET-Benchmark.v3.txt 
+#                                 375728                                  105016 
+#      GM12878.GEUVADIS-Benchmark.v3.txt           GM12878.GTEx-Benchmark.v3.txt 
+#                                  50999                                   38200 
+#           GM12878.HiC-Benchmark.v3.txt GM12878.RNAPII-ChIAPET-Benchmark.v3.txt 
+#                                 153739                                  157235 
+#              HMEC.HiC-Benchmark.v3.txt      HeLa.CTCF-ChIAPET-Benchmark.v3.txt 
+#                                  56285                                   39429 
+#              HeLa.HiC-Benchmark.v3.txt    HeLa.RNAPII-ChIAPET-Benchmark.v3.txt 
+#                                  81325                                    6686 
+#             IMR90.HiC-Benchmark.v3.txt            K562.CRISPR-Benchmark.v3.txt 
+#                                  59627                                   25227 
+#              K562.HiC-Benchmark.v3.txt             Liver.GTEx-Benchmark.v3.txt 
+#                                 202388                                   39698 
+#              NHEK.HiC-Benchmark.v3.txt             Ovary.GTEx-Benchmark.v3.txt 
+#                                  73723                                   18867 
+#         Pancreas.GTEx-Benchmark.v3.txt           Stomach.GTEx-Benchmark.v3.txt 
+#                                  56078                                   49410 
+#          Thyroid.GTEx-Benchmark.v3.txt 
+#                                 183650 
+
+for (i in 2:length(benchmark)){
+	
+	benchmark[[i]]<-merge(benchmark[[i]],map19_38[,2:3],by.x='V1', by.y= 'symbol19')
+	benchmark[[i]]$gene_id1<-gsub("\\..*","", benchmark[[i]]$V2)
+	new_name<-gsub("\\.v3.",".V38.", names(benchmark)[i])
+	write.table(benchmark[[i]],paste0(dir,'V38','/',new_name),quote=FALSE,sep="\t",row.names = F)
+}
+
+
+sapply(benchmark,nrow)
+
+
+#             CD34.CHiC-Benchmark.v3.txt             Colon.GTEx-Benchmark.v3.txt 
+#                                 380468                                   48356 
+#          GM12878.CHiC-Benchmark.v3.txt   GM12878.CTCF-ChIAPET-Benchmark.v3.txt 
+#                                 431696                                  133076 
+#      GM12878.GEUVADIS-Benchmark.v3.txt           GM12878.GTEx-Benchmark.v3.txt 
+#                                  66678                                   53152 
+#           GM12878.HiC-Benchmark.v3.txt GM12878.RNAPII-ChIAPET-Benchmark.v3.txt 
+#                                 190043                                  189463 
+#              HMEC.HiC-Benchmark.v3.txt      HeLa.CTCF-ChIAPET-Benchmark.v3.txt 
+#                                  71270                                   53559 
+#              HeLa.HiC-Benchmark.v3.txt    HeLa.RNAPII-ChIAPET-Benchmark.v3.txt 
+#                                  96765                                    9205 
+#             IMR90.HiC-Benchmark.v3.txt            K562.CRISPR-Benchmark.v3.txt 
+#                                  82814                                   30498 
+#              K562.HiC-Benchmark.v3.txt             Liver.GTEx-Benchmark.v3.txt 
+#                                 230262                                   50098 
+#              NHEK.HiC-Benchmark.v3.txt             Ovary.GTEx-Benchmark.v3.txt 
+#                                  86943                                   27986 
+#         Pancreas.GTEx-Benchmark.v3.txt           Stomach.GTEx-Benchmark.v3.txt 
+#                                  82433                                   70235 
+#          Thyroid.GTEx-Benchmark.v3.txt 
+#                                 238513
+
+
+
+benchmark1<-benchmark[["GM12878.RNAPII-ChIAPET-Benchmark.v3.txt"]]# 189463
+
+benchmark1<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark.V38.txt',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+
+
+
+table(benchmark1$V3)
+#     0      1 
+#159813  29650 
+
+
+#distance
+
+cres_cord<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/Annotations/GRCh38-cCREsV3_all500.bed',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+genes_cord<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/Annotations/gencode_v38.one.transcript.bed',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+
+benchmark1<-merge(benchmark1,cres_cord[,c('V1','V5','middle_point')],by.x='symbol38', by.y= 'V5')## 189463
+
+benchmark1<-merge(benchmark1,genes_cord[,c('chr','gene_id1','transcription_start')],by.x='gene_id1', by.y= 'gene_id1')#173848
+
+
+diff <- benchmark1[(benchmark1$V1.y != benchmark1$chr),]#29
+
+benchmark1<- benchmark1[(benchmark1$V1.y == benchmark1$chr),]#173819
+
+table(benchmark1$V3)
+#     0      1 
+#145571  28248 
+
+benchmark1$distance<-abs(benchmark1$middle_point-benchmark1$transcription_start)
+summary(benchmark1$distance)
+#     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+#        8     49434    101826    121055    154870 125270693 
+
+
+
+hist(benchmark1$distance[benchmark1$distance<500000],
+main="EP distance-GM12878.RNAPII-ChIAPET-Benchmark ",
+xlab="Distance",xlim=c(0,500000),col="darkmagenta",freq=FALSE)
+
+#exlude pairs more than 500KB apart
+
+benchmark1<-benchmark1[benchmark1$distance<=500000,]#173509
+
+#CRUP_EP_scores
+
+cres_cord<-cres_cord[cres_cord$V5 %in% benchmark1$symbol38,]
+length(unique(cres_cord$V5))
+#[1] 13211
+
+
+length(unique(benchmark1$symbol38))
+#[1] 13211
+
+
+cres_ranges=with(cres_cord, GRanges(V1, IRanges(start=new_start,end=new_end)))
+
+
+
+
+paths<-read.csv(file='/home/rapakoul/CRUP_analysis/summary.tsv',header=T,sep='\t')
+
+paths$Path.to.CRUP.scores<-as.character(paths$Path.to.CRUP.scores)
+paths$Name.of.sample<-as.character(paths$Name.of.sample)
+
+cell_of_interest<-"GM12878"
+path_of_interest<-paths$Path.to.CRUP.scores[paths$Name.of.sample==cell_of_interest]
+
+folder1<-"1_ENHANCER_PREDICTIONS/"
+file1<-"prediction.rds"
+
+
+# CRUP enhancer probabilities for enhancer regions
+dir1<-paste0(path_of_interest,folder1)
+prediction<-readRDS(paste0(dir1,file1))
+hits_crup<-findOverlaps(cres_ranges,prediction)
+cres_EP<-data.frame(cres=hits_crup@from,EP=hits_crup@to)#16245
+cres_EP$cres_name<-cres_cord$V5[cres_EP$cres]
+cres_EP$EP_prob<-elementMetadata(prediction)$prob[cres_EP$EP]
+normilized_score<-aggregate(EP_prob ~ cres_name, cres_EP, mean)#put sum instead of mean
+benchmark1<-merge(benchmark1,normilized_score,by.x="symbol38",by.y="cres_name",all.x=TRUE)
+
+cres_EP$cres_name <- factor(cres_EP$cres_name)
+cres_EP$bin<-rep(1:5,nrow(cres_cord))
+trial<-reshape(cres_EP[,3:5],idvar="cres_name",timevar = "bin",direction="wide",v.names="EP_prob")
+
+ext_benchmark<-merge(benchmark1,trial,by.x="symbol38",by.y="cres_name",all.x=TRUE)
+
+prediction.r
+
+
+genes_cord$new_V2<-genes_cord$transcription_start-(genes_cord$transcription_start %% 100)
+genes_cord$new_V3<-genes_cord$transcription_start+(100-genes_cord$transcription_start %% 100)
+stretch<-200
+
+
+#cres$stretch<-ceiling(cres$stretch/2)
+
+
+genes_cord$new_start<-genes_cord$new_V2-stretch
+genes_cord$new_end<-genes_cord$new_V3+stretch
+
+
+genes_cord$newsize<-genes_cord$new_end-genes_cord$new_start
+summary(genes_cord$newsize)
+#   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#    500     500     500     500     500     500 
+
+
+genes_cord$new_start<-genes_cord$new_start+1
+
+write.table(genes_cord[,c(1:10,13,14)],"/home/rapakoul/BENGI/BENGI-master/Benchmark/Annotations/gencode_v38.one.transcript2.bed",
+quote=FALSE,sep="\t",row.names = F)#60574
+
+genes_cord<-genes_cord[genes_cord$gene_id1 %in% benchmark1$gene_id1,]#24047
+
+
+#CRUP enhancer probabilities for genes
+
+genes_ranges=with(genes_cord, GRanges(chr, IRanges(start=new_start,end=new_end)))
+
+hits_crup<-findOverlaps(genes_ranges,prediction)
+cres_EP<-data.frame(genes=hits_crup@from,EP=hits_crup@to)#16245
+cres_EP$gene_id1<-genes_cord$gene_id1[cres_EP$genes]
+cres_EP$EP_prob_gene<-elementMetadata(prediction)$prob[cres_EP$EP]
+normilized_score<-aggregate(EP_prob_gene ~ gene_id1, cres_EP, mean)#sum isted of mean
+benchmark1<-merge(benchmark1,normilized_score,by.x="gene_id1",by.y="gene_id1",all.x=TRUE)
+
+cres_EP$gene_id1 <- factor(cres_EP$gene_id1)
+cres_EP$bin<-rep(1:5,nrow(genes_cord))
+trial<-reshape(cres_EP[,3:5],idvar="gene_id1",timevar = "bin",direction="wide",v.names="EP_prob_gene")
+
+ext_benchmark<-merge(ext_benchmark,trial,by.x="gene_id1",by.y="gene_id1",all.x=TRUE)
+
+
+#genomic_distance EP
+
+benchmark1$distance2<-benchmark1$middle_point-benchmark1$transcription_start
+
+benchmark1$bstart<-benchmark1$middle_point
+benchmark1$bstart[benchmark1$distance2>0]<-benchmark1$transcription_start[benchmark1$distance2>0]
+benchmark1$bend<-benchmark1$transcription_start
+benchmark1$bend[benchmark1$distance2>0]<-benchmark1$middle_point[benchmark1$distance2>0]
+
+benchmark1$pair<-paste0(benchmark1$symbol38,'_',benchmark1$gene_id1)#173509
+benchmark1<-benchmark1[!(duplicated(benchmark1$pair)),]#169049
+ext_benchmark$pair<-paste0(ext_benchmark$symbol38,'_',ext_benchmark$gene_id1)#173509
+ext_benchmark<-ext_benchmark[!(duplicated(ext_benchmark$pair)),]#169049
+
+between_ranges<-with(benchmark1, GRanges(chr, IRanges(start=bstart,end=bend)))
+hits_enh<-findOverlaps(between_ranges,prediction)
+cres_EP<-data.frame(between=hits_enh@from,EP_prob=elementMetadata(prediction)$prob[hits_enh@to])
+normilized_score<-aggregate(EP_prob ~ between, cres_EP, mean)
+bins<-as.data.frame(table(cres_EP$between))
+
+cor(benchmark1$distance,bins$Freq)
+#[1] 0.9999998
+
+cres_EP1<-cres_EP[cres_EP$EP_prob>0.5,]
+bins_pos<-as.data.frame(table(cres_EP1$between))166668
+all_bins<-merge(bins,bins_pos,by.x="Var1",by.y="Var1",all.x=TRUE)
+all_bins[is.na(all_bins)] <- 0
+
+colnames(all_bins)<-c("pair","bins","bins_pos")
+
+cor(benchmark1$distance,all_bins$bins)
+#[1] 0.9999998
+cor(benchmark1$distance,all_bins$bins_pos)
+#[1] 0.3510437
+
+benchmark1$mean_enhancerscore<-normilized_score$EP_prob
+benchmark1$bins_enh<- all_bins$bins_pos
+benchmark1$norm_bins_enh<-all_bins$bins_pos/all_bins$bins
+
+cor(benchmark1[,c("distance","mean_enhancerscore","bins_enh","norm_bins_enh" )])
+
+#                     distance mean_enhancerscore  bins_enh norm_bins_enh
+#distance            1.0000000         -0.4042735 0.3510437    -0.3775633
+#mean_enhancerscore -0.4042735          1.0000000 0.3986933     0.9878811
+#bins_enh            0.3510437          0.3986933 1.0000000     0.3995085
+#norm_bins_enh      -0.3775633          0.9878811 0.3995085     1.0000000
+
+
+ext_benchmark$mean_enhancerscore<-normilized_score$EP_prob
+ext_benchmark$bins_enh<- all_bins$bins_pos
+ext_benchmark$norm_bins_enh<-all_bins$bins_pos/all_bins$bins
+
+cor(ext_benchmark[,c("distance","mean_enhancerscore","bins_enh","norm_bins_enh" )])
+
+#                     distance mean_enhancerscore  bins_enh norm_bins_enh
+#distance            1.0000000         -0.4042735 0.3510437    -0.3775633
+#mean_enhancerscore -0.4042735          1.0000000 0.3986933     0.9878811
+#bins_enh            0.3510437          0.3986933 1.0000000     0.3995085
+#norm_bins_enh      -0.3775633          0.9878811 0.3995085     1.0000000
+
+
+
+
+
+
+#CRUP_PP_scores
+
+
+
+
+folder1<-"1_PROMOTER_PREDICTIONS/"
+file1<-"prediction.rds"
+
+
+dir1<-paste0(path_of_interest,folder1)
+prediction<-readRDS(paste0(dir1,file1))
+hits_crup<-findOverlaps(cres_ranges,prediction)
+cres_EP<-data.frame(cres=hits_crup@from,EP=hits_crup@to)#16245
+cres_EP$cres_name<-cres_cord$V5[cres_EP$cres]
+cres_EP$PP_prob<-elementMetadata(prediction)$prob[cres_EP$EP]
+normilized_score<-aggregate(PP_prob ~ cres_name, cres_EP, mean)
+benchmark1<-merge(benchmark1,normilized_score,by.x="symbol38",by.y="cres_name",all.x=TRUE)
+
+cres_EP$cres_name <- factor(cres_EP$cres_name)
+cres_EP$bin<-rep(1:5,nrow(cres_cord))
+trial<-reshape(cres_EP[,3:5],idvar="cres_name",timevar = "bin",direction="wide",v.names="PP_prob")
+
+ext_benchmark<-merge(ext_benchmark,trial,by.x="symbol38",by.y="cres_name",all.x=TRUE)
+
+#make different file for extended
+
+
+benchmark1<-benchmark1[,1:21]
+
+
+hits_crup<-findOverlaps(genes_ranges,prediction)
+cres_EP<-data.frame(genes=hits_crup@from,EP=hits_crup@to)#16245
+cres_EP$gene_id1<-genes_cord$gene_id1[cres_EP$genes]
+cres_EP$PP_prob_gene<-elementMetadata(prediction)$prob[cres_EP$EP]
+normilized_score<-aggregate(PP_prob_gene ~ gene_id1, cres_EP, mean)
+benchmark1<-merge(benchmark1,normilized_score,by.x="gene_id1",by.y="gene_id1",all.x=TRUE)
+
+#cres_EP$gene_id1 <- factor(cres_EP$gene_id1)
+#cres_EP$bin<-rep(1:5,nrow(genes_cord))
+#trial<-reshape(cres_EP[,3:5],idvar="gene_id1",timevar = "bin",direction="wide",v.names="EP_prob_gene")
+
+#ext_benchmark<-merge(ext_benchmark,trial,by.x="gene_id1",by.y="gene_id1",all.x=TRUE)
+
+
+#genomic_distance EP
+
+
+
+
+between_ranges<-with(benchmark1, GRanges(chr, IRanges(start=bstart,end=bend)))
+hits_enh<-findOverlaps(between_ranges,prediction)
+cres_EP<-data.frame(between=hits_enh@from,PP_prob=elementMetadata(prediction)$prob[hits_enh@to])
+normilized_score<-aggregate(PP_prob ~ between, cres_EP, mean)
+bins<-as.data.frame(table(cres_EP$between))
+
+cor(benchmark1$distance,bins$Freq)
+#[1] [1] 0.9999998
+
+cres_EP1<-cres_EP[cres_EP$PP_prob>0.5,]
+bins_pos<-as.data.frame(table(cres_EP1$between))113738
+all_bins<-merge(bins,bins_pos,by.x="Var1",by.y="Var1",all.x=TRUE)
+all_bins[is.na(all_bins)] <- 0
+
+colnames(all_bins)<-c("pair","bins","bins_pos")
+
+cor(benchmark1$distance,all_bins$bins)
+#[1] 0.9999998
+cor(benchmark1$distance,all_bins$bins_pos)
+#[1] [1] 0.3223835
+
+benchmark1$mean_promoterscore<-normilized_score$PP_prob
+benchmark1$bins_prom<- all_bins$bins_pos
+benchmark1$norm_bins_prom<-all_bins$bins_pos/all_bins$bins
+
+cor(benchmark1[,c("distance","mean_promoterscore","bins_prom","norm_bins_prom" )])
+#                     distance mean_promoterscore bins_prom norm_bins_prom
+#distance            1.0000000         -0.3172597 0.3223835     -0.1953285
+#mean_promoterscore -0.3172597          1.0000000 0.2688908      0.8609025
+#bins_prom           0.3223835          0.2688908 1.0000000      0.3160788
+#norm_bins_prom     -0.1953285          0.8609025 0.3160788      1.0000000
+
+
+
+write.table(benchmark1,'/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark1.txt',quote=FALSE,sep="\t",row.names = F)
+
+
+#cage correlation
+
+
+benchmark1<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark1.txt',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+cage_gene<-read.table(file='/home/rapakoul/FANTOM5/h38/ens_genes_h38_cpm_rle_merged_replicates.txt',
+header=T,sep='\t',quote = "",check.names = FALSE,stringsAsFactors =FALSE,row.names =1)
+
+cage_enh<-read.table(file='/home/rapakoul/FANTOM5/h38/cres_h38_cpm_rle_merged_replicates.txt',
+header=T,sep='\t',quote = "",check.names = FALSE,stringsAsFactors =FALSE,row.names =1)
+
+
+identical(colnames(cage_enh),colnames(cage_gene))
+#[1] TRUE
+
+cage_bench<-benchmark1[benchmark1$gene_id1 %in% rownames(cage_gene),]#92266
+cage_bench<-cage_bench[cage_bench$symbol38 %in% rownames(cage_enh),]#20686
+
+
+cage_bench$wilcoxtest_cage<-NA
+
+
+for (i in  1:nrow(cage_bench)){
+
+			population<-cage_gene[cage_bench$gene_id1[i],]
+			population<-as.data.frame(t(population))
+			colnames(population)[1]<-"gene"
+			enhancer<-cage_enh[cage_bench$symbol38[i],]
+			enhancer<-as.data.frame(t(enhancer[,enhancer>0]))
+			population$active.enhancer<-0
+			population$active.enhancer[rownames(population) %in% rownames(enhancer)]<-1
+			x<-population$gene[population$active.enhancer==1]
+			y<-population$gene[population$active.enhancer==0]
+			if (length(x)>=5){
+				if (length(y)>=5){
+					cage_bench$wilcoxtest_cage[i]<-wilcox.test(x,y,alternative ="greater")$p.value
+				}
+			}
+}
+
+
+
+boxplot(-log(cage_bench$wilcoxtest_cage)~cage_bench$V3)
+
+benchmark1<-merge(benchmark1,cage_bench[,c("pair","wilcoxtest_cage")],by.x="pair",by.y="pair",all.x = TRUE)
+
+write.table(benchmark1,'/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark1.txt',quote=FALSE,sep="\t",row.names = F)
+
+
+#pearson correlation crup
+
+
+benchmark1<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark1.txt',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+cres_cord<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/Annotations/GRCh38-cCREsV3_all500.bed',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+cres_ranges=with(cres_cord, GRanges(V1, IRanges(start=new_start,end=new_end)))
+
+enhancers<-as.data.frame(unique(cres_cord$V5),stringsAsFactors =FALSE)
+colnames(enhancers)<-"cres_name"
+
+paths<-read.csv(file='/home/rapakoul/CRUP_analysis/summary.tsv',header=T,sep='\t')
+
+paths$Path.to.CRUP.scores<-as.character(paths$Path.to.CRUP.scores)
+paths$Name.of.sample<-as.character(paths$Name.of.sample)
+
+
+folder1<-"1_ENHANCER_PREDICTIONS/"
+file1<-"prediction.rds"
+
+for (i in 1:nrow(paths)){
+	
+	dir1<-paste0(paths$Path.to.CRUP.scores[i],folder1)
+	prediction<-readRDS(paste0(dir1,file1))
+	hits_crup<-findOverlaps(cres_ranges,prediction)
+	cres_EP<-data.frame(cres=hits_crup@from,EP=hits_crup@to)#16245
+	cres_EP$cres_name<-cres_cord$V5[cres_EP$cres]
+	cres_EP$EP_prob<-elementMetadata(prediction)$prob[cres_EP$EP]
+	normilized_score<-aggregate(EP_prob ~ cres_name, cres_EP, sum)
+	colnames(normilized_score)[2]<-paths$Name.of.sample[i]
+	enhancers<-merge(enhancers,normilized_score,by.x="cres_name",by.y="cres_name",all.x=TRUE)
+}
+
+
+
+
+rownames(enhancers)<-enhancers[,1]
+
+enhancers<-enhancers[,-1]
+
+ind <- apply(enhancers, 1, function(x) all(is.na(x)))
+enhancers <- enhancers[ !ind, ]
+
+write.table(enhancers,"/home/rapakoul/CRUP_analysis/cres38_CRUPscores.txt",quote=FALSE,sep="\t",row.names = T,col.names = TRUE)
+
+folder1<-"1_PROMOTER_PREDICTIONS/"
+file1<-"prediction.rds"
+
+genes_cord<-read.table(file='/home/rapakoul/BENGI/BENGI-master/Benchmark/Annotations/gencode_v38.one.transcript2.bed',
+header=T,sep='\t',check.names = FALSE,stringsAsFactors =FALSE)
+
+genes_ranges=with(genes_cord, GRanges(chr, IRanges(start=new_start,end=new_end)))
+
+genes<-as.data.frame(unique(genes_cord$gene_id1),stringsAsFactors =FALSE)
+colnames(genes)<-"gene_id1"
+
+
+for (i in 1:nrow(paths)){
+	
+	dir1<-paste0(paths$Path.to.CRUP.scores[i],folder1)
+	prediction<-readRDS(paste0(dir1,file1))
+	hits_crup<-findOverlaps(genes_ranges,prediction)
+	cres_EP<-data.frame(genes=hits_crup@from,EP=hits_crup@to)#16245
+	cres_EP$gene_id1<-genes_cord$gene_id1[cres_EP$genes]
+	cres_EP$EP_prob<-elementMetadata(prediction)$prob[cres_EP$EP]
+	normilized_score<-aggregate(EP_prob ~ gene_id1, cres_EP, sum)
+	colnames(normilized_score)[2]<-paths$Name.of.sample[i]
+	genes<-merge(genes,normilized_score,by.x="gene_id1",by.y="gene_id1",all.x=TRUE)
+}
+
+
+rownames(genes)<-genes[,1]
+
+genes<-genes[,-1]
+
+ind <- apply(genes, 1, function(x) all(is.na(x)))
+genes <- genes[ !ind, ]
+
+
+identical(colnames(genes),colnames(enhancers))
+#[1] TRUE
+
+write.table(genes,"/home/rapakoul/CRUP_analysis/genes38_CRUPscores.txt",quote=FALSE,sep="\t",row.names = T,col.names = TRUE)
+
+
+nrow(benchmark1)
+#[1] 169049
+
+crup_bench<-benchmark1[benchmark1$gene_id1 %in% rownames(genes),]#169049
+crup_bench<-crup_bench[crup_bench$symbol38 %in% rownames(enhancers),]#
+
+
+benchmark1$cor_CRUP<-NA
+
+
+
+
+for (i in 1:nrow(benchmark1)){
+
+	population1<-genes[benchmark1$gene_id1[i],]
+	population2<-enhancers[benchmark1$symbol38[i],]
+	benchmark1$cor_CRUP[i]<-cor(as.numeric(population1),as.numeric(population2))
+
+}
+
+
+write.table(benchmark1,'/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark2.txt',
+quote=FALSE,sep="\t",row.names = F)
+
+
+
+dhs112_cres38<-read.table(file='/home/rapakoul/DHS_exp/dhs112_cres38.txt',
+header=T,sep='\t',quote = "",check.names = FALSE,stringsAsFactors =FALSE,row.names =1)
+
+dhs112_genes38<-read.table(file='/homelibrary(data.table)/rapakoul/DHS_exp/dhs112_genes38.txt',
+header=T,sep='\t',quote = "",check.names = FALSE,stringsAsFactors =FALSE,row.names =1)
+
+
+
+identical(colnames(dhs112_cres38),colnames(dhs112_genes38))
+#[1] TRUE
+
+
+nrow(benchmark1)
+#[1] 169049
+
+
+center_apply <- function(x) {
+    apply(x, 1, function(y) y - quantile(y,0.75))
+}
+
+
+
+
+centered_dhs_enh<-as.data.frame(t(center_apply(dhs112_cres38)))
+
+crup_bench<-benchmark1[benchmark1$gene_id1 %in% rownames(dhs112_genes38),]
+crup_bench<-crup_bench[crup_bench$symbol38 %in% rownames(dhs112_cres38),]#146331
+
+
+crup_bench$wilcoxtest_dhs_dhs<-NA
+
+
+for (i in  1:nrow(crup_bench)){
+
+	population<-dhs112_genes38[crup_bench$gene_id1[i],]
+	population<-as.data.frame(t(population))#do it again considering 0 in the activity of promoter
+	colnames(population)[1]<-"promoter"
+	enhancer<-centered_dhs_enh[crup_bench$symbol38[i],]
+	tissues<-colnames(enhancer)[enhancer>=0]
+	population$active.enhancer<-0
+	population$active.enhancer[rownames(population) %in% tissues]<-1
+	x<-population$promoter[population$active.enhancer==1]
+	y<-population$promoter[population$active.enhancer==0]
+	if (length(x)>=5){
+		if (length(y)>=5){
+			crup_bench$wilcoxtest_dhs_dhs[i]<-wilcox.test(x,y,alternative ="greater")$p.value
+		}
+	}
+
+}
+
+crup_bench<- crup_bench[!is.na(crup_bench$wilcoxtest_dhs_dhs),]#146313
+
+
+boxplot(-log(crup_bench$wilcoxtest_dhs_dhs)~crup_bench$V3)
+
+
+benchmark1<-merge(benchmark1,crup_bench[,c("pair","wilcoxtest_dhs_dhs")],by.x="pair",by.y="pair",all.x = TRUE)
+
+write.table(benchmark1,'/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark2.txt',
+quote=FALSE,sep="\t",row.names = F)
+
+
+exp112<-fread(file='/home/rapakoul/DHS_exp/exp112.ensembl_highquality.bed',header=T,sep='\t',nThread=30)#31896
+
+exp112<-exp112[,5:ncol(exp112)]
+
+exp112$gene_id<-gsub("\\..*","", exp112$gene_id)
+
+exp112<-aggregate(. ~gene_id,exp112, sum)#31894
+
+rownames(exp112)<-exp112$gene_id
+exp112$gene_id<-NULL
+
+
+identical(colnames(exp112),colnames(centered_dhs_enh))
+#[1] TRUE
+
+
+crup_bench<-benchmark1[benchmark1$gene_id1 %in% rownames(exp112),]
+crup_bench<-crup_bench[crup_bench$symbol38 %in% rownames(centered_dhs_enh),]#110107
+
+
+crup_bench$wilcoxtest_dhs_exp<-NA
+
+for (i in  1:nrow(crup_bench)){
+
+	population<-exp112[crup_bench$gene_id1[i],]
+	population<-as.data.frame(t(population))#do it again considering 0 in the activity of promoter
+	colnames(population)[1]<-"promoter"
+	enhancer<-centered_dhs_enh[crup_bench$symbol38[i],]
+	tissues<-colnames(enhancer)[enhancer>0]
+	population$active.enhancer<-0
+	population$active.enhancer[rownames(population) %in% tissues]<-1
+	x<-population$promoter[population$active.enhancer==1]
+	y<-population$promoter[population$active.enhancer==0]
+	if (length(x)>=5){
+		if (length(y)>=5){
+			crup_bench$wilcoxtest_dhs_exp[i]<-wilcox.test(x,y,alternative ="greater")$p.value
+		}
+	}
+
+}
+
+
+benchmark1<-merge(benchmark1,crup_bench[,c("pair","wilcoxtest_dhs_dhs")],by.x="pair",by.y="pair",all.x = TRUE)
+
+write.table(benchmark1,'/home/rapakoul/BENGI/BENGI-master/Benchmark/All-Pairs.Natural-Ratio/V38/GM12878.RNAPII-ChIAPET-Benchmark2.txt',
+quote=FALSE,sep="\t",row.names = F)

@@ -1,0 +1,26 @@
+{
+    "id": "C27F0690",
+    "path": "/project/CRUP_scores/EPI/NAMESPACE",
+    "project_path": "NAMESPACE",
+    "type": "r_namespace",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1638803327581.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "3,0",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1645023315,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1645023315,
+    "read_only": false,
+    "read_only_alternatives": []
+}
