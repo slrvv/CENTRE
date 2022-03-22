@@ -6,16 +6,14 @@ compute_crup_EP_enhancer <- function(input, crup_scores) {
   ccres_enhancer <- as.data.frame(ccres_enhancer)
 
   regions <- subset(ccres_enhancer, ccres_enhancer$V5 %in% input$V2, select = c(V1, V5, new_start, new_end))
-
   genes_ranges <- with(regions, GenomicRanges::GRanges(V1, IRanges::IRanges(start = new_start, end = new_end)))
-
   hits_crup <- GenomicRanges::findOverlaps(genes_ranges, crup_scores)
   cres_EP <- data.frame(cres = hits_crup@from, EP = hits_crup@to)
-  cres_EP$cres_name <- ccres_enhancer$V5[cres_EP$cres]
+  cres_EP$cres_name <- input$V2[cres_EP$cres]
   cres_EP$EP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP,direction="wide",timevar = "bin",idvar="cres_name",v.names="EP_enhancer")
-  return(trial[,4:8])
+  trial<-reshape(cres_EP[3:5],direction="wide",timevar = "bin",idvar="cres_name",v.names="EP_enhancer")
+  return(trial)
 
 
 
@@ -35,11 +33,11 @@ compute_crup_EP_promoter <- function(input, crup_scores) {
 
   hits_crup <- GenomicRanges::findOverlaps(genes_ranges, crup_scores)
   cres_EP <- data.frame(promoter = hits_crup@from, EP = hits_crup@to)
-  cres_EP$gene_name <- gencode$gene_id[cres_EP$promoter]
+  cres_EP$gene_name <- input$V1[cres_EP$promoter]
   cres_EP$EP_promoter <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP,idvar="gene_name",timevar = "bin",direction="wide",v.names="EP_promoter")
-  return(trial[,4:8])
+  trial<-reshape(cres_EP[3:5],idvar="gene_name",timevar = "bin",direction="wide",v.names="EP_promoter")
+  return(trial)
 
 
 }
@@ -68,8 +66,8 @@ compute_crup_EP_reg_distance <- function(input, prediction) {
   input <- input[!(duplicated(input$pair)), ]#169049
   between_ranges <- with(input, GenomicRanges::GRanges(chr, IRanges::IRanges(start = bstart, end = bend)))
   hits_enh <- GenomicRanges::findOverlaps(between_ranges, prediction)
-  cres_EP <- data.frame(between = hits_enh@from, EP_prob = GenomicRanges::elementMetadata(prediction)$score[hits_enh@to])
-  normilized_score <- aggregate(EP_prob ~ between, cres_EP, mean)
+  cres_EP <- data.frame(between = hits_enh@from, EP_reg_distance = GenomicRanges::elementMetadata(prediction)$score[hits_enh@to])
+  normilized_score <- aggregate(EP_reg_distance ~ between, cres_EP, mean)
   return(normilized_score)
 
 
@@ -89,11 +87,11 @@ compute_crup_PP_enhancer <- function(input, crup_scores) {
 
   hits_crup <- GenomicRanges::findOverlaps(genes_ranges, crup_scores)
   cres_EP <- data.frame(cres = hits_crup@from, EP = hits_crup@to)
-  cres_EP$cres_name <- ccres_enhancer$V5[cres_EP$cres]
+  cres_EP$cres_name <- input$V2[cres_EP$cres]
   cres_EP$PP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP,idvar="cres_name",timevar = "bin",direction="wide",v.names="PP_enhancer")
-  return(trial[,4:8])
+  trial<-reshape(cres_EP[3:5],idvar="cres_name",timevar = "bin",direction="wide",v.names="PP_enhancer")
+  return(trial)
 
 
 }
@@ -113,11 +111,11 @@ compute_crup_PP_promoter <- function(input, crup_scores) {
 
   hits_crup <- GenomicRanges::findOverlaps(genes_ranges, crup_scores)
   cres_EP <- data.frame(promoter = hits_crup@from, EP = hits_crup@to)
-  cres_EP$gene_name <- gencode$gene_id[cres_EP$promoter]
+  cres_EP$gene_name <- input$V1[cres_EP$promoter]
   cres_EP$PP_promoter<- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP,idvar="gene_name",timevar = "bin",direction="wide",v.names="PP_promoter")
-  return(trial[,4:8])
+  trial<-reshape(cres_EP[3:5],idvar="gene_name",timevar = "bin",direction="wide",v.names="PP_promoter")
+  return(trial)
 
 }
 
@@ -147,9 +145,9 @@ compute_crup_PP_reg_distance <- function(input, prediction) {
   hits_enh <- GenomicRanges::findOverlaps(between_ranges, prediction)
 
   cres_EP <- data.frame(between = hits_enh@from,
-              EP_prob = GenomicRanges::elementMetadata(prediction)$score[hits_enh@to])
+              PP_reg_distance = GenomicRanges::elementMetadata(prediction)$score[hits_enh@to])
 
-  normilized_score <- aggregate(EP_prob ~ between, cres_EP, mean)
+  normilized_score <- aggregate(PP_reg_distance ~ between, cres_EP, mean)
   return(normilized_score)
 
 }
@@ -177,12 +175,12 @@ compute_features_crup_scores <- function(input, crupinput, cores, chromosome){
   crup_PP_prom <- compute_crup_PP_promoter(input, crup_scores_prom)
   crup_PP_reg <- compute_crup_PP_reg_distance(input, crup_scores_prom)
 
-  input <- cbind(input, crup_EP_enh)
-  input <- cbind(input, crup_EP_prom)
-  input <- cbind(input, crup_EP_reg)
-  input <- cbind(input, crup_PP_enh)
-  input <- cbind(input, crup_PP_prom)
-  input <- cbind(input, crup_PP_reg)
+  input <- cbind(input, crup_EP_enh[2:6])
+  input <- cbind(input, crup_EP_prom[2:6])
+  input <- cbind(input, crup_EP_reg[2])
+  input <- cbind(input, crup_PP_enh[2:6])
+  input <- cbind(input, crup_PP_prom[2:6])
+  input <- cbind(input, crup_PP_reg[2])
 
   return(input)
 

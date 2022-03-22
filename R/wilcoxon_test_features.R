@@ -4,9 +4,7 @@
 ################################################################################
 
 cage_wilcoxon_test <- function(x){
-  x$gene_id2 <- gsub("\\..*","",x[,1])
-  x$pair <- paste( x[,2],x$gene_id2, sep= "_")
-  x$cage_wilcoxon_test <- all_genes[x$pair,3]
+  x$cage_wilcoxon_test <- cage_test_data[x$pair,3]
   return(x)
 
 }
@@ -16,9 +14,7 @@ cage_wilcoxon_test <- function(x){
 ################################################################################
 
 crup_correlations <- function(x){
-  x$gene_id2 <- gsub("\\..*","",x[,1])
-  x$pair <- paste( x[,2],x$gene_id2, sep= "_")
-  x$crup_correlations <- all_genes[x$pair,3]
+  x$crup_correlations <- crup_cor[x$pair,3]
   return(x)
 
 }
@@ -29,9 +25,9 @@ crup_correlations <- function(x){
 ################################################################################
 
 dhsexp_wilcoxon_test <- function(x){
-  x$gene_id2 <- gsub("\\..*","",x[,1])
-  x$pair <- paste( x[,2],x$gene_id2, sep= "_")
-  x$dhsexp_wilcoxon_test  <- all_genes[x$pair,3]
+  x$dhsexp_wilcoxon_test  <-  dhsexp_test_data[x$pair,3]
   return(x)
 
 }
+
+
