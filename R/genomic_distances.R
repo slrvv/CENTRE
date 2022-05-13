@@ -1,3 +1,21 @@
+##################################################################
+#definition: output messages
+##################################################################
+
+done <- function() {
+  cat(".. done.\n")
+}
+skip <- function() {
+  cat("\t ..")
+}
+startPart <- function(m) {
+  cat(paste0("\n--- ", m, " ---\n\n"))
+}
+endPart <- function() {
+  cat("\n\t>>> All done!\n")
+}
+
+
 ###############################################################################
 # lookup table: end position of the chromosomes in hg38 of human genome
 ###############################################################################
@@ -88,35 +106,7 @@ map_genes_to_chromosomes <- function(x){
 
 }
 
-###############################################################################
-# function: compute the distances between genes and enhancers
-###############################################################################
 
-
-distances <- function(x) {
-  # x <- unfactorize(x)
-  print(dim(x))
-  gencode <- as.data.frame(gencode)
-  ccres_enhancer <- as.data.frame(ccres_enhancer)
-  if (ncol(x) == 2) {
-    print("Input case with enhancer gene pairs")
-    distance_dataframe <- distances_gene_enhancer(x)
-    return(distance_dataframe)
-
-  }
-  else{
-    print("Input case with genes")
-    print("calling map genes to chromosomes")
-    returned_mat <- map_genes_to_chromosomes(x)
-    print(returned_mat)
-    distance_dataframe <- distances_gene_enhancer(returned_mat)
-    return(distance_dataframe)
-
-
-
-  }
-
-}
 
 ###############################################################################
 # function: check if file exists

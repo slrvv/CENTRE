@@ -3,6 +3,7 @@
 ###############################################################################
 compute_crup_EP_enhancer <- function(input, crup_scores) {
   print("Computing CRUP EP scores for enhancer...")
+  print(input)
   ccres_enhancer <- as.data.frame(ccres_enhancer)
 
   regions <- subset(ccres_enhancer, ccres_enhancer$V5 %in% input$V2, select = c(V1, V5, new_start, new_end))
@@ -12,7 +13,7 @@ compute_crup_EP_enhancer <- function(input, crup_scores) {
   cres_EP$cres_name <- input$V2[cres_EP$cres]
   cres_EP$EP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP[3:5],direction="wide",timevar = "bin",idvar="cres_name",v.names="EP_enhancer")
+  trial<-reshape(cres_EP[,3:5],direction="wide",timevar = "bin",idvar="cres_name",v.names="EP_enhancer")
   return(trial)
 
 
@@ -36,7 +37,7 @@ compute_crup_EP_promoter <- function(input, crup_scores) {
   cres_EP$gene_name <- input$V1[cres_EP$promoter]
   cres_EP$EP_promoter <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP[3:5],idvar="gene_name",timevar = "bin",direction="wide",v.names="EP_promoter")
+  trial<-reshape(cres_EP[,3:5],idvar="gene_name",timevar = "bin",direction="wide",v.names="EP_promoter")
   return(trial)
 
 
@@ -90,7 +91,7 @@ compute_crup_PP_enhancer <- function(input, crup_scores) {
   cres_EP$cres_name <- input$V2[cres_EP$cres]
   cres_EP$PP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP[3:5],idvar="cres_name",timevar = "bin",direction="wide",v.names="PP_enhancer")
+  trial<-reshape(cres_EP[,3:5],idvar="cres_name",timevar = "bin",direction="wide",v.names="PP_enhancer")
   return(trial)
 
 
@@ -114,7 +115,7 @@ compute_crup_PP_promoter <- function(input, crup_scores) {
   cres_EP$gene_name <- input$V1[cres_EP$promoter]
   cres_EP$PP_promoter<- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
   cres_EP$bin<-rep(1:5,nrow(regions))
-  trial<-reshape(cres_EP[3:5],idvar="gene_name",timevar = "bin",direction="wide",v.names="PP_promoter")
+  trial<-reshape(cres_EP[,3:5],idvar="gene_name",timevar = "bin",direction="wide",v.names="PP_promoter")
   return(trial)
 
 }

@@ -5,3 +5,4 @@ R/.RData
 .Ruserdata
 .Rbuildignore
 R/sysdata.rda
+data/
