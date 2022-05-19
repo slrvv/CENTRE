@@ -18,9 +18,7 @@ Authors@R:
            role = c("aut"),
            email = "vingron@molgen.mpg.de",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-           
 Mantainer: The package mantainer is <lopez_s@molgen.mpg.de>
-    
 Description: An R package to predict Enhancer Promoter Interactions in specific
              tissues. The package has two main use cases : the user can give a
              file with genes of interest or enhancer target pairs of interest. 
@@ -28,7 +26,6 @@ Description: An R package to predict Enhancer Promoter Interactions in specific
              and predict how likely they are to interact in the tissue and in
              the second case it will predict how likely the given pairs are to
              interact. 
-             
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

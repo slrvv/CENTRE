@@ -41,45 +41,44 @@
 #'
 compute_features <- function(file, metaData, cores, tpmpath){
 
-  startPart("Computing features")
-
 
   ##Checking if the file exists
-
   check_file(file)
   x <- read.table(file, sep = "\t", stringsAsFactors = F)
   check_file(tpmpath)
   tpmfile <- read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
-  print(head(tpmfile))
-  cat("Computing distance features")
 
+  startPart("Computing distance features")
   if (ncol(x) == 2) {
-    cat("Input case with enhancer gene pairs")
+    cat("Input case with enhancer gene pairs.\n")
+    colnames(x) <- c("gene_id", "enhancer_id")
     features_distances <- distances_gene_enhancer(x)
-
-
+    done()
+    endPart()
   }
+
   else{
-    cat("Input case with genes")
-    cat("calling map genes to chromosomes")
+    cat("Input case with genes. \n")
+    cat("Mapping genes to enhancers")
+    colnames(x) <- c("gene_id")
     returned_mat <- map_genes_to_chromosomes(x)
     features_distances <- distances_gene_enhancer(returned_mat)
-
+    done()
   }
+  done()
 
-
-  cat("Computing CRUP score features")
+  startPart("Computing CRUP score features")
   chr <- unique(features_distances$chr_gene)
   features_crup <- compute_features_crup_scores(x, metaData, cores, chr)
+  endPart()
 
-  cat("Computing Wilcoxon tests and CRUP correlations")
+  startPart("Computing Wilcoxon tests and CRUP correlations")
   x$gene_id2 <- gsub("\\..*","",x[,1])
 
   x$pair <- paste( x[,2],x$gene_id2, sep= "_")
   tpmvalue <- get_rnaseq(x, tpmfile)
   crup_cor <- crup_correlations(x)
   wilcoxon_features <- wilcoxon_test_features(x)
-  print(wilcoxon_features)
 
   combined_tests<-scran::combinePValues(wilcoxon_features$cage_wilcoxon_test,
                                         wilcoxon_features$dhsexp_wilcoxon_test,
@@ -87,16 +86,17 @@ compute_features <- function(file, metaData, cores, tpmpath){
                                         wilcoxon_features$dhsdhs_wilcoxon_test,
                                         method="fisher")
   combined_tests<-log(combined_tests)
-  print(combined_tests)
+  endPart()
 
   features_table <- cbind(
-    features_distances[c("V1", "V2", "chr_gene", "distance")],
+    features_distances[c("gene_id", "enhancer_id", "chr_gene", "distance")],
     features_crup[,3:ncol(features_crup)],
     combined_tests,
     crup_cor$crup_correlations,
     tpmvalue)
 
   features_table[is.na(features_table)] <- 0
+
   endPart()
   return(features_table)
 
