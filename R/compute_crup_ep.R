@@ -97,7 +97,6 @@ compute_crup_EP_reg_distance <- function(input, prediction) {
                         EP_reg_distance = GenomicRanges::elementMetadata(prediction)$score[hits_enh@to])
 
   bins<-as.data.frame(table(cres_EP$between))
-  print(bins)
 
 
   cres_EP1<-cres_EP[cres_EP$EP_prob>0.5,]
@@ -112,7 +111,6 @@ compute_crup_EP_reg_distance <- function(input, prediction) {
     bins_pos<-as.data.frame(table(cres_EP1$between))
   }
 
-  print(bins_pos)
 
   all_bins<-merge(bins,bins_pos,by.x="Var1",by.y="Var1",all.x=TRUE)
   all_bins[is.na(all_bins)] <- 0
@@ -205,7 +203,7 @@ compute_crup_PP_reg_distance <- function(input, prediction) {
               PP_reg_distance = GenomicRanges::elementMetadata(prediction)$score[hits_enh@to])
 
   bins<-as.data.frame(table(cres_EP$between))
-  print(bins)
+
 
 
   cres_EP1<-cres_EP[cres_EP$EP_prob>0.5,]
@@ -232,7 +230,7 @@ compute_crup_PP_reg_distance <- function(input, prediction) {
 
   reg_distance <- cbind(reg_dist_enh, norm_reg_dist_enh)
 
-  print(reg_distance)
+
   return(reg_distance)
 
 }
