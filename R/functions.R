@@ -88,7 +88,7 @@ distances_gene_enhancer <- function(x) {
 ###############################################################################
 # function: get scores for enhancers
 ###############################################################################
-compute_crup_enhancer <- function(regions_enhancer,list_enh, crup_scores) {
+compute_crup_enhancer <- function(regions_enhancer,list_enh, crup_scores, promprob = F) {
 
   #Overlapping the  enhancer ranges with the crup scores
   enhancer_ranges <- with(regions_enhancer,
@@ -100,16 +100,30 @@ compute_crup_enhancer <- function(regions_enhancer,list_enh, crup_scores) {
   cres_EP <- data.frame(cres = hits_crup@from, EP = hits_crup@to)
 
   cres_EP$cres_name <- list_enh$enhancer_id[cres_EP$cres]
-  cres_EP$EP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
-  cres_EP$cres_name <- factor(cres_EP$cres_name)
-  cres_EP$bin<-rep(1:5,times = nrow(regions_enhancer))
+  if (promprob == T){
+    cres_EP$PP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
+    cres_EP$cres_name <- factor(cres_EP$cres_name)
+    cres_EP$bin<-rep(1:5,times = nrow(regions_enhancer))
 
 
-  trial<-reshape(cres_EP[,3:5],
-                 idvar="cres_name",
-                 timevar = "bin",
-                 direction="wide",
-                 v.names="EP_enhancer")
+    trial<-reshape(cres_EP[,3:5],
+                   idvar="cres_name",
+                   timevar = "bin",
+                   direction="wide",
+                   v.names="PP_enhancer")
+  } else {
+    cres_EP$EP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
+    cres_EP$cres_name <- factor(cres_EP$cres_name)
+    cres_EP$bin<-rep(1:5,times = nrow(regions_enhancer))
+
+
+    trial<-reshape(cres_EP[,3:5],
+                   idvar="cres_name",
+                   timevar = "bin",
+                   direction="wide",
+                   v.names="EP_enhancer")
+  }
+
 
 
   return(trial)
@@ -119,7 +133,7 @@ compute_crup_enhancer <- function(regions_enhancer,list_enh, crup_scores) {
 ###############################################################################
 # function: get  scores for promoters
 ###############################################################################
-compute_crup_promoter <- function(regions_prom,list_prom, crup_scores) {
+compute_crup_promoter <- function(regions_prom,list_prom, crup_scores, promprob = F) {
   #Overlapping with CRUP scores
   genes_ranges <- with(regions_prom,
                        GenomicRanges::GRanges(chr,
@@ -129,15 +143,28 @@ compute_crup_promoter <- function(regions_prom,list_prom, crup_scores) {
   hits_crup <- GenomicRanges::findOverlaps(genes_ranges, crup_scores)
   cres_EP <- data.frame(promoter = hits_crup@from, EP = hits_crup@to)
   cres_EP$gene_name <- list_prom$gene_id[cres_EP$promoter]
-  cres_EP$EP_promoter <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
-  cres_EP$gene_name <- factor(cres_EP$gene_name)
-  #Returning the probabilities in bins
-  cres_EP$bin<-rep(1:5,nrow(regions_prom))
-  trial<-reshape(cres_EP[,3:5],
-                 idvar="gene_name",
-                 timevar = "bin",
-                 direction="wide",
-                 v.names="EP_promoter")
+  if (promprob == T){
+    cres_EP$PP_promoter <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
+    cres_EP$gene_name <- factor(cres_EP$gene_name)
+    #Returning the probabilities in bins
+    cres_EP$bin<-rep(1:5,nrow(regions_prom))
+    trial<-reshape(cres_EP[,3:5],
+                   idvar="gene_name",
+                   timevar = "bin",
+                   direction="wide",
+                   v.names="PP_promoter")
+  } else {
+    cres_EP$EP_promoter <- GenomicRanges::elementMetadata(crup_scores)$score[cres_EP$EP]
+    cres_EP$gene_name <- factor(cres_EP$gene_name)
+    #Returning the probabilities in bins
+    cres_EP$bin<-rep(1:5,nrow(regions_prom))
+    trial<-reshape(cres_EP[,3:5],
+                   idvar="gene_name",
+                   timevar = "bin",
+                   direction="wide",
+                   v.names="EP_promoter")
+  }
+
   return(trial)
 }
 
@@ -145,7 +172,7 @@ compute_crup_promoter <- function(regions_prom,list_prom, crup_scores) {
 # function: get scores for distance between enhancer and promoter
 ###############################################################################
 
-compute_crup_reg_distance <- function(input, prediction) {
+compute_crup_reg_distance <- function(input, prediction, prom = F) {
   ##Check if the distances are negative and flip the start and end around
   input$bstart <- input$middle_point
   input$bstart[input$distance > 0] <- input$transcription_start[input$distance > 0]
@@ -183,8 +210,15 @@ compute_crup_reg_distance <- function(input, prediction) {
   all_bins<-merge(bins,bins_pos,by.x="Var1",by.y="Var1",all.x=TRUE)
   all_bins[is.na(all_bins)] <- 0
   colnames(all_bins)<-c("pair","bins","bins_pos")
-  input$reg_dist_enh<- all_bins$bins_pos
-  input$norm_reg_dist_enh<-all_bins$bins_pos/all_bins$bins
+
+  if (prom == T){
+    input$reg_dist_prom<- all_bins$bins_pos
+    input$norm_reg_dist_prom<-all_bins$bins_pos/all_bins$bins
+  } else {
+    input$reg_dist_enh<- all_bins$bins_pos
+    input$norm_reg_dist_enh<-all_bins$bins_pos/all_bins$bins
+  }
+
 
   return(input)
 

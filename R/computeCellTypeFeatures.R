@@ -46,7 +46,6 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
 
   ## Calling normalization step only on the chromosomes we have
   chr <- unique(features_generic$chr)
-  print(head(features_generic))
   normalized <- crupR::normalize(metaData = metaData,
                                  condition = 1,
                                  replicate = 1,
@@ -82,6 +81,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
   cat("Getting the CRUP-EP scores for enhancer, promoter and the regulatory
       distance")
 
+  #Crup enhancer scores for enhancer
   crup_EP_enh <- compute_crup_enhancer(regions_enhancer, list_enh, crup_scores_enh)
 
   crup_features <-merge(features_generic,
@@ -90,6 +90,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
                         by.y="cres_name",
                         all.x=TRUE)
 
+  #CRUP enhancer scores for promoter
   crup_EP_prom <- compute_crup_promoter(regions_prom,list_prom, crup_scores_enh)
 
   crup_features <-merge(crup_features,
@@ -97,7 +98,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
                         by.x="gene_id2",
                         by.y="gene_name",
                         all.x=TRUE)
-
+  ##crup enhancer scores for distance
   crup_features <- compute_crup_reg_distance(crup_features, crup_scores_enh)
 
 
@@ -107,9 +108,9 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
 
   cat("Getting the CRUP-PP scores for enhancer")
 
+  #Crup promoter scores for enhancer
 
-
-  crup_PP_enh <- compute_crup_enhancer(regions_enhancer, list_enh, crup_scores_prom)
+  crup_PP_enh <- compute_crup_enhancer(regions_enhancer, list_enh, crup_scores_prom, promprob = T)
 
   crup_features <-merge(crup_features,
                         crup_PP_enh,
@@ -117,14 +118,17 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
                         by.y="cres_name",
                         all.x=TRUE)
 
-  crup_PP_prom <- compute_crup_promoter(regions_prom, list_prom, crup_scores_prom)
+  #Crup promoter scores for promoter
+
+  crup_PP_prom <- compute_crup_promoter(regions_prom, list_prom, crup_scores_prom, promprob = T)
   crup_features <-merge(crup_features,
                         crup_PP_prom,
                         by.x="gene_id2",
                         by.y="gene_name",
                         all.x=TRUE)
 
-  crup_features <- compute_crup_reg_distance(crup_features, crup_scores_prom)
+  #Crup promoter scores for distance
+  crup_features <- compute_crup_reg_distance(crup_features, crup_scores_prom, prom = T)
 
 
   endPart()
@@ -134,7 +138,41 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
 
 
   features_table_all[is.na(features_table_all)] <- 0
+  print(head(features_table_all))
+  features_table_all <- features_table_all[,c(1, 2,10,11, 12, 13, 14,15, 16, 17,
+                                              18, 19,22, 23,24, 25, 26, 27, 28,
+                                              29, 30, 31, 32, 33, 34, 35, 36)]
 
+  print(head(features_table_all))
+  colnames(features_table_all) <- c('gene_id2',
+                                    'enhancer_id',
+                                    'EP_prob_enh.1',
+                                    'EP_prob_enh.2',
+                                    'EP_prob_enh.3',
+                                    'EP_prob_enh.4',
+                                    'EP_prob_enh.5',
+                                    'EP_prob_gene.1',
+                                    'EP_prob_gene.2',
+                                    'EP_prob_gene.3',
+                                    'EP_prob_gene.4',
+                                    'EP_prob_gene.5',
+                                    'reg_dist_enh',
+                                    'norm_reg_dist_enh',
+                                    'PP_prob_enh.1',
+                                    'PP_prob_enh.2',
+                                    'PP_prob_enh.3',
+                                    'PP_prob_enh.4',
+                                    'PP_prob_enh.5',
+                                    'PP_prob_gene.1',
+                                    'PP_prob_gene.2',
+                                    'PP_prob_gene.3',
+                                    'PP_prob_gene.4',
+                                    'PP_prob_gene.5',
+                                    'reg_dist_prom',
+                                    'norm_reg_dist_prom',
+                                    'RNA_seq')
+
+  print(head(features_table_all))
   endPart()
   return(features_table_all)
 

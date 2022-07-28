@@ -65,6 +65,8 @@ computeGenericFeatures <- function(file){
 
   features_table[is.na(features_table)] <- 0
 
+  features_table$cor_CRUP <- unname(features_table$cor_CRUP) ##change at the source
+
   return(features_table)
 
 }
