@@ -14,7 +14,8 @@ metaData <- data.frame(HM = c("H3K4me1","H3K4me3","H3K27ac"),
                          condition = c(1,1,1), replicate = c(1,1,1),
                          bamFile = files, inputFile = rep(inputs,3))
 
-tpmfile <- "/project/CRUP_scores/total-RNA-seq/thyroid-gland/ENCSR000AFK/thyroid-gland.tsv"
+tpmpath <- "/project/CRUP_scores/total-RNA-seq/thyroid-gland/ENCSR000AFK/thyroid-gland.tsv"
+tpmfile <-  read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
 
 ###ASK TRIS FOR THE EXPECTED OUTPUT FILES BUT FOR NOW RUN HER CODE AND TAKE IT AS EXPECTED OUTPUT
 
@@ -33,6 +34,7 @@ test_that("compute features functions runs as expected",{
   ###Checking that output has correct number of rows
   cat("Check ComputeGenericFeatures")
   file1 <- "/project/CRUP_scores/toSara/Thyroid.GTEx-Benchmark.V38.edited.txt"
+  file1 <- read.table(file1, sep = "\t", stringsAsFactors = F)
   output <- computeGenericFeatures(file1)
   output$pair <- paste(output$enhancer_id, output$gene_id2, sep= "_")
   expect_equal(length(unique(output$pair)), nrow(output))
@@ -41,6 +43,7 @@ test_that("compute features functions runs as expected",{
   output <- computeCellTypeFeatures(metaData, 1, "single", tpmfile, features_generic)
   output$pair <- paste(output$enhancer_id, output$gene_id2, sep= "_")
   expect_equal(length(unique(output$pair)), nrow(output))
+  print(output$EP_prob_enh.1 !=  output$PP_prob_enh.1 )
   #### Checking that output is the expected
 
 })

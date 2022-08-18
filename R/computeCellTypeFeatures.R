@@ -34,11 +34,9 @@
 #'compute_features(file, metaData, cores)
 #'
 #'
-computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
+computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
                                     features_generic){
   ## Pre-eliminary checks and computations
-  check_file(tpmpath)
-  tpmfile <- read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
 
 
   ## Computing the crup scores
@@ -137,6 +135,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmpath,
   features_table_all <- get_rnaseq(crup_features, tpmfile)
 
 
+  ###Some renaming and so on
   features_table_all[is.na(features_table_all)] <- 0
   print(head(features_table_all))
   features_table_all <- features_table_all[,c(1, 2,10,11, 12, 13, 14,15, 16, 17,

@@ -18,11 +18,8 @@
 #'
 #'
 #'
-computeGenericFeatures <- function(file){
+computeGenericFeatures <- function(x){
   ## Pre-eliminary checks and computations
-
-  check_file(file)
-  x <- read.table(file, sep = "\t", stringsAsFactors = F)
 
   x$gene_id1 <- gsub("\\..*","",x[,1])
 
@@ -45,6 +42,7 @@ computeGenericFeatures <- function(file){
   features_distances$pair <- paste(features_distances$enhancer_id,
                                    features_distances$gene_id2,
                                    sep = "_")
+
   wilcoxon_features <- wilcoxon_test_crup_cor(features_distances)
 
   ## Combining the values of the Wilcoxon tests
@@ -64,8 +62,6 @@ computeGenericFeatures <- function(file){
                                          "distance","cor_CRUP", "combined_tests")]
 
   features_table[is.na(features_table)] <- 0
-
-  features_table$cor_CRUP <- unname(features_table$cor_CRUP) ##change at the source
 
   return(features_table)
 

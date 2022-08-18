@@ -128,6 +128,9 @@ compute_crup_enhancer <- function(regions_enhancer,list_enh, crup_scores, prompr
 
   return(trial)
 
+
+
+
 }
 
 ###############################################################################
