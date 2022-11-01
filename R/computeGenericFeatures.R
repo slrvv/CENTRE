@@ -18,10 +18,10 @@
 #'
 #'
 #'
-computeGenericFeatures <- function(x){
+computeGenericFeatures <- function(x) {
   ## Pre-eliminary checks and computations
 
-  x$gene_id1 <- gsub("\\..*","",x[,1])
+  x$gene_id1 <- gsub("\\..*", "", x[, 1])
 
   ## Computing the distance features
 
@@ -33,7 +33,7 @@ computeGenericFeatures <- function(x){
 
   cat("Removing pairs with distance over 500 Kb")
   features_distances <- features_distances[abs(features_distances$distance)
-                                           <= 500000,]
+                                           <= 500000, ]
   endPart()
 
   ## Getting the values for the Wilcoxon tests and the CRUP correlations
@@ -46,7 +46,6 @@ computeGenericFeatures <- function(x){
   wilcoxon_features <- wilcoxon_test_crup_cor(features_distances)
 
   ## Combining the values of the Wilcoxon tests
-
   wilcoxon_features$combined_tests <- scran::combinePValues(
     wilcoxon_features$cage_wilcoxon_test,
     wilcoxon_features$dhsexp_wilcoxon_test,
@@ -54,12 +53,14 @@ computeGenericFeatures <- function(x){
     wilcoxon_features$dhsdhs_wilcoxon_test,
     method="fisher")
 
+
   wilcoxon_features$combined_tests <-log(wilcoxon_features$combined_tests)
 
   ## Return the table of features
-  features_table <- wilcoxon_features[,c("gene_id2", "enhancer_id", "chr",
+  features_table <- wilcoxon_features[, c("gene_id2", "enhancer_id", "chr",
                                          "middle_point", "transcription_start",
-                                         "distance","cor_CRUP", "combined_tests")]
+                                         "distance", "cor_CRUP",
+                                         "combined_tests")]
 
   features_table[is.na(features_table)] <- 0
 

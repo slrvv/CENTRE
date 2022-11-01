@@ -4,15 +4,15 @@
 \alias{computeCellTypeFeatures}
 \title{Compute cell type specific features}
 \usage{
-computeCellTypeFeatures(file, metaData, cores, sequencing, tpmpath)
+computeCellTypeFeatures(metaData, cores, sequencing, tpmfile, features_generic)
 }
 \arguments{
-\item{file}{Path to a file with gene and enhancer pairs.}
-
 \item{metaData}{Dataframe indicating the paths to the ChIP-seq experiments.
 More information on the format here \code{crupR::normalize()}}
 
 \item{cores}{Number of cores to compute the CRUP score features}
+
+\item{file}{Path to a file with gene and enhancer pairs.}
 
 \item{tpmpath}{Path to a file with the RNA-seq TPM values, with the names of
 the genes given as ENSEMBLE ID's}
@@ -20,8 +20,10 @@ the genes given as ENSEMBLE ID's}
 \value{
 A table containting the following computed features :
 \itemize{
-\item CRUP enhancer score for enhancer region, promoter region and the region between the enhancer and the promoter
-\item CRUP promoter score for enhancer region, promoter region and the region between the enhancer and the promoter
+\item CRUP enhancer score for enhancer region, promoter region and the region
+between the enhancer and the promoter
+\item CRUP promoter score for enhancer region, promoter region and the region
+between the enhancer and the promoter
 \item RNA-seq TPM values
 }
 }
@@ -30,16 +32,13 @@ Computes the cell type specific features needed for the CENTRE classification
 step.
 }
 \examples{
-files <- c(
-"/project/CRUP_scores/CRUP_scores/ENCODE/Single_ended/Tissues/body_pancreas/H3K4me1/H3K4me1.bam",
-"/project/CRUP_scores/CRUP_scores/ENCODE/Single_ended/Tissues/body_pancreas/H3K4me3/H3K4me3.bam",
-"/project/CRUP_scores/CRUP_scores/ENCODE/Single_ended/Tissues/body_pancreas/H3K27ac/H3K27ac.bam" )
 
-inputs <- "/project/CRUP_scores/CRUP_scores/ENCODE/Single_ended/Tissues/body_pancreas/Controls/input.bam"
+
 
 metaData <- data.frame(HM = c("H3K4me1","H3K4me3","H3K27ac"),
                       condition = c(1,1,1), replicate = c(1,1,1),
-                      bamFile = files, inputFile = rep(inputs,3))
+                      bamFile = files,
+                      features_genericFile = rep(features_generics,3))
 file <- "/project/CRUP_scores/EPI/example1.txt"
 compute_features(file, metaData, cores)
 

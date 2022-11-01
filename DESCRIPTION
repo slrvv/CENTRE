@@ -5,7 +5,7 @@ Version: 0.0.0.9000
 Authors@R:
     person(given = "Sara",
            family = "Lopez Ruiz de Vargas",
-           role = c("cre", "mantainer"),
+           role = c("cre"),
            email = "lopez_s@molgen.mpg.de",
            comment = c(ORCID = "YOUR-ORCID-ID"))
     person(given = "Trisevgeni",

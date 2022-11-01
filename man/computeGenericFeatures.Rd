@@ -4,7 +4,7 @@
 \alias{computeGenericFeatures}
 \title{Compute generic features}
 \usage{
-computeGenericFeatures(file)
+computeGenericFeatures(x)
 }
 \arguments{
 \item{file}{Path to a file with either genes and enhancer pairs.}

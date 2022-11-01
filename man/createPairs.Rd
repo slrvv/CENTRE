@@ -14,6 +14,7 @@ dataframe with two columns the ENSEMBL id's without their version and
 the enhancer id's
 }
 \description{
-Creates all of the possible gene enhancer pairs at 500kb distance from the given genes
+Creates all of the possible gene enhancer pairs at 500kb distance
+from the given genes
 transcription start sites.
 }
