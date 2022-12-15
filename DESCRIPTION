@@ -2,23 +2,9 @@ Package: CENTRE
 Type: Package
 Title: an R package to predict tissue specific enhancer target interactions
 Version: 0.0.0.9000
-Authors@R:
-    person(given = "Sara",
-           family = "Lopez Ruiz de Vargas",
-           role = c("cre"),
-           email = "lopez_s@molgen.mpg.de",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-    person(given = "Trisevgeni",
-           family = "Rapakoulia",
-           role = c("aut"),
-           email = "",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-    person(given = "Martin",
-           family = "Vingron",
-           role = c("aut"),
-           email = "vingron@molgen.mpg.de",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Mantainer: The package mantainer is <lopez_s@molgen.mpg.de>
+Authors@R:c(person("Sara", "Lopez Ruiz de Vargas", role = c("cre"),email = "lopez_s@molgen.mpg.de"),
+           person("Trisevgeni", "Rapakoulia", role = c("aut"), email = ""),
+           person("Martin", "Vingron", role = c("aut"), email = "vingron@molgen.mpg.de"))
 Description: An R package to predict Enhancer Promoter Interactions in specific
              tissues. The package has two main use cases : the user can give a
              file with genes of interest or enhancer target pairs of interest. 
@@ -31,7 +17,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Depends: 
     R (>= 2.10)
 Suggests: 

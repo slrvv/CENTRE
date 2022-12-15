@@ -154,13 +154,66 @@ and the label and probability for each of the pairs.
 
 ### Example run
 
+We provide an in-package example on the cell line HeLa-S3. The Histone Mark data 
+and RNA-seq data are from ENCODE :
+| Experiment type| ENCODE experiment accession | File accession numbers|
+|----------------|-----------------------------|-----------------------|
+| H3K4me1        |ENCSR000APW| ENCFF712AAP, ENCFF826OLG|
+| H3K4me3        | ENCSR340WQU|ENCFF650IXI, ENCFF760VTC |
+| H3K27ac        |ENCSR000AOC |	ENCFF609ZAE, ENCFF711QAI |
+| ChIP-seq Control| ENCSR000AOB|ENCFF017QCL, ENCFF842IEZ|
+| RNA-seq        | ENCSR000CPP |ENCFF297BJF, ENCFF623UDU|
+
+For the Histone ChIP-seq replicates were merged using bamtools merge and for the
+RNA-seq data we take the mean of the TPM values over the replicates.
+
+```
+#Start by providing genes with their ENSEMBL id
+
+candidates <- read.table(system.file("extdata", 
+              "exampleids.txt", package = "CENTRE"), header = T)
+
+#Remember to give the columns the name "gene_id" 
+colnames(candidates) <- c("gene_id")
+
+#Generate the candidate pairs
+candidate_pairs <- createPairs(candidates)
+
+#Compute the generic features for given names
+
+generic_features <- computeGenericFeatures(candidate_pairs)
+
+## Prepare the data needed for computing cell type features
+
+files <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
+          system.file("extdata","HeLa_H3K4me3.bam", package = "CENTRE"),
+          system.file("extdata","HeLa_H3K27ac.bam", package = "CENTRE")
+          
+inputs <- system.file("extdata", "HeLa_input.bam", package = "CENTRE")
+
+metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
+                       condition = c(1, 1, 1), replicate = c(1, 1, 1),
+                       bamFile = files, inputFile = rep(inputs, 3))
+#More information on this step is found in the crupR documentation
+
+tpmfile <- read.table(system.file("extdata", "HeLa.tsv", package = "CENTRE"),
+                      sep = "", stringsAsFactors = F, header = T)
+
+celltype_features <- computeCellTypeFeatures(metaData,
+                                    cores = 1,
+                                    "single",
+                                    tpmfile,
+                                    generic_features)
+  
+  
+# Finally compute the predictions
+predictions <- centrePrediction(celltype_features,
+                                  generic_features)
+  
 
 ```
 
 
 
-```
-
-### Where do I get the original data used for the examples?
 
 
