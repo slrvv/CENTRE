@@ -24,12 +24,16 @@ test_that("compute features functions runs as expected for thyroid", {
   tpmfile <-  read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
 
   ###expected_predictions
+  predictions_expected <- read.table("/project/CRUP_scores/EPI/tests/testthat/Thyroid.GTEx-Benchmark.V38.predictions.txt"
+                            , sep = "\t", header = T)
 
   ###Checking that output has correct number of rows
   cat("Check ComputeGenericFeatures")
-  file1 <- "/project/CRUP_scores/toSara/Thyroid.GTEx-Benchmark.V38.edited.txt"
-  file1 <- read.table(file1, sep = "\t", stringsAsFactors = F)
-
+  file1 <- "/project/CRUP_scores/toSara/Thyroid.GTEx-Benchmark.V38.txt"
+  file1 <- read.table(file1, sep = "\t", stringsAsFactors = F, header = T)
+  file1 <- file1[,c("V2", "symbol38")]
+  file1 <- file1[sample(nrow(file1), 20), ]
+  row.names(file1) <- NULL
   generic_features <- computeGenericFeatures(file1)
 
   generic_features$pair <- paste(generic_features$enhancer_id,
@@ -52,10 +56,20 @@ test_that("compute features functions runs as expected for thyroid", {
 
   #### Checking that output is the expected
   cat("Check centrePrediction")
-  # predictions <- centrePrediction(celltype_features,
-  #                                 generic_features,
-  #                                 model = "/project/CRUP_scores/EPI/model/centre2_final_model.txt" )
-
+  predictions <- centrePrediction(celltype_features,
+                                  generic_features,
+                                  model = "/project/CRUP_scores/EPI/model/centre2_final_model.txt" )
+  predictions$pair <- paste(predictions$enhancer_id,
+                                 predictions$gene_id2,
+                                 sep = "_")
+  predictions_expected$pair <- paste(predictions_expected$enhancer_id,
+                                 predictions_expected$gene_id2,
+                                 sep = "_")
+  predictions_expected <- predictions_expected[predictions_expected$pair == predictions$pair,]
+  expect_equal(predictions$label, predictions_expected$label)
+  # expect_equal(predictions$predictions,
+  #              predictions_expected$predictions,
+  #              tolerance =1e-5)
 })
 
 # files <- c("/project/CRUP_scores/CRUP_scores/ENCODE/Single_ended/Cell_lines/GM12878/H3K4me1/H3K4me1.bam",

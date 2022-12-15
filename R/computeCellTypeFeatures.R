@@ -86,7 +86,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
                         by.x = "enhancer_id",
                         by.y = "cres_name",
                         all.x = TRUE)
-
+  print(crup_features)
   #CRUP enhancer scores for promoter
   crup_EP_prom <- compute_crup_promoter(regions_prom,
                                         list_prom,
@@ -97,8 +97,10 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
                         by.x = "gene_id2",
                         by.y = "gene_name",
                         all.x = TRUE)
+  print(crup_features)
+
   ##crup enhancer scores for distance
-  crup_features <- compute_crup_reg_distance(crup_features, crup_scores_enh)
+  crup_features <- compute_crup_reg_distance_enh(crup_features, crup_scores_enh)
 
 
   ##Get CRUP promoter probabilities
@@ -138,9 +140,8 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
                         all.x = TRUE)
 
   #Crup promoter scores for distance
-  crup_features <- compute_crup_reg_distance(crup_features,
-                                             crup_scores_prom,
-                                             prom = T)
+  crup_features <- compute_crup_reg_distance_prom(crup_features,
+                                             crup_scores_prom)
 
 
   endPart()
@@ -151,9 +152,9 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
 
   ###Some renaming and so on
   features_table_all[is.na(features_table_all)] <- 0
-
-  features_table_all <- features_table_all[, c(1, 2, 10, 11, 12, 13, 14, 15,
-                                              16, 17, 18, 19, 22, 23, 24, 25,
+  print(features_table_all)
+  features_table_all <- features_table_all[, c(1, 2, 9, 10, 11, 12, 13, 14, 15,
+                                              16, 17, 18, 22, 23, 24, 25,
                                               26, 27, 28, 29, 30, 31, 32, 33,
                                               34, 35, 36)]
 

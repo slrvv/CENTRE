@@ -5,15 +5,13 @@
 \alias{cage_test_data}
 \title{CAGE test data}
 \format{
-A data frame with five variables: \code{year}, \code{sex},
-\code{name}, \code{n} and \code{prop} (\code{n} divided by total number
-of applicants in that year, which means proportions are of people of
-that sex with that name born in that year).
+A data frame with three variables: \code{gene_id} Gene ID,
+\code{symbol38} Enhancer ID, \code{wilcoxtest_cage} result of the test ).
 }
 \usage{
 cage_test_data
 }
 \description{
-Result of the Wilcoxon test on the CAGE data of the enhancer gene pairs.
+Result of the Wilcoxon tests on the CAGE data of the enhancer gene pairs.
 }
 \keyword{datasets}

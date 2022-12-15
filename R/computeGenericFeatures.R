@@ -54,7 +54,7 @@ computeGenericFeatures <- function(x) {
     method="fisher")
 
 
-  wilcoxon_features$combined_tests <-log(wilcoxon_features$combined_tests)
+  wilcoxon_features$combined_tests <- abs(log(wilcoxon_features$combined_tests))
 
   ## Return the table of features
   features_table <- wilcoxon_features[, c("gene_id2", "enhancer_id", "chr",

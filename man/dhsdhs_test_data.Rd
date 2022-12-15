@@ -3,17 +3,15 @@
 \docType{data}
 \name{dhsdhs_test_data}
 \alias{dhsdhs_test_data}
-\title{CRUP expression test}
+\title{DNase-DNase test}
 \format{
-A data frame with five variables: \code{year}, \code{sex},
-\code{name}, \code{n} and \code{prop} (\code{n} divided by total number
-of applicants in that year, which means proportions are of people of
-that sex with that name born in that year).
+A data frame with three variables: \code{gene_id} Gene ID,
+\code{symbol38} Enhancer ID, \code{wilcoxtest_dhs_dhs} result of the test ).
 }
 \usage{
 dhsdhs_test_data
 }
 \description{
-Correlation between the CRUP scores of enhancer and genes  in the pairs
+Results of the Wilcoxon tests on the DNase data of the pairs
 }
 \keyword{datasets}

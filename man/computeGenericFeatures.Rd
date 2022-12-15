@@ -24,8 +24,3 @@ expression, CRUP expression and DNase DNase)
 \description{
 Computes the generic features needed by CENTRE to make predictions
 }
-\examples{
-
-
-
-}

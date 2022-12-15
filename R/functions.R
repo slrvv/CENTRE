@@ -104,10 +104,12 @@ compute_crup_enhancer <- function(regions_enhancer,
 
   cres_EP$cres_name <- list_enh$enhancer_id[cres_EP$cres]
   if (promprob == T) {
+    print(head(cres_EP))
     cres_EP$PP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$probP[cres_EP$EP]
     cres_EP$cres_name <- factor(cres_EP$cres_name)
+    print("Todo bien")
     cres_EP$bin <- rep(1:5, times = nrow(regions_enhancer))
-    print(head(cres_EP))
+ 
     trial <- reshape(cres_EP[,3:5],
                    idvar = "cres_name",
                    timevar = "bin",
@@ -166,11 +168,13 @@ compute_crup_promoter <- function(regions_prom,
     cres_EP$gene_name <- factor(cres_EP$gene_name)
     #Returning the probabilities in bins
     cres_EP$bin <- rep(1:5, nrow(regions_prom))
+    print(head(cres_EP))
     trial <- reshape(cres_EP[,3:5],
                    idvar = "gene_name",
                    timevar = "bin",
                    direction = "wide",
                    v.names = "EP_promoter")
+    print(trial)
   }
 
   return(trial)
@@ -180,7 +184,7 @@ compute_crup_promoter <- function(regions_prom,
 # function: get scores for distance between enhancer and promoter
 ###############################################################################
 
-compute_crup_reg_distance <- function(input, prediction, prom = F) {
+compute_crup_reg_distance_enh <- function(input, prediction) {
   ##Check if the distances are negative and flip the start and end around
   input$bstart <- input$middle_point
   input$bstart[input$distance > 0] <- input$transcription_start[input$distance > 0]
@@ -219,13 +223,10 @@ compute_crup_reg_distance <- function(input, prediction, prom = F) {
   all_bins[is.na(all_bins)] <- 0
   colnames(all_bins) <- c("pair", "bins", "bins_pos")
 
-  if (prom == T) {
-    input$reg_dist_prom <- all_bins$bins_pos
-    input$norm_reg_dist_prom <- all_bins$bins_pos / all_bins$bins
-  } else {
-    input$reg_dist_enh <- all_bins$bins_pos
-    input$norm_reg_dist_enh <- all_bins$bins_pos / all_bins$bins
-  }
+
+  input$reg_dist_enh <- all_bins$bins_pos
+  input$norm_reg_dist_enh <- all_bins$bins_pos / all_bins$bins
+
 
 
   return(input)
@@ -234,6 +235,58 @@ compute_crup_reg_distance <- function(input, prediction, prom = F) {
 
 }
 
+###############################################################################
+# function: get scores for distance between enhancer and promoter
+###############################################################################
+
+compute_crup_reg_distance_prom <- function(input, prediction) {
+  ##Check if the distances are negative and flip the start and end around
+  input$bstart <- input$middle_point
+  input$bstart[input$distance > 0] <- input$transcription_start[input$distance > 0]
+  input$bend <- input$transcription_start
+  input$bend[input$distance > 0] <- input$middle_point[input$distance > 0]
+
+  #Make the gene enhancer pairs into ranges
+  input$pair <- paste0(input$gene_id, "_", input$enhancer_id)
+  input <- input[!(duplicated(input$pair)), ]
+  between_ranges <- with(input,
+                         GenomicRanges::GRanges(chr,
+                                                IRanges::IRanges(start = bstart,
+                                                                 end = bend)))
+
+  hits_enh <- GenomicRanges::findOverlaps(between_ranges, prediction)
+  cres_EP <- data.frame(between = hits_enh@from,
+                        EP_reg_distance = GenomicRanges::elementMetadata(prediction)$probP[hits_enh@to])
+
+  bins <- as.data.frame(table(cres_EP$between))
+
+  cres_EP1 <- cres_EP[cres_EP$EP_reg_distance > 0.5, ]
+
+  if (nrow(cres_EP1) == 0) {
+
+    bins_pos <- as.data.frame(matrix(c(c(seq(1:nrow(input)),
+                                         rep(0, times = nrow(input))),
+                                       nrow = nrow(input),
+                                       ncol =  2)))
+    colnames(bins_pos) <- c("Var1", "Freq")
+  } else {
+    bins_pos <- as.data.frame(table(cres_EP1$between))
+  }
+
+
+  all_bins <- merge(bins, bins_pos, by.x = "Var1", by.y = "Var1", all.x = TRUE)
+  all_bins[is.na(all_bins)] <- 0
+  colnames(all_bins) <- c("pair", "bins", "bins_pos")
+
+  input$reg_dist_prom <- all_bins$bins_pos
+  input$norm_reg_dist_prom <- all_bins$bins_pos / all_bins$bins
+
+
+  return(input)
+
+
+
+}
 
 ################################################################################
 # function: gets the precomputed values of the Wilcoxon tests
@@ -258,7 +311,10 @@ wilcoxon_test_crup_cor <- function(x) {
 
 get_rnaseq <- function(x, tpmfile) {
   tpmfile$gene_id2 <- gsub("\\..*", "", tpmfile[, 1])
-  x$tpmvalue <- tpmfile[x$gene_id2, 3]
+  
+  x <- merge(x, tpmfile[,c(3,4)],by.x = "gene_id2", by.y = "gene_id2" )
+  
+
 
   return(x)
 }
