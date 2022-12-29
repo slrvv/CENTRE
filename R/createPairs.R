@@ -7,9 +7,21 @@
 #' @param gene One column dataframe with gene ENSEMBL id's
 #' @return dataframe with two columns the ENSEMBL id's without their version and
 #' the enhancer id's
-#' @export
+#'
 #'
 #' @examples
+#' #Start by providing genes with their ENSEMBL id
+#' candidates <- read.table(system.file("extdata",
+#' "exampleids.txt", package = "CENTRE"), header = T)
+#' #Remember to give the columns the name "gene_id"
+#' colnames(candidates) <- c("gene_id")
+#' #Generate the candidate pairs
+#' candidate_pairs <- createPairs(candidates)
+#' @export
+#' @import utils
+#' @importFrom GenomicRanges GRanges findOverlaps
+#' @importFrom IRanges IRanges
+
 createPairs <- function(gene) {
 
   colnames(gene) <- c("gene_id")

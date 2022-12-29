@@ -9,9 +9,48 @@
 #'
 #' @return Dataframe containing the enhancer gene pairs and the probability of
 #' them interacting based on CENTRE model
-#' @export
+#'
+#'
 #'
 #' @examples
+#' #Start by providing genes with their ENSEMBL id
+#' candidates <- read.table(system.file("extdata",
+#'                         "exampleids.txt", package = "CENTRE"), header = T)
+#'                         #Remember to give the columns the name "gene_id"
+#'colnames(candidates) <- c("gene_id")
+#'#Generate the candidate pairs
+#'candidate_pairs <- createPairs(candidates)
+#'#Compute the generic features for given names
+#'generic_features <- computeGenericFeatures(candidate_pairs)
+#'## Prepare the data needed for computing cell type features
+#'files <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
+#'           system.file("extdata","HeLa_H3K4me3.bam", package = "CENTRE"),
+#'           system.file("extdata","HeLa_H3K27ac.bam", package = "CENTRE"))
+#'
+#'inputs <- system.file("extdata", "HeLa_input.bam", package = "CENTRE")
+#'
+#'metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
+#'                      condition = c(1, 1, 1), replicate = c(1, 1, 1),
+#'                      bamFile = files, inputFile = rep(inputs, 3))
+#'
+#'#More information on this step is found in the crupR documentation
+#'
+#'tpmfile <- read.table(system.file("extdata", "HeLa.tsv", package = "CENTRE"),
+#'                     sep = "", stringsAsFactors = F, header = T)
+#'
+#'celltype_features <- computeCellTypeFeatures(metaData,
+#'                                             cores = 1,
+#'                                             "single",
+#'                                             tpmfile,
+#'                                             generic_features)
+#'# Finally compute the predictions
+#'predictions <- centrePrediction(celltype_features,
+#'generic_features)
+#' @export
+#' @importFrom stats predict
+#' @import utils
+#' @importFrom xgboost xgb.load xgb.DMatrix
+#'
 centrePrediction <- function(features_celltype,features_generic, model = NULL){
   #Merge the generic features and the cell type features
 
@@ -33,7 +72,7 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
                         features_generic, by.x = "pair", by.y = "pair")
 
   ##Loading the xgboost model
-  if (is.NULL(model)){
+  if (is.null(model)){
     model <- system.file("extdata", "centre2_final_model.txt")
   } else {
     check_file(model)

@@ -104,13 +104,11 @@ compute_crup_enhancer <- function(regions_enhancer,
 
   cres_EP$cres_name <- list_enh$enhancer_id[cres_EP$cres]
   if (promprob == T) {
-    print(head(cres_EP))
     cres_EP$PP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$probP[cres_EP$EP]
     cres_EP$cres_name <- factor(cres_EP$cres_name)
-    print("Todo bien")
     cres_EP$bin <- rep(1:5, times = nrow(regions_enhancer))
- 
-    trial <- reshape(cres_EP[,3:5],
+
+    trial <- stats::reshape(cres_EP[,3:5],
                    idvar = "cres_name",
                    timevar = "bin",
                    direction = "wide",
@@ -121,7 +119,7 @@ compute_crup_enhancer <- function(regions_enhancer,
     cres_EP$bin <- rep(1:5, times = nrow(regions_enhancer))
 
 
-    trial <- reshape(cres_EP[,3:5],
+    trial <-stats::reshape(cres_EP[,3:5],
                    idvar = "cres_name",
                    timevar = "bin",
                    direction = "wide",
@@ -158,7 +156,7 @@ compute_crup_promoter <- function(regions_prom,
     cres_EP$gene_name <- factor(cres_EP$gene_name)
     #Returning the probabilities in bins
     cres_EP$bin <- rep(1:5, nrow(regions_prom))
-    trial <- reshape(cres_EP[,3:5],
+    trial <- stats::reshape(cres_EP[,3:5],
                    idvar = "gene_name",
                    timevar = "bin",
                    direction = "wide",
@@ -168,13 +166,12 @@ compute_crup_promoter <- function(regions_prom,
     cres_EP$gene_name <- factor(cres_EP$gene_name)
     #Returning the probabilities in bins
     cres_EP$bin <- rep(1:5, nrow(regions_prom))
-    print(head(cres_EP))
-    trial <- reshape(cres_EP[,3:5],
+    trial <- stats::reshape(cres_EP[,3:5],
                    idvar = "gene_name",
                    timevar = "bin",
                    direction = "wide",
                    v.names = "EP_promoter")
-    print(trial)
+
   }
 
   return(trial)
@@ -294,11 +291,11 @@ compute_crup_reg_distance_prom <- function(input, prediction) {
 
 wilcoxon_test_crup_cor <- function(x) {
 
-  x$cage_wilcoxon_test <- cage_test_data[x$pair, 3]
-  x$dhsexp_wilcoxon_test  <-  dhsexp_test_data[x$pair, 3]
-  x$crupexp_wilcoxon_test  <-  crupexp_test_data[x$pair, 3]
-  x$dhsdhs_wilcoxon_test  <- dhsdhs_test_data[x$pair, 3]
-  x$cor_CRUP <- crup_cor[x$pair, 3]
+  x$cage_wilcoxon_test <- CENTREdata::cage_test_data[x$pair, 3]
+  x$dhsexp_wilcoxon_test  <-  CENTREdata::dhsexp_test_data[x$pair, 3]
+  x$crupexp_wilcoxon_test  <-  CENTREdata::crupexp_test_data[x$pair, 3]
+  x$dhsdhs_wilcoxon_test  <- CENTREdata::dhsdhs_test_data[x$pair, 3]
+  x$cor_CRUP <- CENTREdata::crup_cor[x$pair, 3]
   return(x)
 }
 
@@ -311,9 +308,9 @@ wilcoxon_test_crup_cor <- function(x) {
 
 get_rnaseq <- function(x, tpmfile) {
   tpmfile$gene_id2 <- gsub("\\..*", "", tpmfile[, 1])
-  
+
   x <- merge(x, tpmfile[,c(3,4)],by.x = "gene_id2", by.y = "gene_id2" )
-  
+
 
 
   return(x)

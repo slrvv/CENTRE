@@ -7,10 +7,7 @@
 computeGenericFeatures(x)
 }
 \arguments{
-\item{file}{Path to a file with either genes and enhancer pairs.}
-
-\item{metaData}{Dataframe indicating the paths to the ChIP-seq experiments.
-More information on the format here \code{crupR::normalize()}}
+\item{x}{Dataframe with the gene-enhancer pairs of interest}
 }
 \value{
 A table containting the following computed features :
@@ -23,4 +20,20 @@ expression, CRUP expression and DNase DNase)
 }
 \description{
 Computes the generic features needed by CENTRE to make predictions
+}
+\examples{
+#Create candidate pairs
+candidates <- read.table(system.file("extdata",
+"exampleids.txt", package = "CENTRE"), header = T)
+#Remember to give the columns the name "gene_id"
+colnames(candidates) <- c("gene_id")
+#Generate the candidate pairs
+candidate_pairs <- createPairs(candidates)
+
+#Or give your own
+#Rememeber to name them correctly
+colnames(candidate_pairs) <- c("gene_id", "enhancer_id")
+
+generic_features <- computeGenericFeatures(candidate_pairs)
+
 }

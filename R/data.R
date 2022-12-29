@@ -4,7 +4,6 @@
 #'
 #' @format A data frame with three variables: \code{gene_id} Gene ID,
 #' \code{symbol38} Enhancer ID, \code{wilcoxtest_cage} result of the test ).
-#'@source
 "cage_test_data"
 
 #' CRUP correlations

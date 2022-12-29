@@ -18,3 +18,12 @@ Creates all of the possible gene enhancer pairs at 500kb distance
 from the given genes
 transcription start sites.
 }
+\examples{
+#Start by providing genes with their ENSEMBL id
+candidates <- read.table(system.file("extdata",
+"exampleids.txt", package = "CENTRE"), header = T)
+#Remember to give the columns the name "gene_id"
+colnames(candidates) <- c("gene_id")
+#Generate the candidate pairs
+candidate_pairs <- createPairs(candidates)
+}

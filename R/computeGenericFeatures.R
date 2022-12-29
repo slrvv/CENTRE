@@ -2,10 +2,7 @@
 #'
 #' Computes the generic features needed by CENTRE to make predictions
 #'
-#' @param file Path to a file with either genes and enhancer pairs.
-#' @param metaData Dataframe indicating the paths to the ChIP-seq experiments.
-#' More information on the format here `crupR::normalize()`
-#'
+#' @param x Dataframe with the gene-enhancer pairs of interest
 #'
 #' @return
 #' A table containting the following computed features :
@@ -15,9 +12,24 @@
 #'* crup_COR: CRUP correlation scores
 #'
 #' @examples
+#' #Create candidate pairs
+#' candidates <- read.table(system.file("extdata",
+#' "exampleids.txt", package = "CENTRE"), header = T)
+#' #Remember to give the columns the name "gene_id"
+#' colnames(candidates) <- c("gene_id")
+#' #Generate the candidate pairs
+#' candidate_pairs <- createPairs(candidates)
 #'
+#' #Or give your own
+#' #Rememeber to name them correctly
+#' colnames(candidate_pairs) <- c("gene_id", "enhancer_id")
 #'
+#' generic_features <- computeGenericFeatures(candidate_pairs)
 #'
+#' @export
+#' @import utils
+#' @importFrom scran combinePValues
+#' @importFrom CENTREdata crup_cor dhsdhs_test_data dhsexp_test_data crupexp_test_data cage_test_data
 computeGenericFeatures <- function(x) {
   ## Pre-eliminary checks and computations
 

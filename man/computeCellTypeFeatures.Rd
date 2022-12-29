@@ -4,7 +4,13 @@
 \alias{computeCellTypeFeatures}
 \title{Compute cell type specific features}
 \usage{
-computeCellTypeFeatures(metaData, cores, sequencing, tpmfile, features_generic)
+computeCellTypeFeatures(
+  metaData,
+  cores,
+  sequencing = "single",
+  tpmfile,
+  features_generic
+)
 }
 \arguments{
 \item{metaData}{Dataframe indicating the paths to the ChIP-seq experiments.
@@ -12,10 +18,13 @@ More information on the format here \code{crupR::normalize()}}
 
 \item{cores}{Number of cores to compute the CRUP score features}
 
-\item{file}{Path to a file with gene and enhancer pairs.}
+\item{sequencing}{Type of sequencing of the ChIP-seq experiments "paired" or
+"single". The parameter takes single as default}
 
-\item{tpmpath}{Path to a file with the RNA-seq TPM values, with the names of
-the genes given as ENSEMBLE ID's}
+\item{tpmfile}{Dataframe of two columns one with the RNA-seq TPM values,
+one with the names of the genes given as ENSEMBLE ID's}
+
+\item{features_generic}{The output of \code{CENTRE::computeGenericFeatures()}}
 }
 \value{
 A table containting the following computed features :
@@ -32,15 +41,34 @@ Computes the cell type specific features needed for the CENTRE classification
 step.
 }
 \examples{
+candidates <- read.table(system.file("extdata",
+"exampleids.txt", package = "CENTRE"), header = T)
 
+#Remember to give the columns the name "gene_id"
+colnames(candidates) <- c("gene_id")
 
+#Generate the candidate pairs
+candidate_pairs <- createPairs(candidates)
 
-metaData <- data.frame(HM = c("H3K4me1","H3K4me3","H3K27ac"),
-                      condition = c(1,1,1), replicate = c(1,1,1),
-                      bamFile = files,
-                      features_genericFile = rep(features_generics,3))
-file <- "/project/CRUP_scores/EPI/example1.txt"
-compute_features(file, metaData, cores)
+#Compute the generic features for given names
+generic_features <- computeGenericFeatures(candidate_pairs)
 
+## Prepare the data needed for computing cell type
+featuresfiles <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
+                  system.file("extdata","HeLa_H3K4me3.bam", package = "CENTRE"),
+                  system.file("extdata","HeLa_H3K27ac.bam", package = "CENTRE"))
 
+inputs <- system.file("extdata", "HeLa_input.bam", package = "CENTRE")
+metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
+                       condition = c(1, 1, 1), replicate = c(1, 1, 1),
+                       bamFile = files, inputFile = rep(inputs, 3))
+#More information on this step is found in the crupR documentation
+tpmfile <- read.table(system.file("extdata", "HeLa.tsv", package = "CENTRE"),
+                     sep = "", stringsAsFactors = F, header = T)
+
+celltype_features <- computeCellTypeFeatures(metaData,
+                                           cores = 1,
+                                           "single",
+                                           tpmfile,
+                                           generic_features)
 }

@@ -1,4 +1,4 @@
 library(testthat)
-library(EPI)
+library(CENTRE)
 
-test_check("EPI")
+test_check("CENTRE")

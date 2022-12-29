@@ -6,3 +6,14 @@ R/.RData
 .Rbuildignore
 R/sysdata.rda
 data/
+inst/extdata/HeLa-S3.tsv
+inst/extdata/HeLa_H3K27ac.bam
+inst/extdata/HeLa_H3K27ac.bam.bai
+inst/extdata/HeLa_H3K4me1.bam
+inst/extdata/HeLa_H3K4me1.bam.bai
+inst/extdata/HeLa_H3K4me3.bam
+inst/extdata/HeLa_H3K4me3.bam.bai
+inst/extdata/HeLa_input.bam
+inst/extdata/HeLa_input.bam.bai
+
+

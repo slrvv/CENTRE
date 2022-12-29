@@ -3,12 +3,16 @@
 #' Computes the cell type specific features needed for the CENTRE classification
 #' step.
 #'
-#' @param file Path to a file with gene and enhancer pairs.
+#'
 #' @param metaData Dataframe indicating the paths to the ChIP-seq experiments.
 #' More information on the format here `crupR::normalize()`
 #' @param cores Number of cores to compute the CRUP score features
-#' @param tpmpath Path to a file with the RNA-seq TPM values, with the names of
-#' the genes given as ENSEMBLE ID's
+#' @param sequencing Type of sequencing of the ChIP-seq experiments "paired" or
+#' "single". The parameter takes single as default
+#' @param tpmfile Dataframe of two columns one with the RNA-seq TPM values,
+#' one with the names of the genes given as ENSEMBLE ID's
+#' @param features_generic The output of `CENTRE::computeGenericFeatures()`
+#'
 #'
 #' @return
 #' A table containting the following computed features :
@@ -19,21 +23,45 @@
 #'* RNA-seq TPM values
 #'
 #'
-#' @export
-#'
 #' @examples
+#' candidates <- read.table(system.file("extdata",
+#' "exampleids.txt", package = "CENTRE"), header = T)
 #'
+#' #Remember to give the columns the name "gene_id"
+#' colnames(candidates) <- c("gene_id")
 #'
+#' #Generate the candidate pairs
+#' candidate_pairs <- createPairs(candidates)
 #'
-#'metaData <- data.frame(HM = c("H3K4me1","H3K4me3","H3K27ac"),
-#'                       condition = c(1,1,1), replicate = c(1,1,1),
-#'                       bamFile = files,
-#'                       features_genericFile = rep(features_generics,3))
-#'file <- "/project/CRUP_scores/EPI/example1.txt"
-#'compute_features(file, metaData, cores)
+#' #Compute the generic features for given names
+#' generic_features <- computeGenericFeatures(candidate_pairs)
 #'
+#' ## Prepare the data needed for computing cell type
+#' featuresfiles <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
+#'                   system.file("extdata","HeLa_H3K4me3.bam", package = "CENTRE"),
+#'                   system.file("extdata","HeLa_H3K27ac.bam", package = "CENTRE"))
 #'
-computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
+#'inputs <- system.file("extdata", "HeLa_input.bam", package = "CENTRE")
+#' metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
+#'                        condition = c(1, 1, 1), replicate = c(1, 1, 1),
+#'                        bamFile = files, inputFile = rep(inputs, 3))
+#'#More information on this step is found in the crupR documentation
+#'tpmfile <- read.table(system.file("extdata", "HeLa.tsv", package = "CENTRE"),
+#'                      sep = "", stringsAsFactors = F, header = T)
+#'
+#'celltype_features <- computeCellTypeFeatures(metaData,
+#'                                            cores = 1,
+#'                                            "single",
+#'                                            tpmfile,
+#'                                            generic_features)
+#'@export
+#'@importFrom crupR normalize getEnhancers
+#'@import utils
+#'@importFrom GenomicRanges GRanges findOverlaps elementMetadata
+#'@importFrom IRanges IRanges
+#'@importFrom stats reshape
+
+computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmfile,
                                     features_generic) {
   ## Pre-eliminary checks and computations
 
@@ -47,7 +75,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing, tpmfile,
                                  condition = 1,
                                  replicate = 1,
                                  genome = "hg38",
-                                 sequencing = "single",
+                                 sequencing = sequencing,
                                  chroms = chr,
                                  C = cores)
   #Get CRUP enhancer probabilities

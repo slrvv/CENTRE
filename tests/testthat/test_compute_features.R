@@ -24,7 +24,7 @@ test_that("compute features functions runs as expected for thyroid", {
   tpmfile <-  read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
 
   ###expected_predictions
-  predictions_expected <- read.table("/project/CRUP_scores/EPI/tests/testthat/Thyroid.GTEx-Benchmark.V38.predictions.txt"
+  predictions_expected <- read.table("/project/CRUP_scores/CENTRE/tests/testthat/Thyroid.GTEx-Benchmark.V38.predictions.txt"
                             , sep = "\t", header = T)
 
   ###Checking that output has correct number of rows
@@ -58,7 +58,7 @@ test_that("compute features functions runs as expected for thyroid", {
   cat("Check centrePrediction")
   predictions <- centrePrediction(celltype_features,
                                   generic_features,
-                                  model = "/project/CRUP_scores/EPI/model/centre2_final_model.txt" )
+                                  model = "/project/CRUP_scores/CENTRE/inst/extdata/centre2_final_model.txt" )
   predictions$pair <- paste(predictions$enhancer_id,
                                  predictions$gene_id2,
                                  sep = "_")
