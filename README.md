@@ -35,13 +35,16 @@ columns one
 ## CENTRE Provided Data
 
 CENTRE uses precomputed datasets that the user needs to download from the 
-following link (insert url) and add to the /data folder. 
+following link https://nc.molgen.mpg.de/cloud/index.php/s/TywGRejS3Sf2Y4D and add to the 
+/inst/extdata folder. 
 
 
 ## How to run CENTRE
-
 ### Installing CENTRE
-Install this R package. It is not yet published so we recommend blabla
+Install this R package. It is not yet published so we recommend using the `install_github`
+function in devtools. Then, download the CENTRE provided data from 
+https://nc.molgen.mpg.de/cloud/index.php/s/TywGRejS3Sf2Y4D and add it to inst/extdata/, do
+the same for the example data https://nc.molgen.mpg.de/cloud/index.php/s/TP4ogT5b3Xewnzy
 
 ### General workflow
 
@@ -185,18 +188,18 @@ generic_features <- computeGenericFeatures(candidate_pairs)
 
 ## Prepare the data needed for computing cell type features
 
-files <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
-          system.file("extdata","HeLa_H3K4me3.bam", package = "CENTRE"),
-          system.file("extdata","HeLa_H3K27ac.bam", package = "CENTRE")
+files <- c(system.file("extdata/example","HeLa_H3K4me1.bam", package = "CENTRE"),
+          system.file("extdata/example","HeLa_H3K4me3.bam", package = "CENTRE"),
+          system.file("extdata/example","HeLa_H3K27ac.bam", package = "CENTRE")
           
-inputs <- system.file("extdata", "HeLa_input.bam", package = "CENTRE")
+inputs <- system.file("extdata/example", "HeLa_input.bam", package = "CENTRE")
 
 metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
                        condition = c(1, 1, 1), replicate = c(1, 1, 1),
                        bamFile = files, inputFile = rep(inputs, 3))
 #More information on this step is found in the crupR documentation
 
-tpmfile <- read.table(system.file("extdata", "HeLa.tsv", package = "CENTRE"),
+tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
                       sep = "", stringsAsFactors = F, header = T)
 
 celltype_features <- computeCellTypeFeatures(metaData,
@@ -212,8 +215,3 @@ predictions <- centrePrediction(celltype_features,
   
 
 ```
-
-
-
-
-
