@@ -22,8 +22,7 @@ Imports:
     GenomicRanges,
     IRanges,
     utils,
-    stats,
-    CENTREdata
+    stats
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
 Depends: 

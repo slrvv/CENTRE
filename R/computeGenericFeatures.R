@@ -29,7 +29,7 @@
 #' @export
 #' @import utils
 #' @importFrom scran combinePValues
-#' @importFrom CENTREdata crup_cor dhsdhs_test_data dhsexp_test_data crupexp_test_data cage_test_data
+#' 
 computeGenericFeatures <- function(x) {
   ## Pre-eliminary checks and computations
 

@@ -26,12 +26,13 @@ CENTRE predicton
 \examples{
 #Start by providing genes with their ENSEMBL id
 candidates <- read.table(system.file("extdata",
-                        "exampleids.txt", package = "CENTRE"), header = T)
+                        "exampleids.txt", package = "CENTRE"), header = TRUE)
                         #Remember to give the columns the name "gene_id"
 colnames(candidates) <- c("gene_id")
 #Generate the candidate pairs
 candidate_pairs <- createPairs(candidates)
 #Compute the generic features for given names
+colnames(candidate_pairs) <- c("gene_id", "enhancer_id")
 generic_features <- computeGenericFeatures(candidate_pairs)
 ## Prepare the data needed for computing cell type features
 files <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),

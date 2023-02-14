@@ -290,12 +290,18 @@ compute_crup_reg_distance_prom <- function(input, prediction) {
 ################################################################################
 
 wilcoxon_test_crup_cor <- function(x) {
-
-  x$cage_wilcoxon_test <- CENTREdata::cage_test_data[x$pair, 3]
-  x$dhsexp_wilcoxon_test  <-  CENTREdata::dhsexp_test_data[x$pair, 3]
-  x$crupexp_wilcoxon_test  <-  CENTREdata::crupexp_test_data[x$pair, 3]
-  x$dhsdhs_wilcoxon_test  <- CENTREdata::dhsdhs_test_data[x$pair, 3]
-  x$cor_CRUP <- CENTREdata::crup_cor[x$pair, 3]
+   
+  load(system.file("extdata/data", "cage_test_data.rda", package = "CENTRE"))
+  
+  load(system.file("extdata/data", "dhsexp_test_data.rda", package = "CENTRE"))
+  load(system.file("extdata/data", "crupexp_test_data.rda", package = "CENTRE"))
+  load(system.file("extdata/data", "dhsdhs_test_data.rda", package = "CENTRE"))
+  load(system.file("extdata/data", "crup_cor.rda", package = "CENTRE"))
+  x$cage_wilcoxon_test <- cage_test_data[x$pair, 3]
+  x$dhsexp_wilcoxon_test  <-  dhsexp_test_data[x$pair, 3]
+  x$crupexp_wilcoxon_test  <-  crupexp_test_data[x$pair, 3]
+  x$dhsdhs_wilcoxon_test  <- dhsdhs_test_data[x$pair, 3]
+  x$cor_CRUP <- crup_cor[x$pair, 3]
   return(x)
 }
 

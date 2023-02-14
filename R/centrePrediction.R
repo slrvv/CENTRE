@@ -15,12 +15,13 @@
 #' @examples
 #' #Start by providing genes with their ENSEMBL id
 #' candidates <- read.table(system.file("extdata",
-#'                         "exampleids.txt", package = "CENTRE"), header = T)
+#'                         "exampleids.txt", package = "CENTRE"), header = TRUE)
 #'                         #Remember to give the columns the name "gene_id"
 #'colnames(candidates) <- c("gene_id")
 #'#Generate the candidate pairs
 #'candidate_pairs <- createPairs(candidates)
 #'#Compute the generic features for given names
+#'colnames(candidate_pairs) <- c("gene_id", "enhancer_id")
 #'generic_features <- computeGenericFeatures(candidate_pairs)
 #'## Prepare the data needed for computing cell type features
 #'files <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
@@ -73,19 +74,27 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
 
   ##Loading the xgboost model
   if (is.null(model)){
-    model <- system.file("extdata", "centre2_final_model.txt")
+    model <- system.file("extdata", "centre2_final_model.txt", package = "CENTRE")
   } else {
     check_file(model)
   }
   xgb_model <- xgboost::xgb.load(model)
 
+
   ##Transforming data
-  feature_matrix <- as.matrix(features_all[, -1])
+  colnames(features_all) <- NULL
+  pairs <- features_all[, 1]
+  features_all <- features_all[, -1]
+
+
+  feature_matrix <- data.matrix(features_all)
+
   test <- xgboost::xgb.DMatrix(data = feature_matrix)
   ##Predicting
   predictions <- predict(xgb_model, test)
   label <- as.numeric(predictions > 0.5)
   #Add the gene and enhancer id's
-  predictions <- cbind(features_all[,1], predictions, label)
+  predictions <- cbind(pairs, predictions, label)
+  predictions <- as.data.frame(predictions)
   return(predictions)
 }
