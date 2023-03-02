@@ -17,9 +17,6 @@ test_that("compute generic feature function runs as expected", {
 
   testthat::expect_equal(length(unique(pred$pair)), nrow(pred))
   testthat::expect_equal(dim(pred), c(19,9))
-  testthat::expect_equal(pred$cor_CRUP, expected$cor_CRUP)
+  testthat::expect_equal(pred$crup_cor, expected$cor_CRUP[,1])
   testthat::expect_equal(pred$combined_tests, expected$combined_tests, tolerance =1e-5)
-  # expect_equal(predictions$predictions,
-  #              predictions_expected$predictions,
-  #              tolerance =1e-5)
 })

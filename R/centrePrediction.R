@@ -55,7 +55,7 @@
 centrePrediction <- function(features_celltype,features_generic, model = NULL){
   #Merge the generic features and the cell type features
 
-
+  start_time <- Sys.time()
   features_generic$distance <- abs(features_generic$distance) # make distance absolute distance
   #generate the pair id to merge both feature sets
   features_generic$pair <- paste(features_generic$enhancer_id,
@@ -96,5 +96,6 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
   #Add the gene and enhancer id's
   predictions <- cbind(pairs, predictions, label)
   predictions <- as.data.frame(predictions)
+  cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
   return(predictions)
 }

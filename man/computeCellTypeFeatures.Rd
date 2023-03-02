@@ -6,10 +6,14 @@
 \usage{
 computeCellTypeFeatures(
   metaData,
+  condition = 1,
+  replicate = 1,
+  map.q = 10,
+  input.free = FALSE,
   cores,
   sequencing = "single",
   tpmfile,
-  features_generic
+  featuresGeneric
 )
 }
 \arguments{
@@ -24,7 +28,7 @@ More information on the format here \code{crupR::normalize()}}
 \item{tpmfile}{Dataframe of two columns one with the RNA-seq TPM values,
 one with the names of the genes given as ENSEMBLE ID's}
 
-\item{features_generic}{The output of \code{CENTRE::computeGenericFeatures()}}
+\item{featuresGeneric}{The output of \code{CENTRE::computeGenericFeatures()}}
 }
 \value{
 A table containting the following computed features :

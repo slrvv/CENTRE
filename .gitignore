@@ -16,4 +16,4 @@ inst/extdata/HeLa_H3K4me3.bam.bai
 inst/extdata/HeLa_input.bam
 inst/extdata/HeLa_input.bam.bai
 inst/extdata/data/
-
+inst/extdata/PrecomputedData.db

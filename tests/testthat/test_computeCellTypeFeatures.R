@@ -31,10 +31,14 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
 
   cat("Check ComputeCellTypeFeatures")
   celltype_features <- computeCellTypeFeatures(metaData,
-                                    cores = 1,
-                                    "single",
-                                    tpmfile,
-                                    generic_features)
+                                               condition = 1,
+                                               replicate = 1,
+                                               mapq = 10,
+                                               input.free = FALSE,
+                                               cores = 1,
+                                               sequencing = "single",
+                                               tpmfile = tpmfile,
+                                               featuresGeneric = generic_features)
   celltype_features$pair <- paste(celltype_features$enhancer_id,
                                   celltype_features$gene_id2,
                                   sep = "_")

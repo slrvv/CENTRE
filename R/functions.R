@@ -32,6 +32,7 @@ chromosomes <- data.frame(
 )
 
 
+
 ###############################################################################
 # function: convert factor type columns into character type
 ###############################################################################
@@ -42,6 +43,34 @@ unfactorize <- function(df) {
 
   return(df)
 }
+
+###############################################################################
+# function: extend 500Kbp
+###############################################################################
+extend <- function(gene){
+  ##extend 500 kb to the left of tts
+  if (gene$transcription_start[i] <= 500000) {
+    ##We check that the extension doesnt fall outside of the chromosome
+    start_tts[i] <- 1
+  } else{
+    start_tts[i] <- gene$transcription_start[i] - 500000
+  }
+
+  ##extend 500kb to the right of tts
+
+  chr_size <- chromosomes[chromosomes[, 1] %in% gene$chr[i], 2]
+
+  if (gene$transcription_start[i] + 500000 >= chr_size) {
+    ##We check that the extension doesnt fall outside of the chromosome
+    end_tts[i] <- chr_size
+  } else {
+
+    end_tts[i] <- gene$transcription_start[i] + 500000
+  }
+
+
+}
+
 
 
 ###############################################################################
@@ -58,7 +87,7 @@ check_file <- function(f) {
 ###############################################################################
 # function: get the distance from gene to enhancer
 ###############################################################################
-distances_gene_enhancer <- function(x) {
+computeDistances <- function(x) {
 
 
   #Getting the chrosomes and the middle points for the provided enhancers
@@ -286,23 +315,29 @@ compute_crup_reg_distance_prom <- function(input, prediction) {
 }
 
 ################################################################################
-# function: gets the precomputed values of the Wilcoxon tests
+# function: Makes the query for Precomputed.db
 ################################################################################
 
-wilcoxon_test_crup_cor <- function(x) {
-   
-  load(system.file("extdata/data", "cage_test_data.rda", package = "CENTRE"))
-  
-  load(system.file("extdata/data", "dhsexp_test_data.rda", package = "CENTRE"))
-  load(system.file("extdata/data", "crupexp_test_data.rda", package = "CENTRE"))
-  load(system.file("extdata/data", "dhsdhs_test_data.rda", package = "CENTRE"))
-  load(system.file("extdata/data", "crup_cor.rda", package = "CENTRE"))
-  x$cage_wilcoxon_test <- cage_test_data[x$pair, 3]
-  x$dhsexp_wilcoxon_test  <-  dhsexp_test_data[x$pair, 3]
-  x$crupexp_wilcoxon_test  <-  crupexp_test_data[x$pair, 3]
-  x$dhsdhs_wilcoxon_test  <- dhsdhs_test_data[x$pair, 3]
-  x$cor_CRUP <- crup_cor[x$pair, 3]
-  return(x)
+queryMaker <- function(table, feature, x) {
+  query <- paste("SELECT ", feature, ", pair FROM ", table, " WHERE pair in (",
+                paste0(sprintf("'%s'", x$pair), collapse = ", "), ")", sep = "")
+  return(query)
+}
+
+################################################################################
+# function: gets the precomputed values of the Wilcoxon tests from
+# PrecomputedData.db
+################################################################################
+
+getPrecomputedValues <- function(table, feature, x, conn) {
+
+  query <- queryMaker(table, feature, x)
+
+
+  df_return <- RSQLite::dbGetQuery(conn, query)
+  rownames(df_return) <- df_return$pair
+  df_return$pair <- NULL
+  return(df_return)
 }
 
 

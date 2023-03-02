@@ -23,6 +23,7 @@
 #' @importFrom IRanges IRanges
 
 createPairs <- function(gene) {
+  start_time <- Sys.time()
 
   colnames(gene) <- c("gene_id")
 
@@ -31,57 +32,58 @@ createPairs <- function(gene) {
 
 
   #get chromosome and tts of our genes
+  ##This should be changed to annotation hub v40 but it is missing
   gene <- merge(gene,
                   gencode[, c("chr","gene_id1","transcription_start")],
                   by.x = "gene_id1",
                   by.y = "gene_id1")
 
-  start_tts <- integer(nrow(gene))
-  end_tts <- integer(nrow(gene))
-  for (i in 1:nrow(gene)) {
+  gene$startTts <- integer(nrow(gene))
+  gene$endTts <- integer(nrow(gene))
+
+  for (i in seq_along(gene)) {
     ##extend 500 kb to the left of tts
 
     if (gene$transcription_start[i] <= 500000) {
       ##We check that the extension doesnt fall outside of the chromosome
-      start_tts[i] <- 1
+      gene$startTts[i] <- 1
     } else{
-      start_tts[i] <- gene$transcription_start[i] - 500000
+      gene$startTts[i] <- gene$transcription_start[i] - 500000
     }
 
     ##extend 500kb to the right of tts
 
-    chr_size <- chromosomes[chromosomes[, 1] %in% gene$chr[i], 2]
+    chrSize <- chromosomes[chromosomes[, 1] %in% gene$chr[i], 2]
 
-    if (gene$transcription_start[i] + 500000 >= chr_size) {
+    if (gene$transcription_start[i] + 500000 >= chrSize) {
       ##We check that the extension doesnt fall outside of the chromosome
-      end_tts[i] <- chr_size
+      gene$endTts[i] <- chrSize
     } else {
 
-      end_tts[i] <- gene$transcription_start[i] + 500000
+      gene$endTts[i] <- gene$transcription_start[i] + 500000
     }
 
   }
 
-  gene <- cbind(gene, start_tts, end_tts)
-
-  genes_range <- with(gene,
+  genesRange <- with(gene,
                       GenomicRanges::GRanges(chr,
-                                             IRanges::IRanges(start = start_tts,
-                                                              end = end_tts)))
-
-  enhancer_range<-  with(ccres_enhancer,
+                                             IRanges::IRanges(start = startTts,
+                                                              end = endTts)))
+  #Implement it with annotation Hub
+  enhancerRange<-  with(ccres_enhancer,
                          GenomicRanges::GRanges(V1,
                                                 IRanges::IRanges(start = new_start,
                                                                  end = new_end)))
 
-  overlaps <- GenomicRanges::findOverlaps(genes_range, enhancer_range,
-                                          ignore.strand = T)
+  overlaps <- GenomicRanges::findOverlaps(genesRange, enhancerRange,
+                                          ignore.strand = TRUE)
 
-  cres_overlaping <-data.frame(gene = overlaps@from, enhancer = overlaps@to)
-  cres_overlaping$gene_id1 <- gene[cres_overlaping$gene, 1]
-  cres_overlaping$enhancer_id <- ccres_enhancer$V5[cres_overlaping$enhancer]
-  cres_overlaping <- cres_overlaping[, 3:4]
-  return(cres_overlaping)
+  ccresOverlapping <-data.frame(gene = overlaps@from, enhancer = overlaps@to)
+  ccresOverlapping$gene_id1 <- gene[ccresOverlapping$gene, 1]
+  ccresOverlapping$enhancer_id <- ccres_enhancer$V5[ccresOverlapping$enhancer]
+  ccresOverlapping <- ccresOverlapping[, 3:4]
+  cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
+  return(ccresOverlapping)
 
 
 }

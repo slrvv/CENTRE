@@ -11,7 +11,7 @@
 #' "single". The parameter takes single as default
 #' @param tpmfile Dataframe of two columns one with the RNA-seq TPM values,
 #' one with the names of the genes given as ENSEMBLE ID's
-#' @param features_generic The output of `CENTRE::computeGenericFeatures()`
+#' @param featuresGeneric The output of `CENTRE::computeGenericFeatures()`
 #'
 #'
 #' @return
@@ -61,8 +61,16 @@
 #'@importFrom IRanges IRanges
 #'@importFrom stats reshape
 
-computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmfile,
-                                    features_generic) {
+computeCellTypeFeatures <- function(metaData,
+                                    condition,
+                                    replicate,
+                                    mapq = 10,
+                                    input.free = FALSE,
+                                    cores,
+                                    sequencing = "single",
+                                    tpmfile,
+                                    featuresGeneric) {
+  start_time <- Sys.time()
   ## Pre-eliminary checks and computations
 
 
@@ -70,19 +78,21 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
   startPart("Computing CRUP score features")
 
   ## Calling normalization step only on the chromosomes we have
-  chr <- unique(features_generic$chr)
+  chr <- unique(featuresGeneric$chr)
   normalized <- crupR::normalize(metaData = metaData,
-                                 condition = 1,
-                                 replicate = 1,
+                                 condition = condition,
+                                 replicate = replicate,
+                                 mapq = mapq,
+                                 input.free = input.free,
                                  genome = "hg38",
                                  sequencing = sequencing,
                                  chroms = chr,
                                  C = cores)
   #Get CRUP enhancer probabilities
-  crup_scores_enh <- crupR::getEnhancers(data = normalized, C = cores)
-  crup_scores_enh <- crup_scores_enh$D
+  crupScores <- crupR::getEnhancers(data = normalized, C = cores, all = TRUE)
+  crupScores <- crupScores$D
   ##Making the ranges for the enhancers
-  list_enh <- as.data.frame(unique(features_generic$enhancer_id))
+  list_enh <- as.data.frame(unique(featuresGeneric$enhancer_id))
   colnames(list_enh) <- c("enhancer_id")
 
   regions_enhancer <-  merge(list_enh,
@@ -93,7 +103,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
 
   ##Making the ranges for the genes
 
-  list_prom <- as.data.frame(unique(features_generic$gene_id2))
+  list_prom <- as.data.frame(unique(featuresGeneric$gene_id2))
   colnames(list_prom) <- c("gene_id2")
   regions_prom <- merge(list_prom,
                    gencode[, c("chr", "gene_id1", "new_start", "new_end")],
@@ -107,9 +117,9 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
   #Crup enhancer scores for enhancer
   crup_EP_enh <- compute_crup_enhancer(regions_enhancer,
                                        list_enh,
-                                       crup_scores_enh)
+                                       crupScores)
 
-  crup_features <- merge(features_generic,
+  crup_features <- merge(featuresGeneric,
                         crup_EP_enh,
                         by.x = "enhancer_id",
                         by.y = "cres_name",
@@ -117,7 +127,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
   #CRUP enhancer scores for promoter
   crup_EP_prom <- compute_crup_promoter(regions_prom,
                                         list_prom,
-                                        crup_scores_enh)
+                                        crupScores)
 
   crup_features <- merge(crup_features,
                         crup_EP_prom,
@@ -125,17 +135,13 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
                         by.y = "gene_name",
                         all.x = TRUE)
   ##crup enhancer scores for distance
-  crup_features <- compute_crup_reg_distance_enh(crup_features, crup_scores_enh)
+  crup_features <- compute_crup_reg_distance_enh(crup_features, crupScores)
 
 
   ##Get CRUP promoter probabilities
-  crup_scores_prom <- crupR::getEnhancers(data = normalized,
-                                          C = cores,
-                                          all = T)
 
-  crup_scores_prom <- crup_scores_prom$D
   ### Compute the promoter probability from probA and probE
-  crup_scores_prom$probP <- crup_scores_prom$probA *(1 - crup_scores_prom$probE)
+  crupScores$probP <- crupScores$probA *(1 - crupScores$probE)
 
   cat("Getting the CRUP-PP scores for enhancer")
 
@@ -143,7 +149,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
 
   crup_PP_enh <- compute_crup_enhancer(regions_enhancer,
                                        list_enh,
-                                       crup_scores_prom,
+                                       crupScores,
                                        promprob = T)
 
   crup_features <- merge(crup_features,
@@ -156,7 +162,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
 
   crup_PP_prom <- compute_crup_promoter(regions_prom,
                                         list_prom,
-                                        crup_scores_prom,
+                                        crupScores,
                                         promprob = T)
   crup_features <- merge(crup_features,
                         crup_PP_prom,
@@ -166,7 +172,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
 
   #Crup promoter scores for distance
   crup_features <- compute_crup_reg_distance_prom(crup_features,
-                                             crup_scores_prom)
+                                             crupScores)
 
 
   endPart()
@@ -211,7 +217,7 @@ computeCellTypeFeatures <- function(metaData, cores, sequencing = "single", tpmf
                                     "norm_reg_dist_prom",
                                     "RNA_seq")
 
-
+  cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
   endPart()
   return(features_table_all)
 

@@ -28,9 +28,10 @@
 #'
 #' @export
 #' @import utils
-#' @importFrom scran combinePValues
-#' 
+#' @importFrom metapod combineParallelPValues
+#' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
 computeGenericFeatures <- function(x) {
+  start_time <- Sys.time()
   ## Pre-eliminary checks and computations
 
   x$gene_id1 <- gsub("\\..*", "", x[, 1])
@@ -41,41 +42,72 @@ computeGenericFeatures <- function(x) {
 
 
   colnames(x) <- c("gene_id", "enhancer_id", "gene_id2")
-  features_distances <- distances_gene_enhancer(x)
+  featuresDistances <- computeDistances(x)
 
   cat("Removing pairs with distance over 500 Kb")
-  features_distances <- features_distances[abs(features_distances$distance)
+  featuresDistances <- featuresDistances[abs(featuresDistances$distance)
                                            <= 500000, ]
   endPart()
 
   ## Getting the values for the Wilcoxon tests and the CRUP correlations
   startPart("Get Wilcoxon tests and CRUP correlations")
 
-  features_distances$pair <- paste(features_distances$enhancer_id,
-                                   features_distances$gene_id2,
+  featuresDistances$pair <- paste(featuresDistances$enhancer_id,
+                                   featuresDistances$gene_id2,
                                    sep = "_")
 
-  wilcoxon_features <- wilcoxon_test_crup_cor(features_distances)
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
+                             system.file("extdata",
+                                         "PrecomputedData.db",
+                                         package = "CENTRE"))
 
+
+  cageDf <- getPrecomputedValues("cage_test_data",
+                                  "wilcoxtest_cage",
+                                  featuresDistances,
+                                  conn)
+  dhsexpDf <- getPrecomputedValues("dhsexp_test_data",
+                                    "wilcoxtest_dhs_exp",
+                                    featuresDistances,
+                                    conn)
+  crupexpDf <- getPrecomputedValues("crupexp_test_data",
+                                     "wilcoxtest_crup_exp",
+                                     featuresDistances,
+                                     conn)
+  dhsdhsDf <- getPrecomputedValues("dhsdhs_test_data",
+                                    "wilcoxtest_dhs_dhs",
+                                    featuresDistances,
+                                    conn)
+  crupCorDf <- getPrecomputedValues("crup_cor",
+                                      "cor_CRUP",
+                                      featuresDistances,
+                                      conn)
+
+  RSQLite::dbDisconnect(conn)
+
+  cageWilcoxTest <- cageDf[featuresDistances$pair, 1]
+  dhsexpWilcoxTest <- dhsexpDf[featuresDistances$pair, 1]
+  crupexpWilcoxTest <- crupexpDf[featuresDistances$pair, 1]
+  dhsdhsWilcoxTest <- dhsdhsDf[featuresDistances$pair, 1]
+  crupCor <- crupCorDf[featuresDistances$pair, 1]
+
+  pValue <- list(cageWilcoxTest, dhsexpWilcoxTest,
+                 crupexpWilcoxTest, dhsdhsWilcoxTest)
+  pValue[is.na(pValue)] <- 0
   ## Combining the values of the Wilcoxon tests
-  wilcoxon_features$combined_tests <- scran::combinePValues(
-    wilcoxon_features$cage_wilcoxon_test,
-    wilcoxon_features$dhsexp_wilcoxon_test,
-    wilcoxon_features$crupexp_wilcoxon_test,
-    wilcoxon_features$dhsdhs_wilcoxon_test,
-    method="fisher")
+  combined_tests <- metapod::combineParallelPValues(pValue, method="fisher")
 
 
-  wilcoxon_features$combined_tests <- abs(log(wilcoxon_features$combined_tests))
-
+  featuresDistances$combined_tests <- abs(log(combined_tests$p.value))
+  featuresDistances$crup_cor <- crupCor
   ## Return the table of features
-  features_table <- wilcoxon_features[, c("gene_id2", "enhancer_id", "chr",
+  featuresGeneric <- featuresDistances[, c("gene_id2", "enhancer_id", "chr",
                                          "middle_point", "transcription_start",
-                                         "distance", "cor_CRUP",
+                                         "distance", "crup_cor",
                                          "combined_tests")]
 
-  features_table[is.na(features_table)] <- 0
-
-  return(features_table)
+  featuresGeneric[is.na(featuresGeneric)] <- 0
+  cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
+  return(featuresGeneric)
 
 }
