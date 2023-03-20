@@ -18,19 +18,35 @@
 downloadPrecomputedData <- function(method) {
 	start_time <- Sys.time()
 	url <- "http://owww.molgen.mpg.de/~CENTRE_data/PrecomputedData.db"
+	cat("Downloading PrecomputedData.db\n")
 	exit <- download.file(url, 
 				destfile=system.file("extdata",
 						"PrecomputedData.db",
 						package = "CENTRE"),
 						method = method)         
 	if (exit != 0 ) {
-		stop("Download failed. Non-zero exit status.")
+		stop("Download of PrecomputedData.db failed. Non-zero exit status.")
         }
 
 	f <- system.file("extdata","PrecomputedData.db", package = "CENTRE") 
 	if (!file.exists(f)){
-		stop("Download failed or file was saved in the wrong directory.")
+		stop("Download of of PrecomputedData.db failed or file was saved in the wrong directory.")
 	}
+	##Download sysdata.rda
+	url_sys <- "http://owww.molgen.mpg.de/~CENTRE_data/sysdata.rda"
+	cat("Downloading sysdata.rda\n")
+	exit_sys <- download.file(url_sys,
+				destfile=system.file(package="CENTRE", "R","sysdata.rda"),
+				method = method)
+	if (exit_sys != 0 ) {
+                 stop("Download sysdata.rda failed. Non-zero exit status.")
+         }
+
+         fs <- system.file("extdata","PrecomputedData.db", package = "CENTRE")
+         if (!file.exists(fs)){
+                 stop("Download sysdata.rda failed or file was saved in the wrong directory.")
+         }
+
 	cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
 	return(0)
 }

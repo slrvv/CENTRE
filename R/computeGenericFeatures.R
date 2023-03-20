@@ -98,7 +98,7 @@ computeGenericFeatures <- function(x) {
   combined_tests <- metapod::combineParallelPValues(pValue, method="fisher")
 
 
-  featuresDistances$combined_tests <- abs(log(combined_tests$p.value))
+  featuresDistances$combined_tests <- -log(combined_tests$p.value)
   featuresDistances$crup_cor <- crupCor
   ## Return the table of features
   featuresGeneric <- featuresDistances[, c("gene_id2", "enhancer_id", "chr",
