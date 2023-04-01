@@ -6,9 +6,9 @@
 \usage{
 computeCellTypeFeatures(
   metaData,
-  condition = 1,
-  replicate = 1,
-  map.q = 10,
+  condition,
+  replicate,
+  mapq = 10,
   input.free = FALSE,
   cores,
   sequencing = "single",

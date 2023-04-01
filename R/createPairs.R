@@ -11,8 +11,9 @@
 #'
 #' @examples
 #' #Start by providing genes with their ENSEMBL id
-#' candidates <- read.table(system.file("extdata",
-#' "exampleids.txt", package = "CENTRE"), header = T)
+#' benchmark <- readRDS(system.file("extdata",
+#' "input_generic_features.rds", package = "CENTRE"), header = T)
+#' candidates <- as.data.frame(benchmark[, 1])
 #' #Remember to give the columns the name "gene_id"
 #' colnames(candidates) <- c("gene_id")
 #' #Generate the candidate pairs
@@ -21,7 +22,7 @@
 #' @import utils
 #' @importFrom GenomicRanges GRanges findOverlaps
 #' @importFrom IRanges IRanges
-
+#' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
 createPairs <- function(gene) {
   start_time <- Sys.time()
 
@@ -30,14 +31,17 @@ createPairs <- function(gene) {
   gene$gene_id1 <- gsub("\\..*", "", gene$gene_id)
 
 
-
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
+                             system.file("extdata",
+                            "Annotation.db",
+			    package = "CENTRE"))
   #get chromosome and tts of our genes
-  ##This should be changed to annotation hub v40 but it is missing
-  gene <- merge(gene,
-                  gencode[, c("chr","gene_id1","transcription_start")],
-                  by.x = "gene_id1",
-                  by.y = "gene_id1")
-
+  query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
+  paste0(sprintf("'%s'", gene$gene_id1), collapse = ", "),")",sep="" )
+  gene <- RSQLite::dbGetQuery(conn, query)
+  #Select all of the annotation for ccres
+  ccres_enhancer <- RSQLite::dbGetQuery(conn, "SELECT * FROM ccres_enhancer")
+  RSQLite::dbDisconnect(conn)
   gene$startTts <- integer(nrow(gene))
   gene$endTts <- integer(nrow(gene))
 

@@ -88,13 +88,28 @@ check_file <- function(f) {
 # function: get the distance from gene to enhancer
 ###############################################################################
 computeDistances <- function(x) {
+  # connect to annotation dataBase
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
+                              system.file("extdata",
+                             "Annotation.db",
+                             package = "CENTRE"))
+  #get chromosome and tts of our genes
+  query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
+  paste0(sprintf("'%s'", x$gene_id2), collapse = ", "),")",sep="" )
+  gene <- RSQLite::dbGetQuery(conn, query)
+  
+  #get chr and middle point of enhancers
+  query_enh <-  paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
+  paste0(sprintf("'%s'", x$enhancer_id), collapse = ", "),")",sep="" )
+  enhancer <- RSQLite::dbGetQuery(conn, query_enh)
+  RSQLite::dbDisconnect(conn)
 
-
+  #Get the chr gene_id and transcription_start from gencode annotation
   #Getting the chrosomes and the middle points for the provided enhancers
   result <- merge(x,
                   ccres_enhancer[, c("V1", "V5", "middle_point")],
-                  by.x = "enhancer_id",
-                  by.y = "V5") #change V1 and V5 to more meaningful names
+                   by.x = "enhancer_id",
+                   by.y = "V5") #change V1 and V5 to more meaningful names
   #Getting the chrosomes and transcription start sites for the provided genes
   result <- merge(result,
                   gencode[, c("chr", "gene_id1", "transcription_start")],

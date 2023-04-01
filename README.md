@@ -56,11 +56,21 @@ publication.
 
 ## How to run CENTRE
 ### Installing CENTRE
-Install this R package. It is not yet published so we recommend using the 
-`install_github` function in devtools. Then, download the PrecomputedData.db.
+This package is still in development. To install it correctly do the
+following: 
+1. Clone the repository
+2. Download the sysdata.rda from http://owww.molgen.mpg.de/~CENTRE_data/hello.html
+and move it into the CENTRE/R folder
+3. Install the R package *after* downloading the sysdata.rda either from
+terminal or using `devtools::build()` and ``devtools::install()`
+4. After installing the R package use our `CENTRE::downloadPrecomputedData()` 
+function to download the PrecomputedData.db 
 
 You can find the data for the example below at https://nc.molgen.mpg.de/cloud/index.php/s/TP4ogT5b3Xewnzy
 
+Note: sysdata.rda contains the annotations for GENCODE v40 and ENCODE cCREs v3
+we are working to make them available through AnnotationHub. Sorry for the inconvinience 
+of having to install it manually.
 
 ### General workflow
 
@@ -206,15 +216,18 @@ downloadPrecomputedData(method = "wget")
 
 #Computation:
 #Start by providing genes with their ENSEMBL id
-n
-candidates <- read.table(system.file("extdata", 
-              "exampleids.txt", package = "CENTRE"), header = T)
+candidates <- readRDS(file= system.file("extdata",
+                                         "input_generic_features.rds",
+                                         package = "CENTRE"))
+genes <- as.data.frame(candidates[, 1])
+
+
 
 #Remember to give the columns the name "gene_id" 
-colnames(candidates) <- c("gene_id")
+colnames(genes) <- c("gene_id")
 
 #Generate the candidate pairs
-candidate_pairs <- createPairs(candidates)
+candidate_pairs <- createPairs(genes)
 
 #Compute the generic features for given names
 

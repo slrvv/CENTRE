@@ -17,3 +17,4 @@ inst/extdata/HeLa_input.bam
 inst/extdata/HeLa_input.bam.bai
 inst/extdata/data/
 inst/extdata/PrecomputedData.db
+inst/extdata/Annotation.db

@@ -62,9 +62,7 @@
 #'@importFrom stats reshape
 
 computeCellTypeFeatures <- function(metaData,
-                                    condition,
                                     replicate,
-                                    mapq = 10,
                                     input.free = FALSE,
                                     cores,
                                     sequencing = "single",
@@ -80,9 +78,9 @@ computeCellTypeFeatures <- function(metaData,
   ## Calling normalization step only on the chromosomes we have
   chr <- unique(featuresGeneric$chr)
   normalized <- crupR::normalize(metaData = metaData,
-                                 condition = condition,
+                                 condition = 1,
                                  replicate = replicate,
-                                 mapq = mapq,
+                                 mapq = 10,
                                  input.free = input.free,
                                  genome = "hg38",
                                  sequencing = sequencing,
@@ -91,24 +89,29 @@ computeCellTypeFeatures <- function(metaData,
   #Get CRUP enhancer probabilities
   crupScores <- crupR::getEnhancers(data = normalized, C = cores, all = TRUE)
   crupScores <- crupScores$D
-  ##Making the ranges for the enhancers
+
   list_enh <- as.data.frame(unique(featuresGeneric$enhancer_id))
   colnames(list_enh) <- c("enhancer_id")
 
-  regions_enhancer <-  merge(list_enh,
-                    ccres_enhancer[, c("V1", "V5", "new_start", "new_end")],
-                    by.x = "enhancer_id",
-                    by.y = "V5")
-
-
-  ##Making the ranges for the genes
-
   list_prom <- as.data.frame(unique(featuresGeneric$gene_id2))
   colnames(list_prom) <- c("gene_id2")
-  regions_prom <- merge(list_prom,
-                   gencode[, c("chr", "gene_id1", "new_start", "new_end")],
-                   by.x = "gene_id2",
-                   by.y = "gene_id1")
+  #Get Gencode and CCRes anntotations for the input genes and enhancers
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
+                               system.file("extdata",
+                              "Annotation.db",
+                              package = "CENTRE"))
+  #get chromosome tts new_start and new_end of input genes
+  query <- paste("SELECT  gene_id1, chr, transcription_start, new_start, new_end FROM gencode WHERE gene_id1 in (",
+		paste0(sprintf("'%s'", list_prom$gene_id2), collapse = ", "),")",sep="" )
+  regions_prom <- RSQLite::dbGetQuery(conn, query)
+  #get chr middle new_start new_end point of input enhancers
+  query_enh <-  paste("SELECT  V5, V1, middle_point, new_start, new_end FROM ccres_enhancer WHERE V5 in (",
+			paste0(sprintf("'%s'", list_enh$enhancer_id), collapse = ", "),")",sep="" )
+  regions_enhancer <- RSQLite::dbGetQuery(conn, query_enh)
+  RSQLite::dbDisconnect(conn)
+  ##Making the ranges for the enhancers
+  list_enh <- as.data.frame(unique(featuresGeneric$enhancer_id))
+  colnames(list_enh) <- c("enhancer_id")
 
 
   cat("Getting the CRUP-EP scores for enhancer, promoter and the regulatory

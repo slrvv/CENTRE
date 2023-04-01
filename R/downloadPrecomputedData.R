@@ -33,18 +33,20 @@ downloadPrecomputedData <- function(method) {
 		stop("Download of of PrecomputedData.db failed or file was saved in the wrong directory.")
 	}
 	##Download sysdata.rda
-	url_sys <- "http://owww.molgen.mpg.de/~CENTRE_data/sysdata.rda"
+	url_sys <- "http://owww.molgen.mpg.de/~CENTRE_data/Annotation.db"
 	cat("Downloading sysdata.rda\n")
 	exit_sys <- download.file(url_sys,
-				destfile=system.file(package="CENTRE", "R","sysdata.rda"),
+				destfile=system.file("extdata",
+				"Annotation.db",
+				package="CENTRE"),
 				method = method)
 	if (exit_sys != 0 ) {
-                 stop("Download sysdata.rda failed. Non-zero exit status.")
+                 stop("Download Annotation.db failed. Non-zero exit status.")
          }
 
          fs <- system.file("extdata","PrecomputedData.db", package = "CENTRE")
          if (!file.exists(fs)){
-                 stop("Download sysdata.rda failed or file was saved in the wrong directory.")
+                 stop("Download Annotation.db failed or file was saved in the wrong directory.")
          }
 
 	cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
