@@ -47,9 +47,11 @@ pkgLoad <- function(pkg) {
   }
 }
 
+# Install the packages one by one if they are not already available om your system
+
 pkg <- c("GenomicRanges", "IRanges", "RSQLite", "metapod", "stats", "xgboost", "devtools")
 for (i in seq_along(pkg)){
 	pkgLoad(pkg[i])
 }
 
-devtools::install_github("akbariomgba/crupR")
+devtools::install_git("https://github.com/slrvv/CENTRE.git")
