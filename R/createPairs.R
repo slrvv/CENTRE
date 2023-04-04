@@ -44,10 +44,10 @@ createPairs <- function(gene) {
   RSQLite::dbDisconnect(conn)
   gene$startTts <- integer(nrow(gene))
   gene$endTts <- integer(nrow(gene))
-
-  for (i in seq_along(gene)) {
+  print(gene)
+  for (i in seq_along(nrow(gene)))
+ {
     ##extend 500 kb to the left of tts
-
     if (gene$transcription_start[i] <= 500000) {
       ##We check that the extension doesnt fall outside of the chromosome
       gene$startTts[i] <- 1

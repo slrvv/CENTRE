@@ -96,12 +96,12 @@ computeDistances <- function(x) {
   #get chromosome and tts of our genes
   query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
   paste0(sprintf("'%s'", x$gene_id2), collapse = ", "),")",sep="" )
-  gene <- RSQLite::dbGetQuery(conn, query)
+  gencode <- RSQLite::dbGetQuery(conn, query)
   
   #get chr and middle point of enhancers
   query_enh <-  paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
   paste0(sprintf("'%s'", x$enhancer_id), collapse = ", "),")",sep="" )
-  enhancer <- RSQLite::dbGetQuery(conn, query_enh)
+  ccres_enhancer <- RSQLite::dbGetQuery(conn, query_enh)
   RSQLite::dbDisconnect(conn)
 
   #Get the chr gene_id and transcription_start from gencode annotation
