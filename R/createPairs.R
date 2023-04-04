@@ -44,7 +44,6 @@ createPairs <- function(gene) {
   RSQLite::dbDisconnect(conn)
   gene$startTts <- integer(nrow(gene))
   gene$endTts <- integer(nrow(gene))
-  print(gene)
   for (i in seq_along(nrow(gene)))
  {
     ##extend 500 kb to the left of tts
