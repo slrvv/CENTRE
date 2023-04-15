@@ -10,14 +10,11 @@
 #'
 #'
 #' @examples
-#' #Start by providing genes with their ENSEMBL id
-#' benchmark <- readRDS(system.file("extdata",
-#' "input_generic_features.rds", package = "CENTRE"), header = T)
-#' candidates <- as.data.frame(benchmark[, 1])
-#' #Remember to give the columns the name "gene_id"
-#' colnames(candidates) <- c("gene_id")
-#' #Generate the candidate pairs
-#' candidate_pairs <- createPairs(candidates)
+#' #Create gene enhancer pairs
+#' genes <- as.data.frame(c("ENSG00000130203.10",
+#' "ENSG00000171119.3"))
+#' colnames(genes) <- c("gene_id") #It is important to name the column gene_id
+#' pairs <- CENTRE::createPairs(genes)
 #' @export
 #' @import utils
 #' @importFrom GenomicRanges GRanges findOverlaps

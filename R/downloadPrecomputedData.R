@@ -20,9 +20,9 @@ downloadPrecomputedData <- function(method) {
 	url <- "http://owww.molgen.mpg.de/~CENTRE_data/PrecomputedData.db"
 	cat("Downloading PrecomputedData.db\n")
 	exit <- download.file(url, 
-				destfile=system.file("extdata",
-						"PrecomputedData.db",
-						package = "CENTRE"),
+				destfile=paste(system.file("extdata",package = "CENTRE")
+						, "PrecomputedData.db", 
+						sep = "/") ,
 						method = method)         
 	if (exit != 0 ) {
 		stop("Download of PrecomputedData.db failed. Non-zero exit status.")
@@ -36,9 +36,8 @@ downloadPrecomputedData <- function(method) {
 	url_sys <- "http://owww.molgen.mpg.de/~CENTRE_data/Annotation.db"
 	cat("Downloading sysdata.rda\n")
 	exit_sys <- download.file(url_sys,
-				destfile=system.file("extdata",
-				"Annotation.db",
-				package="CENTRE"),
+				destfile=paste(system.file("extdata",
+				package="CENTRE"), "Annotation.db", sep = "/"),
 				method = method)
 	if (exit_sys != 0 ) {
                  stop("Download Annotation.db failed. Non-zero exit status.")

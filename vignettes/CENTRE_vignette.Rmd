@@ -162,7 +162,7 @@ inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam", package = "
 metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
                        condition = c(1, 1, 1), replicate = c(1, 1, 1),
                        bamFile = files, inputFile = rep(inputs, 3))
-#More information on this step is found in the crupR documentation
+
 
 tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
                       sep = "", stringsAsFactors = F, header = T)

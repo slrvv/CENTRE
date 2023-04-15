@@ -22,18 +22,13 @@ expression, CRUP expression and DNase DNase)
 Computes the generic features needed by CENTRE to make predictions
 }
 \examples{
-#Create candidate pairs
-candidates <- read.table(system.file("extdata",
-"exampleids.txt", package = "CENTRE"), header = T)
-#Remember to give the columns the name "gene_id"
-colnames(candidates) <- c("gene_id")
-#Generate the candidate pairs
-candidate_pairs <- createPairs(candidates)
+#Create gene enhancer pairs
+genes <- as.data.frame(c("ENSG00000130203.10",
+"ENSG00000171119.3"))
+colnames(genes) <- c("gene_id") #It is important to name the column gene_id
+pairs <- CENTRE::createPairs(genes)
 
-#Or give your own
-#Rememeber to name them correctly
-colnames(candidate_pairs) <- c("gene_id", "enhancer_id")
-
-generic_features <- computeGenericFeatures(candidate_pairs)
-
+#Compute generic features
+colnames(pairs) <- c("gene_id", "enhancer_id")
+generic_features <- CENTRE::computeGenericFeatures(pairs)
 }

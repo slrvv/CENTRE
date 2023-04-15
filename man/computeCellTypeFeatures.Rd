@@ -6,9 +6,7 @@
 \usage{
 computeCellTypeFeatures(
   metaData,
-  condition,
   replicate,
-  mapq = 10,
   input.free = FALSE,
   cores,
   sequencing = "single",
@@ -18,7 +16,7 @@ computeCellTypeFeatures(
 }
 \arguments{
 \item{metaData}{Dataframe indicating the paths to the ChIP-seq experiments.
-More information on the format here \code{crupR::normalize()}}
+More information on the format here `crupR::normalize}
 
 \item{cores}{Number of cores to compute the CRUP score features}
 
@@ -29,6 +27,14 @@ More information on the format here \code{crupR::normalize()}}
 one with the names of the genes given as ENSEMBLE ID's}
 
 \item{featuresGeneric}{The output of \code{CENTRE::computeGenericFeatures()}}
+
+\item{replicate:}{The number of replicates of the ChIP-seq experiments
+that need to be normalized.}
+
+\item{input.free:}{Boolean value indicating whether a Control/Input ChIP-seq
+experiment is provided to go with the Histone Modification ChIP-seq experiments.
+If the parameter is set to FALSE the normalization of ChIP-seq experiments
+will be run in input.free mode.}
 }
 \value{
 A table containting the following computed features :
@@ -45,34 +51,33 @@ Computes the cell type specific features needed for the CENTRE classification
 step.
 }
 \examples{
-candidates <- read.table(system.file("extdata",
-"exampleids.txt", package = "CENTRE"), header = T)
+#Create gene enhancer pairs
+genes <- as.data.frame(c("ENSG00000130203.10",
+"ENSG00000171119.3"))
+colnames(genes) <- c("gene_id") #It is important to name the column gene_id
+pairs <- CENTRE::createPairs(genes)
 
-#Remember to give the columns the name "gene_id"
-colnames(candidates) <- c("gene_id")
+#Compute generic features
+colnames(pairs) <- c("gene_id", "enhancer_id")
+generic_features <- CENTRE::computeGenericFeatures(pairs)
 
-#Generate the candidate pairs
-candidate_pairs <- createPairs(candidates)
-
-#Compute the generic features for given names
-generic_features <- computeGenericFeatures(candidate_pairs)
-
-## Prepare the data needed for computing cell type
-featuresfiles <- c(system.file("extdata","HeLa_H3K4me1.bam", package = "CENTRE"),
-                  system.file("extdata","HeLa_H3K4me3.bam", package = "CENTRE"),
-                  system.file("extdata","HeLa_H3K27ac.bam", package = "CENTRE"))
-
-inputs <- system.file("extdata", "HeLa_input.bam", package = "CENTRE")
+#Compute Cell-type features
+files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
+system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
+system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam", package = "CENTRE"))
+# Control ChIP-seq experiment to go with the rest of ChIP-seqs
+inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam", package = "CENTRE")
 metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
-                       condition = c(1, 1, 1), replicate = c(1, 1, 1),
-                       bamFile = files, inputFile = rep(inputs, 3))
-#More information on this step is found in the crupR documentation
-tpmfile <- read.table(system.file("extdata", "HeLa.tsv", package = "CENTRE"),
-                     sep = "", stringsAsFactors = F, header = T)
+                     condition = c(1, 1, 1), replicate = c(1, 1, 1),
+                      bamFile = files, inputFile = rep(inputs, 3))
+tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
+                      sep = "", stringsAsFactors = F, header = T)
+celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
+                                                    replicate = 1,
+                                                    input.free = FALSE,
+                                                    cores = 1,
+                                                    sequencing = "single",
+                                                    tpmfile = tpmfile,
+                                                    featuresGeneric = generic_features)
 
-celltype_features <- computeCellTypeFeatures(metaData,
-                                           cores = 1,
-                                           "single",
-                                           tpmfile,
-                                           generic_features)
 }

@@ -27,6 +27,9 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
   generic_features<- readRDS(file = system.file("extdata",
                                          "expected_generic_features.rds",
                                          package = "CENTRE"))
+  expcelltype_features <- readRDS(file = system.file("extdata",
+                                                  "expected_celltype_features.rds",
+                                                  package = "CENTRE"))
 
 
   cat("Check ComputeCellTypeFeatures")
@@ -41,6 +44,22 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
                                   celltype_features$gene_id2,
                                   sep = "_")
   expect_equal(length(unique(celltype_features$pair)), nrow(celltype_features))
+
+  testthat::expect_equal(celltype_features$TPM,
+                         expcelltype_features$TPM,
+                         tolerance = 1e-8)
+  testthat::expect_equal(celltype_features$reg_dist_enh,
+                         expcelltype_features$reg_dist_enh)
+  testthat::expect_equal(celltype_features$norm_reg_dist_enh,
+                         expcelltype_features$norm_reg_dist_enh,
+                         tolerance = 1e-5)
+  testthat::expect_equal(celltype_features$reg_dist_enh,
+                         expcelltype_features$reg_dist_enh)
+  testthat::expect_equal(celltype_features$norm_reg_dist_enh,
+                         expcelltype_features$norm_reg_dist_enh,
+                         tolerance = 1e-5)
+
+
 
   #### Checking that output is the expected
 
