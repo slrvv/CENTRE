@@ -5,7 +5,7 @@ ChIP-seq data for three histone modifications for the cell type of interest.
  CENTRE uses various available datasets and extracts cell-type agnostic 
 statistics to complement the cell-type specific information.
 
-![title](Images/Figure1-export.tiff)
+![title](Images/Figure1-export.png)
 
 ### Contact
 
@@ -69,7 +69,8 @@ Note: If the installation of any of the dependencies of CENTRE fails
 try running the script CENTRE/install/install_CENTRE.R
 
 ## References
-Andersson,R. et al. (2014) An atlas of active enhancers across human cell types and tissues. Nature, 507, 455–461.
-Thurman,R.E. et al. (2012) The accessible chromatin landscape of the human genome. Nature, 489, 75–82.
-Sheffield,N.C. et al. (2013) Patterns of regulatory activity across diverse human cell types predict tissue identity, transcription factor binding, and long-range interactions. Genome Res., 23, 777–788.
+
+- Andersson,R. et al. (2014) An atlas of active enhancers across human cell types and tissues. Nature, 507, 455–461.
+- Thurman,R.E. et al. (2012) The accessible chromatin landscape of the human genome. Nature, 489, 75–82.
+- Sheffield,N.C. et al. (2013) Patterns of regulatory activity across diverse human cell types predict tissue identity, transcription factor binding, and long-range interactions. Genome Res., 23, 777–788.
 

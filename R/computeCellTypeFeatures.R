@@ -118,7 +118,7 @@ computeCellTypeFeatures <- function(metaData,
   list_enh <- as.data.frame(unique(featuresGeneric$enhancer_id))
   colnames(list_enh) <- c("enhancer_id")
 
-
+  print(head(regions_enhancer))
   cat("Getting the CRUP-EP scores for enhancer, promoter and the regulatory
       distance")
 
@@ -126,12 +126,12 @@ computeCellTypeFeatures <- function(metaData,
   crup_EP_enh <- compute_crup_enhancer(regions_enhancer,
                                        list_enh,
                                        crupScores)
-
   crup_features <- merge(featuresGeneric,
                         crup_EP_enh,
                         by.x = "enhancer_id",
                         by.y = "cres_name",
                         all.x = TRUE)
+  print(head(crup_features))
   #CRUP enhancer scores for promoter
   crup_EP_prom <- compute_crup_promoter(regions_prom,
                                         list_prom,
@@ -142,9 +142,10 @@ computeCellTypeFeatures <- function(metaData,
                         by.x = "gene_id2",
                         by.y = "gene_name",
                         all.x = TRUE)
+  print(head(crup_features))
   ##crup enhancer scores for distance
   crup_features <- compute_crup_reg_distance_enh(crup_features, crupScores)
-
+  print(head(crup_features))
 
   ##Get CRUP promoter probabilities
 

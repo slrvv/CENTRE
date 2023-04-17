@@ -247,23 +247,23 @@ compute_crup_reg_distance_enh <- function(input, prediction) {
   bins <- as.data.frame(table(cres_EP$between))
 
   cres_EP1 <- cres_EP[cres_EP$EP_reg_distance > 0.5, ]
-
+  print(cres_EP1) 
   if (nrow(cres_EP1) == 0) {
 
-    bins_pos <- as.data.frame(matrix(c(c(seq(1:nrow(input)),
+    bins_pos <- as.data.frame(matrix(c(seq(1:nrow(input)),
                                          rep(0, times = nrow(input))),
                                        nrow = nrow(input),
-                                       ncol =  2)))
+                                       ncol =  2))
     colnames(bins_pos) <- c("Var1", "Freq")
   } else {
     bins_pos <- as.data.frame(table(cres_EP1$between))
   }
-
+  print(head(bins_pos))
 
   all_bins <- merge(bins, bins_pos, by.x = "Var1", by.y = "Var1", all.x = TRUE)
   all_bins[is.na(all_bins)] <- 0
   colnames(all_bins) <- c("pair", "bins", "bins_pos")
-
+  print(head(all_bins))
 
   input$reg_dist_enh <- all_bins$bins_pos
   input$norm_reg_dist_enh <- all_bins$bins_pos / all_bins$bins
@@ -305,10 +305,10 @@ compute_crup_reg_distance_prom <- function(input, prediction) {
 
   if (nrow(cres_EP1) == 0) {
 
-    bins_pos <- as.data.frame(matrix(c(c(seq(1:nrow(input)),
+    bins_pos <- as.data.frame(matrix(c(seq(1:nrow(input)),
                                          rep(0, times = nrow(input))),
                                        nrow = nrow(input),
-                                       ncol =  2)))
+                                       ncol =  2))
     colnames(bins_pos) <- c("Var1", "Freq")
   } else {
     bins_pos <- as.data.frame(table(cres_EP1$between))

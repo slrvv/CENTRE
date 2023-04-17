@@ -41,7 +41,7 @@ createPairs <- function(gene) {
   RSQLite::dbDisconnect(conn)
   gene$startTts <- integer(nrow(gene))
   gene$endTts <- integer(nrow(gene))
-  for (i in seq_along(nrow(gene)))
+  for (i in seq_len(nrow(gene)))
  {
     ##extend 500 kb to the left of tts
     if (gene$transcription_start[i] <= 500000) {
