@@ -247,7 +247,7 @@ compute_crup_reg_distance_enh <- function(input, prediction) {
   bins <- as.data.frame(table(cres_EP$between))
 
   cres_EP1 <- cres_EP[cres_EP$EP_reg_distance > 0.5, ]
-  print(cres_EP1) 
+ 
   if (nrow(cres_EP1) == 0) {
 
     bins_pos <- as.data.frame(matrix(c(seq(1:nrow(input)),
@@ -258,12 +258,10 @@ compute_crup_reg_distance_enh <- function(input, prediction) {
   } else {
     bins_pos <- as.data.frame(table(cres_EP1$between))
   }
-  print(head(bins_pos))
 
   all_bins <- merge(bins, bins_pos, by.x = "Var1", by.y = "Var1", all.x = TRUE)
   all_bins[is.na(all_bins)] <- 0
   colnames(all_bins) <- c("pair", "bins", "bins_pos")
-  print(head(all_bins))
 
   input$reg_dist_enh <- all_bins$bins_pos
   input$norm_reg_dist_enh <- all_bins$bins_pos / all_bins$bins
