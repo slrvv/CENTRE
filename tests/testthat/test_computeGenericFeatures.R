@@ -1,13 +1,5 @@
 
 test_that("compute generic feature function runs as expected", {
-<<<<<<< Updated upstream
-  ##Defining inputs for compute features function
-
-  cat("Check ComputeGenericFeatures")
-  input <- readRDS(file = system.file("extdata",
-                                      "input_generic_features.rds",
-                                      package = "CENTRE"))
-=======
   #Defining inputs for compute features function
   input <- readRDS(file = system.file("extdata",
                                       "input_generic_features.rds",
@@ -19,22 +11,11 @@ test_that("compute generic feature function runs as expected", {
                                          package = "CENTRE"))
 
   ## gen features with all of the input
->>>>>>> Stashed changes
   pred <- computeGenericFeatures(input)
 
   pred$pair <- paste(pred$enhancer_id,
                                  pred$gene_id2,
                                  sep = "_")
-<<<<<<< Updated upstream
-  expected <- readRDS(file = system.file("extdata",
-                                         "expected_generic_features.rds",
-                                         package = "CENTRE"))
-
-  testthat::expect_equal(length(unique(pred$pair)), nrow(pred))
-  testthat::expect_equal(dim(pred), c(19,9))
-  testthat::expect_equal(pred$crup_cor, expected$cor_CRUP[,1])
-  testthat::expect_equal(pred$combined_tests, expected$combined_tests, tolerance =1e-5)
-=======
 
   ## gen features with only one pair
   input1 <- as.data.frame(matrix(c("ENSG00000059728.6", "EH38E3350767"),
@@ -77,5 +58,4 @@ test_that("compute generic feature function runs as expected", {
   testthat::expect_equal(pred2[pred2$gene_id2 == "ENSG00000059728", 5],
                          expected[expected$gene_id2 == "ENSG00000059728", 8],
                          tolerance =1e-5)
->>>>>>> Stashed changes
 })

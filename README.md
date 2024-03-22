@@ -11,17 +11,12 @@ statistics to complement the cell-type specific information.
 
 - Sara Lopez lopez_s@molgen.mpg.de
 - Trisevgeni Rapakoulia rapakoul@molgen.mpg.de
-<<<<<<< Updated upstream
-### Citation
-
-=======
 
 ### Citation
 Rapakoulia, T., Lopez Ruiz De Vargas, S., Omgba, P. A., Laupert, V., Ulitsky, I., 
 & Vingron, M. (2023). CENTRE: A gradient boosting algorithm for Cell-type-specific 
 ENhancer-Target pREdiction. Bioinformatics, 39(11), btad687. 
 https://doi.org/10.1093/bioinformatics/btad687
->>>>>>> Stashed changes
 
 ## Requirements
 - R (tested 4.0.0)
@@ -61,8 +56,6 @@ tests on the following data sets:
 - Pearson Correlation between CRUP-EP(Enhancer Probability) and CRUP-PP
 (Promoter Probability) across 104 cell types
 
-<<<<<<< Updated upstream
-=======
 ## Clarification on select chromosome normalization 
 
 The function `CENTRE::computeCellTypeFeatures()` has a parameter called `chr` with 
@@ -70,8 +63,6 @@ which the user can provide a subset of chromosomes for which to quantile normali
 This can be used to make the normalization step faster but could change the outcome
 of the function and following predictions. For CENTRE to run as expected the user
 should normalize for all chromosomes and provide genome-wide ChIP-seq data.
-
->>>>>>> Stashed changes
 
 ## Installing CENTRE
 ```
@@ -94,7 +85,3 @@ try running the script CENTRE/install/install_CENTRE.R
 - Thurman,R.E. et al. (2012) The accessible chromatin landscape of the human genome. Nature, 489, 75–82.
 - Sheffield,N.C. et al. (2013) Patterns of regulatory activity across diverse human cell types predict tissue identity, transcription factor binding, and long-range interactions. Genome Res., 23, 777–788.
 
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes

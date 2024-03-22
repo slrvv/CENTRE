@@ -15,10 +15,6 @@ endPart <- function() {
   cat("\n\t>>> All done!\n")
 }
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 ###############################################################################
 # lookup table: end position of the chromosomes in hg38 of human genome
 ###############################################################################
@@ -34,20 +30,12 @@ chromosomes <- data.frame(
                58617616, 64444167, 46709983, 50818468, 156040895, 57227415)
 )
 
-<<<<<<< Updated upstream
 
-
-=======
->>>>>>> Stashed changes
 ###############################################################################
 # function: convert factor type columns into character type
 ###############################################################################
 unfactorize <- function(df) {
-<<<<<<< Updated upstream
-  for (i in which(sapply(df, class) == "factor")) {
-=======
   for (i in which(vapply(df, class) == "factor")) {
->>>>>>> Stashed changes
     df[[i]] <- as.character(df[[i]])
   }
 
@@ -81,11 +69,6 @@ extend <- function(gene){
 
 }
 
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
 ###############################################################################
 # function: check if file exists
 ###############################################################################
@@ -110,20 +93,11 @@ computeDistances <- function(x) {
   query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
   paste0(sprintf("'%s'", x$gene_id2), collapse = ", "),")",sep="" )
   gencode <- RSQLite::dbGetQuery(conn, query)
-<<<<<<< Updated upstream
-  
-=======
-
->>>>>>> Stashed changes
   #get chr and middle point of enhancers
   query_enh <-  paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
   paste0(sprintf("'%s'", x$enhancer_id), collapse = ", "),")",sep="" )
   ccres_enhancer <- RSQLite::dbGetQuery(conn, query_enh)
   RSQLite::dbDisconnect(conn)
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
   #Get the chr gene_id and transcription_start from gencode annotation
   #Getting the chrosomes and the middle points for the provided enhancers
   result <- merge(x,
@@ -137,81 +111,22 @@ computeDistances <- function(x) {
                   by.y = "gene_id1")
 
   cat("Removing all gene enhancer pairs that are not in the same chromosome.\n")
-<<<<<<< Updated upstream
-
-  result <- result[(result$V1 == result$chr), ]
-
-  result$distance <- result$middle_point - result$transcription_start
-
-  return(result)
-}
-
-
-
-
-
-=======
   result <- result[(result$V1 == result$chr), ]
   result$distance <- result$middle_point - result$transcription_start
   return(result)
 }
 
->>>>>>> Stashed changes
+
 ###############################################################################
 # function: get scores for enhancers
 ###############################################################################
 compute_crup_enhancer <- function(regions_enhancer,
-<<<<<<< Updated upstream
-                                  list_enh,
-                                  crup_scores,
-                                  promprob = F) {
-=======
                                   crup_scores,
                                   promprob = FALSE) {
->>>>>>> Stashed changes
 
   #Overlapping the  enhancer ranges with the crup scores
   enhancer_ranges <- with(regions_enhancer,
                           GenomicRanges::GRanges(V1,
-<<<<<<< Updated upstream
-                                                 IRanges::IRanges(start = new_start,
-                                                                  end = new_end)))
-
-  hits_crup <- GenomicRanges::findOverlaps(enhancer_ranges, crup_scores)
-  cres_EP <- data.frame(cres = hits_crup@from, EP = hits_crup@to)
-
-  cres_EP$cres_name <- list_enh$enhancer_id[cres_EP$cres]
-  if (promprob == T) {
-    cres_EP$PP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$probP[cres_EP$EP]
-    cres_EP$cres_name <- factor(cres_EP$cres_name)
-    cres_EP$bin <- rep(1:5, times = nrow(regions_enhancer))
-
-    trial <- stats::reshape(cres_EP[,3:5],
-                   idvar = "cres_name",
-                   timevar = "bin",
-                   direction = "wide",
-                   v.names = "PP_enhancer")
-  } else {
-    cres_EP$EP_enhancer <- GenomicRanges::elementMetadata(crup_scores)$prob[cres_EP$EP]
-    cres_EP$cres_name <- factor(cres_EP$cres_name)
-    cres_EP$bin <- rep(1:5, times = nrow(regions_enhancer))
-
-
-    trial <-stats::reshape(cres_EP[,3:5],
-                   idvar = "cres_name",
-                   timevar = "bin",
-                   direction = "wide",
-                   v.names = "EP_enhancer")
-  }
-
-
-
-  return(trial)
-
-
-
-
-=======
                                                  IRanges::IRanges(start = new_start.x,
                                                                   end = new_end.x),
                                                  enhancer_id = enhancer_id))
@@ -246,48 +161,12 @@ compute_crup_enhancer <- function(regions_enhancer,
   }
 
   return(trial)
->>>>>>> Stashed changes
 }
 
 ###############################################################################
 # function: get  scores for promoters
 ###############################################################################
 compute_crup_promoter <- function(regions_prom,
-<<<<<<< Updated upstream
-                                  list_prom,
-                                  crup_scores,
-                                  promprob = F) {
-  #Overlapping with CRUP scores
-  genes_ranges <- with(regions_prom,
-                       GenomicRanges::GRanges(chr,
-                                              IRanges::IRanges(start = new_start,
-                                                               end = new_end)))
-
-  hits_crup <- GenomicRanges::findOverlaps(genes_ranges, crup_scores)
-  cres_EP <- data.frame(promoter = hits_crup@from, EP = hits_crup@to)
-  cres_EP$gene_name <- list_prom$gene_id[cres_EP$promoter]
-  if (promprob == T) {
-    cres_EP$PP_promoter <- GenomicRanges::elementMetadata(crup_scores)$probP[cres_EP$EP]
-    cres_EP$gene_name <- factor(cres_EP$gene_name)
-    #Returning the probabilities in bins
-    cres_EP$bin <- rep(1:5, nrow(regions_prom))
-    trial <- stats::reshape(cres_EP[,3:5],
-                   idvar = "gene_name",
-                   timevar = "bin",
-                   direction = "wide",
-                   v.names = "PP_promoter")
-  } else {
-    cres_EP$EP_promoter <- GenomicRanges::elementMetadata(crup_scores)$prob[cres_EP$EP]
-    cres_EP$gene_name <- factor(cres_EP$gene_name)
-    #Returning the probabilities in bins
-    cres_EP$bin <- rep(1:5, nrow(regions_prom))
-    trial <- stats::reshape(cres_EP[,3:5],
-                   idvar = "gene_name",
-                   timevar = "bin",
-                   direction = "wide",
-                   v.names = "EP_promoter")
-
-=======
                                   crup_scores,
                                   promprob = FALSE) {
   #Overlapping with CRUP scores
@@ -322,118 +201,10 @@ compute_crup_promoter <- function(regions_prom,
                    timevar = "bin",
                    direction = "wide",
                    v.names = "EP_prob_gene")
->>>>>>> Stashed changes
   }
 
   return(trial)
 }
-
-<<<<<<< Updated upstream
-###############################################################################
-# function: get scores for distance between enhancer and promoter
-###############################################################################
-
-compute_crup_reg_distance_enh <- function(input, prediction) {
-  ##Check if the distances are negative and flip the start and end around
-  input$bstart <- input$middle_point
-  input$bstart[input$distance > 0] <- input$transcription_start[input$distance > 0]
-  input$bend <- input$transcription_start
-  input$bend[input$distance > 0] <- input$middle_point[input$distance > 0]
-
-  #Make the gene enhancer pairs into ranges
-  input$pair <- paste0(input$gene_id, "_", input$enhancer_id)
-  input <- input[!(duplicated(input$pair)), ]
-  between_ranges <- with(input,
-                         GenomicRanges::GRanges(chr,
-                                                IRanges::IRanges(start = bstart,
-                                                                 end = bend)))
-
-  hits_enh <- GenomicRanges::findOverlaps(between_ranges, prediction)
-  cres_EP <- data.frame(between = hits_enh@from,
-                        EP_reg_distance = GenomicRanges::elementMetadata(prediction)$prob[hits_enh@to])
-
-  bins <- as.data.frame(table(cres_EP$between))
-
-  cres_EP1 <- cres_EP[cres_EP$EP_reg_distance > 0.5, ]
- 
-  if (nrow(cres_EP1) == 0) {
-
-    bins_pos <- as.data.frame(matrix(c(seq(1:nrow(input)),
-                                         rep(0, times = nrow(input))),
-                                       nrow = nrow(input),
-                                       ncol =  2))
-    colnames(bins_pos) <- c("Var1", "Freq")
-  } else {
-    bins_pos <- as.data.frame(table(cres_EP1$between))
-  }
-
-  all_bins <- merge(bins, bins_pos, by.x = "Var1", by.y = "Var1", all.x = TRUE)
-  all_bins[is.na(all_bins)] <- 0
-  colnames(all_bins) <- c("pair", "bins", "bins_pos")
-
-  input$reg_dist_enh <- all_bins$bins_pos
-  input$norm_reg_dist_enh <- all_bins$bins_pos / all_bins$bins
-
-
-
-  return(input)
-
-
-
-}
-
-###############################################################################
-# function: get scores for distance between enhancer and promoter
-###############################################################################
-
-compute_crup_reg_distance_prom <- function(input, prediction) {
-  ##Check if the distances are negative and flip the start and end around
-  input$bstart <- input$middle_point
-  input$bstart[input$distance > 0] <- input$transcription_start[input$distance > 0]
-  input$bend <- input$transcription_start
-  input$bend[input$distance > 0] <- input$middle_point[input$distance > 0]
-
-  #Make the gene enhancer pairs into ranges
-  input$pair <- paste0(input$gene_id, "_", input$enhancer_id)
-  input <- input[!(duplicated(input$pair)), ]
-  between_ranges <- with(input,
-                         GenomicRanges::GRanges(chr,
-                                                IRanges::IRanges(start = bstart,
-                                                                 end = bend)))
-
-  hits_enh <- GenomicRanges::findOverlaps(between_ranges, prediction)
-  cres_EP <- data.frame(between = hits_enh@from,
-                        EP_reg_distance = GenomicRanges::elementMetadata(prediction)$probP[hits_enh@to])
-
-  bins <- as.data.frame(table(cres_EP$between))
-
-  cres_EP1 <- cres_EP[cres_EP$EP_reg_distance > 0.5, ]
-
-  if (nrow(cres_EP1) == 0) {
-
-    bins_pos <- as.data.frame(matrix(c(seq(1:nrow(input)),
-                                         rep(0, times = nrow(input))),
-                                       nrow = nrow(input),
-                                       ncol =  2))
-    colnames(bins_pos) <- c("Var1", "Freq")
-  } else {
-    bins_pos <- as.data.frame(table(cres_EP1$between))
-  }
-
-
-  all_bins <- merge(bins, bins_pos, by.x = "Var1", by.y = "Var1", all.x = TRUE)
-  all_bins[is.na(all_bins)] <- 0
-  colnames(all_bins) <- c("pair", "bins", "bins_pos")
-
-  input$reg_dist_prom <- all_bins$bins_pos
-  input$norm_reg_dist_prom <- all_bins$bins_pos / all_bins$bins
-
-
-  return(input)
-
-
-
-=======
 
 ###############################################################################
 # function: make between_ranges GRanges object for reg distance calculations
@@ -526,7 +297,6 @@ compute_crup_reg_distance_prom <- function(input, prediction, between_ranges) {
     input$norm_reg_dist_prom <- 0
   }
   return(input)
->>>>>>> Stashed changes
 }
 
 ################################################################################
@@ -555,27 +325,12 @@ getPrecomputedValues <- function(table, feature, x, conn) {
   return(df_return)
 }
 
-<<<<<<< Updated upstream
-
-
-
-=======
->>>>>>> Stashed changes
 ################################################################################
 # function: get the RNA seq TPM values for our genes
 ################################################################################
 
 get_rnaseq <- function(x, tpmfile) {
   tpmfile$gene_id2 <- gsub("\\..*", "", tpmfile[, 1])
-<<<<<<< Updated upstream
-
-  x <- merge(x, tpmfile[,c(3,4)],by.x = "gene_id2", by.y = "gene_id2" )
-
-
-
-  return(x)
-}
-=======
   x <- merge(x, tpmfile[,c(3,4)],by.x = "gene_id2", by.y = "gene_id2" )
   return(x)
 }
@@ -619,4 +374,4 @@ createRegionsDf <- function(listProm, listEnh, pairs){
   regions$distance <- regions$middle_point - regions$transcription_start
   return(regions)
 }
->>>>>>> Stashed changes
+

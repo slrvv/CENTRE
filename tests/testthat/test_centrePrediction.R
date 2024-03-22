@@ -1,35 +1,19 @@
 test_that("compute centrePrediction function runs as expected", {
-<<<<<<< Updated upstream
-  cat("Check centrePrediction")
-=======
-
   startPart("Check centrePrediction full input")
->>>>>>> Stashed changes
   generic_features <- readRDS(file = system.file("extdata",
                                                  "expected_generic_features.rds",
                                                  package = "CENTRE"))
   celltype_features <- readRDS(file = system.file("extdata",
                                                   "expected_celltype_features.rds",
                                                   package = "CENTRE"))
-<<<<<<< Updated upstream
-=======
-
   ## add some pairs that are positive
->>>>>>> Stashed changes
+
   predictions_expected <- readRDS(file = system.file("extdata",
                                                      "expected_predictions.rds",
                                                      package = "CENTRE"))
   predictions <- centrePrediction(celltype_features,
                                 generic_features)
 
-<<<<<<< Updated upstream
-
-  expect_equal(predictions$label, predictions_expected$label)
-  expect_equal(predictions$predictions,
-             predictions_expected$predictions,
-             tolerance =1e-5)
-})
-=======
   expect_equal(predictions$label, predictions_expected$label)
   expect_equal(predictions$score,
              predictions_expected$score,
@@ -49,4 +33,4 @@ test_that("compute centrePrediction function runs as expected", {
                tolerance =1e-5)
 })
 
->>>>>>> Stashed changes
+
