@@ -17,7 +17,16 @@
 #' "single". The parameter takes single as default
 #' @param tpmfile Dataframe of two columns one with the RNA-seq TPM values,
 #' one with the names of the genes given as ENSEMBLE ID's
+<<<<<<< Updated upstream
 #' @param featuresGeneric The output of `CENTRE::computeGenericFeatures()`
+=======
+#' @param chr NULL or a vector of chromosomes. Use only if the crupR
+#' normalization should be done for certain chromosomes. If this parameter is
+#' not used crupR normalization is done for all chromosomes.
+#' Using only certain chromosomes for normalization might change results
+#' and is not the intented used of crupR or CENTRE.
+#' @param pairs The output of `CENTRE::createPairs()`
+>>>>>>> Stashed changes
 #'
 #'
 #' @return
@@ -57,7 +66,11 @@
 #'                                                     cores = 1,
 #'                                                     sequencing = "single",
 #'                                                     tpmfile = tpmfile,
+<<<<<<< Updated upstream
 #'                                                     featuresGeneric = generic_features)
+=======
+#'                                                     pairs = generic_features)
+>>>>>>> Stashed changes
 #'
 #'@export
 #'@importFrom crupR normalize getEnhancers
@@ -72,6 +85,7 @@ computeCellTypeFeatures <- function(metaData,
                                     cores,
                                     sequencing = "single",
                                     tpmfile,
+<<<<<<< Updated upstream
                                     featuresGeneric) {
   start_time <- Sys.time()
   ## Pre-eliminary checks and computations
@@ -82,6 +96,14 @@ computeCellTypeFeatures <- function(metaData,
 
   ## Calling normalization step only on the chromosomes we have
   chr <- unique(featuresGeneric$chr)
+=======
+                                    chr = NULL,
+                                    pairs) {
+  startTime <- Sys.time()
+  ## Computing the crup scores
+  startPart("Computing CRUP score features")
+  ## Calling normalization step only on the chromosomes we have
+>>>>>>> Stashed changes
   normalized <- crupR::normalize(metaData = metaData,
                                  condition = 1,
                                  replicate = replicate,
@@ -94,6 +116,7 @@ computeCellTypeFeatures <- function(metaData,
   #Get CRUP enhancer probabilities
   crupScores <- crupR::getEnhancers(data = normalized, C = cores, all = TRUE)
   crupScores <- crupScores$D
+<<<<<<< Updated upstream
 
   list_enh <- as.data.frame(unique(featuresGeneric$enhancer_id))
   colnames(list_enh) <- c("enhancer_id")
@@ -147,12 +170,55 @@ computeCellTypeFeatures <- function(metaData,
   ##Get CRUP promoter probabilities
 
   ### Compute the promoter probability from probA and probE
+=======
+  ## check what parts of this are necessary
+  listEnh <- as.data.frame(unique(pairs$enhancer_id))
+  colnames(listEnh) <- c("enhancer_id")
+  listProm <- as.data.frame(unique(pairs$gene_id2))
+  colnames(listProm) <- c("gene_id2")
+  #Get Gencode and CCRes anntotations for the input genes and enhancers
+  regions <- createRegionsDf(listProm, listEnh, pairs)
+  pairs$pair <- paste(pairs$enhancer_id, pairs$gene_id2, sep = "_")
+
+  cat("Getting the CRUP-EP scores for enhancer, promoter and the regulatory
+      distance\n")
+  #Crup enhancer scores for enhancer
+  crupEPenh <- compute_crup_enhancer(regions,
+                                     crupScores)
+  crupFeatures <- merge(pairs,
+                        crupEPenh,
+                        by.x = "enhancer_id",
+                        by.y = "enhancer_id",
+                        all.x = TRUE)
+
+  #CRUP enhancer scores for promoter
+  crupEPprom <- compute_crup_promoter(regions,
+                                      crupScores)
+  crupFeatures <- merge(crupFeatures,
+                        crupEPprom,
+                        by.x = "gene_id2",
+                        by.y = "gene_id2",
+                        all.x = TRUE)
+
+  #create the between_ranges objects that is used for the distance calculations
+  betweenRanges <- createBetweenRanges(regions)
+  crupFeatures <- compute_crup_reg_distance_enh(crupFeatures,
+                                                crupScores,
+                                                betweenRanges)
+  ##Get CRUP promoter probabilities
+
+  # Compute the promoter probability from probA and probE
+  # In CRUP probA is the probability of a region being an active reg. element
+  # probE is the probability of a region being an active enhancer
+
+>>>>>>> Stashed changes
   crupScores$probP <- crupScores$probA *(1 - crupScores$probE)
 
   cat("Getting the CRUP-PP scores for enhancer")
 
   #Crup promoter scores for enhancer
 
+<<<<<<< Updated upstream
   crup_PP_enh <- compute_crup_enhancer(regions_enhancer,
                                        list_enh,
                                        crupScores,
@@ -162,10 +228,21 @@ computeCellTypeFeatures <- function(metaData,
                         crup_PP_enh,
                         by.x = "enhancer_id",
                         by.y = "cres_name",
+=======
+  crupPPenh <- compute_crup_enhancer(regions,
+                                       crupScores,
+                                       promprob = TRUE)
+
+  crupFeatures <- merge(crupFeatures,
+                        crupPPenh,
+                        by.x = "enhancer_id",
+                        by.y = "enhancer_id",
+>>>>>>> Stashed changes
                         all.x = TRUE)
 
   #Crup promoter scores for promoter
 
+<<<<<<< Updated upstream
   crup_PP_prom <- compute_crup_promoter(regions_prom,
                                         list_prom,
                                         crupScores,
@@ -180,10 +257,26 @@ computeCellTypeFeatures <- function(metaData,
   crup_features <- compute_crup_reg_distance_prom(crup_features,
                                              crupScores)
 
+=======
+  crupPPprom <- compute_crup_promoter(regions,
+                                      crupScores,
+                                      promprob = TRUE)
+  crupFeatures <- merge(crupFeatures,
+                        crupPPprom,
+                        by.x = "gene_id2",
+                        by.y = "gene_id2",
+                        all.x = TRUE)
+
+  #Crup promoter scores for distance
+  crupFeatures <- compute_crup_reg_distance_prom(crupFeatures,
+                                                 crupScores,
+                                                 betweenRanges)
+>>>>>>> Stashed changes
 
   endPart()
 
   startPart("Getting the TPM values")
+<<<<<<< Updated upstream
   features_table_all <- get_rnaseq(crup_features, tpmfile)
 
 
@@ -224,6 +317,41 @@ computeCellTypeFeatures <- function(metaData,
                                     "RNA_seq")
 
   cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
+=======
+  features_table_all <- get_rnaseq(crupFeatures, tpmfile)
+
+  features_table_all[is.na(features_table_all)] <- 0
+
+  features_table_all <- features_table_all[, c("gene_id2",
+                                               "enhancer_id",
+                                               "EP_prob_enh.1",
+                                               "EP_prob_enh.2",
+                                               "EP_prob_enh.3",
+                                               "EP_prob_enh.4",
+                                               "EP_prob_enh.5",
+                                               "EP_prob_gene.1",
+                                               "EP_prob_gene.2",
+                                               "EP_prob_gene.3",
+                                               "EP_prob_gene.4",
+                                               "EP_prob_gene.5",
+                                               "reg_dist_enh",
+                                               "norm_reg_dist_enh",
+                                               "PP_prob_enh.1",
+                                               "PP_prob_enh.2",
+                                               "PP_prob_enh.3",
+                                               "PP_prob_enh.4",
+                                               "PP_prob_enh.5",
+                                               "PP_prob_gene.1",
+                                               "PP_prob_gene.2",
+                                               "PP_prob_gene.3",
+                                               "PP_prob_gene.4",
+                                               "PP_prob_gene.5",
+                                               "reg_dist_prom",
+                                               "norm_reg_dist_prom",
+                                               "TPM")]
+
+  cat(paste0('time: ', format(Sys.time() - startTime), "\n"))
+>>>>>>> Stashed changes
   endPart()
   return(features_table_all)
 

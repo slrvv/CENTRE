@@ -1,7 +1,11 @@
 Package: CENTRE
 Type: Package
 Title: an R package to predict tissue specific enhancer target interactions
+<<<<<<< Updated upstream
 Version: 0.0.0.9000
+=======
+Version: 0.99.0
+>>>>>>> Stashed changes
 Authors@R: c(person("Sara", "Lopez Ruiz de Vargas", role = c("cre"),email = "lopez_s@molgen.mpg.de"),
            person("Trisevgeni", "Rapakoulia", role = c("aut"), email = ""),
            person("Martin", "Vingron", role = c("aut"), email = "vingron@molgen.mpg.de"))
@@ -29,5 +33,13 @@ RoxygenNote: 7.2.3
 Depends: 
     R (>= 4.0)
 Suggests: 
+<<<<<<< Updated upstream
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+=======
+    knitr,
+    testthat (>= 3.0.0),
+Config/testthat/edition: 3
+biocViews: BiologicalQuestion, Software
+VignetteBuilder: knitr
+>>>>>>> Stashed changes

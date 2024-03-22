@@ -64,7 +64,15 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
                                   sep = "_")
 
   #remove all non-feature columns except pair id
+<<<<<<< Updated upstream
   features_generic <- features_generic[, c(6, 7, 8, 9)]
+=======
+  features_generic <- features_generic[, c("distance",
+                                           "crup_cor",
+                                           "combined_tests",
+                                           "pair")]
+
+>>>>>>> Stashed changes
   features_celltype <- features_celltype[, - c(1, 2)]
   #mergeboth datasets
   features_all <- merge(features_celltype,
@@ -76,15 +84,21 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
   } else {
     check_file(model)
   }
+<<<<<<< Updated upstream
   xgb_model <- xgboost::xgb.load(model)
 
 
+=======
+
+  xgb_model <- xgboost::xgb.load(model)
+>>>>>>> Stashed changes
   ##Transforming data
   colnames(features_all) <- NULL
   pairs <- features_all[, 1]
   features_all <- features_all[, -1]
 
 
+<<<<<<< Updated upstream
   feature_matrix <- data.matrix(features_all)
 
   test <- xgboost::xgb.DMatrix(data = feature_matrix)
@@ -93,6 +107,15 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
   label <- as.numeric(predictions > 0.5)
   #Add the gene and enhancer id's
   predictions <- cbind(pairs, predictions, label)
+=======
+  feature_matrix <- xgb.DMatrix(data.matrix(features_all))
+  #test <- xgboost::xgb.DMatrix(data = feature_matrix)
+  ##Predicting
+  score <- predict(xgb_model, feature_matrix)
+  label <- as.numeric(score > 0.5)
+  #Add the gene and enhancer id's
+  predictions <- cbind(pairs, score, label)
+>>>>>>> Stashed changes
   predictions <- as.data.frame(predictions)
   cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
   return(predictions)

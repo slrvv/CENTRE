@@ -2,7 +2,11 @@
 #'
 #' Computes the generic features needed by CENTRE to make predictions
 #'
+<<<<<<< Updated upstream
 #' @param x Dataframe with the gene-enhancer pairs of interest
+=======
+#' @param pairs Dataframe with the gene-enhancer pairs of interest
+>>>>>>> Stashed changes
 #'
 #' @return
 #' A table containting the following computed features :
@@ -25,19 +29,31 @@
 #' @import utils
 #' @importFrom metapod combineParallelPValues
 #' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
+<<<<<<< Updated upstream
 computeGenericFeatures <- function(x) {
   start_time <- Sys.time()
   ## Pre-eliminary checks and computations
 
   x$gene_id1 <- gsub("\\..*", "", x[, 1])
 
+=======
+computeGenericFeatures <- function(pairs) {
+  startTime <- Sys.time()
+  ## Pre-eliminary checks and computations
+  pairs$gene_id2 <- gsub("\\..*", "", pairs[, 1])
+>>>>>>> Stashed changes
   ## Computing the distance features
 
   startPart("Computing distance features")
 
+<<<<<<< Updated upstream
 
   colnames(x) <- c("gene_id", "enhancer_id", "gene_id2")
   featuresDistances <- computeDistances(x)
+=======
+  colnames(pairs) <- c("gene_id", "enhancer_id", "gene_id2")
+  featuresDistances <- computeDistances(pairs)
+>>>>>>> Stashed changes
 
   cat("Removing pairs with distance over 500 Kb")
   featuresDistances <- featuresDistances[abs(featuresDistances$distance)
@@ -53,6 +69,7 @@ computeGenericFeatures <- function(x) {
 
   conn <- RSQLite::dbConnect(RSQLite::SQLite(),
                              system.file("extdata",
+<<<<<<< Updated upstream
                                          "PrecomputedData.db",
                                          package = "CENTRE"))
 
@@ -71,6 +88,13 @@ computeGenericFeatures <- function(x) {
                                      conn)
   dhsdhsDf <- getPrecomputedValues("dhsdhs_test_data",
                                     "wilcoxtest_dhs_dhs",
+=======
+                                         "PrecomputedData2.db",
+                                         package = "CENTRE"))
+
+  combinedTestDf <- getPrecomputedValues("combinedTestData",
+                                    "combined_tests",
+>>>>>>> Stashed changes
                                     featuresDistances,
                                     conn)
   crupCorDf <- getPrecomputedValues("crup_cor",
@@ -80,6 +104,7 @@ computeGenericFeatures <- function(x) {
 
   RSQLite::dbDisconnect(conn)
 
+<<<<<<< Updated upstream
   cageWilcoxTest <- cageDf[featuresDistances$pair, 1]
   dhsexpWilcoxTest <- dhsexpDf[featuresDistances$pair, 1]
   crupexpWilcoxTest <- crupexpDf[featuresDistances$pair, 1]
@@ -105,4 +130,18 @@ computeGenericFeatures <- function(x) {
   cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
   return(featuresGeneric)
 
+=======
+  featuresDistances$combined_tests <- combinedTestDf[featuresDistances$pair, 1]
+
+  featuresDistances$crup_cor <- crupCorDf[featuresDistances$pair, 1]
+
+  ## Return the table of features
+  featuresGeneric <- featuresDistances[, c("gene_id2", "enhancer_id",
+                                         "distance", "crup_cor",
+                                         "combined_tests")]
+
+  featuresGeneric[is.na(featuresGeneric)] <- 0 ##NA values
+  cat(paste0('time: ', format(Sys.time() - startTime), "\n"))
+  return(featuresGeneric)
+>>>>>>> Stashed changes
 }

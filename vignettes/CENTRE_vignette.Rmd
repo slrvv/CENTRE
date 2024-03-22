@@ -128,6 +128,14 @@ the histone ChIP-seq experiments.
 dataframe has to have 3 columns, one for the `gene_id`, 
 one for the `transcript_ids` and one for the TPM value, for all genes and not
 just the genes of interest.
+<<<<<<< Updated upstream
+=======
+- `chr`: NULL or a vector of chromosomes. Use only if the crupR
+normalization should be done for certain chromosomes. If this parameter is
+not used crupR normalization is done for all chromosomes.
+Using only certain chromosomes for normalization might change results
+and is not the intented used of crupR or CENTRE.
+>>>>>>> Stashed changes
 - `features_generic`: The dataframe that was produced in `computeGenericFeatures()`
 
 Example of the tpm dataframe: 
@@ -152,6 +160,13 @@ Returns the cell type specific features :
 - `RNA_seq`: RNA-seq TPM values for the gene in each pair of the cell type of interest.
 
 First prepare the metadata and tpm dataframes and then run the function.
+<<<<<<< Updated upstream
+=======
+
+Note: In this example we use data only for chromosome 19 to make it run quicker
+and make it occupy less memory. In order for CENTRE to run as intended the user
+should provide genome-wide bam files and leave `chr` parameter NULL.
+>>>>>>> Stashed changes
 ```{r}
 files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
           system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
@@ -166,7 +181,11 @@ metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
 
 
 tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
+<<<<<<< Updated upstream
                       sep = "", stringsAsFactors = F, header = T)
+=======
+                      sep = "", stringsAsFactors = FALSE, header = TRUE)
+>>>>>>> Stashed changes
 
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                     replicate = 1,
@@ -190,7 +209,11 @@ by a `_` of the corresponding pair and the label and probability for each of the
 
 ```{r}
 # Finally compute the predictions
+<<<<<<< Updated upstream
 predictions <- centrePrediction(celltype_features,
+=======
+predictions <- CENTRE::centrePrediction(celltype_features,
+>>>>>>> Stashed changes
                                   generic_features)
 ```
 
