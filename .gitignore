@@ -18,13 +18,10 @@ inst/extdata/HeLa_input.bam.bai
 inst/extdata/data/
 inst/extdata/PrecomputedData.db
 inst/extdata/Annotation.db
-<<<<<<< Updated upstream
-=======
 inst/extdata/.RData
 inst/extdata/.Rhistory
 vignettes/.RData
 vignettes/.Rhistory
->>>>>>> Stashed changes
 inst/extdata/NAperrow.txt
 inst/extdata/NAprecomputedfisher.txt
 inst/extdata/PrecomputedData2.db
@@ -34,8 +31,4 @@ inst/extdata/numberofNAprecomputedData.png
 inst/extdata/plots.R
 inst/extdata/replacenawith0.txt
 inst/extdata/testPrecomputedDataNA.R
-<<<<<<< Updated upstream
-
-=======
-Benchmark/
->>>>>>> Stashed changes
+vignettes/CENTRE_vignette.html
