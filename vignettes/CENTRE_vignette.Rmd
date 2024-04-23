@@ -47,11 +47,11 @@ values for all genes.
 The first time you run CENTRE you will need to download the PrecomputedData.db 
 and Annotation.db. To do this run the following: 
 
-```{r}
-CENTRE::downloadPrecomputedData(method = "curl")
+```{r, eval=FALSE}
+CENTRE::downloadPrecomputedData(method = "wget", all = FALSE)
 # Make sure whatever method you use to download is available on your system
 ```
-Or download the data from http://owww.molgen.mpg.de/~CENTRE_data/PrecomputedData.db
+Or download the data from http://owww.molgen.mpg.de/~CENTRE_data/PrecomputedDataLight.db
 and http://owww.molgen.mpg.de/~CENTRE_data/Annotation.db add it to the /inst/extdata folder.
 
 # Run the *CENTRE* pipeline
@@ -62,7 +62,7 @@ and RNA-seq data are from ENCODE and correspond to the following experiments:
 
 
 | Experiment type| ENCODE experiment accession | File accession numbers|
-|----------------|-----------------------------|-----------------------|
+| :------------  |   :------------------:      |    ----------------:  |
 | H3K4me1        |ENCSR000APW| ENCFF712AAP, ENCFF826OLG|
 | H3K4me3        | ENCSR340WQU|ENCFF650IXI, ENCFF760VTC |
 | H3K27ac        |ENCSR000AOC | ENCFF609ZAE, ENCFF711QAI |
@@ -110,7 +110,7 @@ generic_features <- CENTRE::computeGenericFeatures(pairs)
 ```
 
 ## Step 3: Compute Cell Type Features
-The function `computeCellTypeFeatures(metaData, replicate, input.free, sequencing, tpm, featuresGeneric)` computes the features that are cell type specific.
+The function `computeCellTypeFeatures(metaData, replicate, input.free, sequencing, tpm, pairs)` computes the features that are cell type specific.
 Takes as input the following
 
 - `metaData`: Dataframe with the path to the cell type specific ChIP-seq
@@ -125,27 +125,25 @@ will be run in input.free mode.
 - `sequencing`: String "single" or "paired" indicating the type of sequencing of
 the histone ChIP-seq experiments.
 - `tpm`: RNA-seq gene quantification data in R dataframe format. The R 
-dataframe has to have 3 columns, one for the `gene_id`, 
-one for the `transcript_ids` and one for the TPM value, for all genes and not
-just the genes of interest.
-<<<<<<< Updated upstream
-=======
+dataframe has to have 3 columns, one for the `gene_id` (ENSEMBL ID), 
+one for the `transcript_ids` (ENSEMBL ID) and one for the TPM value.
 - `chr`: NULL or a vector of chromosomes. Use only if the crupR
 normalization should be done for certain chromosomes. If this parameter is
 not used crupR normalization is done for all chromosomes.
 Using only certain chromosomes for normalization might change results
 and is not the intented used of crupR or CENTRE.
->>>>>>> Stashed changes
-- `features_generic`: The dataframe that was produced in `computeGenericFeatures()`
+- `pairs`: The dataframe of enhancer gene pairs that was produced in 
+`createPairs()`
 
 Example of the tpm dataframe: 
 
-|gene_id | transcript_id.s.| TPM|
-|--------|-----------------|----|
-|   10904 |           10904|   0|
-|   12954|            12954|   0|
-|   12956|            12956|   0|
-|   ... |            ...|   0|
+|gene_id | transcript_id.s.| TPM |
+| :----- | :-------------: | --: |
+| ENSG00000000003.14 | ENST00000373020.8,ENST00000494424.1, ...| 25.635
+| ENSG00000000005.5 | ENST00000373031.4,ENST00000485971.1, ... | 0.000
+| ENSG00000000419.12 | ENST00000371582.8,ENST00000371584.8, ... | 55.915
+| ENSG00000000457.13 | ENST00000367770.5,ENST00000367771.10, ... |  4.660
+| ... | ... | ... |
 
 Returns the cell type specific features : 
 
@@ -157,16 +155,14 @@ Returns the cell type specific features :
 - `PP_prob_gene`: CRUP-PP(Promoter Probability) for Promoters
 - `reg_dist_enh`: Regulatory distance computed on promoter probabilities
 - `norm_reg_dist_enh`: Normalized regulatory distance computed on promoter probabilities
-- `RNA_seq`: RNA-seq TPM values for the gene in each pair of the cell type of interest.
+- `TPM`: RNA-seq TPM values for the gene in each pair of the cell type of interest.
 
 First prepare the metadata and tpm dataframes and then run the function.
-<<<<<<< Updated upstream
-=======
 
 Note: In this example we use data only for chromosome 19 to make it run quicker
-and make it occupy less memory. In order for CENTRE to run as intended the user
+and make the occupy less memory. In order for CENTRE to run as intended the user
 should provide genome-wide bam files and leave `chr` parameter NULL.
->>>>>>> Stashed changes
+
 ```{r}
 files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
           system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
@@ -180,12 +176,11 @@ metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
                        bamFile = files, inputFile = rep(inputs, 3))
 
 
-tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
-<<<<<<< Updated upstream
-                      sep = "", stringsAsFactors = F, header = T)
-=======
-                      sep = "", stringsAsFactors = FALSE, header = TRUE)
->>>>>>> Stashed changes
+tpmfile <- read.table(system.file("extdata/example",
+                                   "HeLa-S3.tsv",
+                                   package = "CENTRE"), 
+                       header = TRUE, sep = "\t")
+
 
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                     replicate = 1,
@@ -193,7 +188,7 @@ celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                     cores = 1,
                                     sequencing = "single",
                                     tpmfile = tpmfile,
-                                    featuresGeneric = generic_features)
+                                    pairs = pairs)
 
 ```
 
@@ -209,11 +204,7 @@ by a `_` of the corresponding pair and the label and probability for each of the
 
 ```{r}
 # Finally compute the predictions
-<<<<<<< Updated upstream
-predictions <- centrePrediction(celltype_features,
-=======
 predictions <- CENTRE::centrePrediction(celltype_features,
->>>>>>> Stashed changes
                                   generic_features)
 ```
 

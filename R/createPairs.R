@@ -36,11 +36,11 @@ createPairs <- function(gene) {
   conn <- RSQLite::dbConnect(RSQLite::SQLite(),
                              system.file("extdata",
                             "Annotation.db",
-			    package = "CENTRE"))
+                            package = "CENTRE"))
   #get chromosome and tts of our genes
 
   query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
-  paste0(sprintf("'%s'", gene$gene_id1), collapse = ", "),")",sep="" )
+  paste0(sprintf("'%s'", gene$gene_id1), collapse = ", "), ")", sep = "")
   gene <- RSQLite::dbGetQuery(conn, query)
 
   #Select all of the annotation for ccres v3
@@ -54,10 +54,10 @@ createPairs <- function(gene) {
 
   #extend the gene region 500Kb to the left of TTS and to the right
   genesRange <- regioneR::extendRegions(genesRange,
-                                        extend.start=500000,
-                                        extend.end=500000)
+                                        extend.start = 500000,
+                                        extend.end = 500000)
 
-  enhancerRange<-  with(ccresEnhancer,
+  enhancerRange <-  with(ccresEnhancer,
                          GenomicRanges::GRanges(V1,
                                                 IRanges::IRanges(start = new_start,
                                                                  end = new_end)))
@@ -67,7 +67,7 @@ createPairs <- function(gene) {
   overlaps <- GenomicRanges::findOverlaps(genesRange, enhancerRange,
                                           ignore.strand = TRUE)
 
-  ccresOverlapping <-data.frame(gene = overlaps@from, enhancer = overlaps@to)
+  ccresOverlapping <- data.frame(gene = overlaps@from, enhancer = overlaps@to)
   ccresOverlapping$gene_id1 <- gene$gene_id1[ccresOverlapping$gene]
   ccresOverlapping$enhancer_id <- ccresEnhancer$V5[ccresOverlapping$enhancer]
 
@@ -76,6 +76,6 @@ createPairs <- function(gene) {
 
   ### add a function to exclude any pairs that are not in the same chromosome
 
-  cat(paste0('time: ', format(Sys.time() - startTime), "\n"))
+  cat(paste0("time: ", format(Sys.time() - startTime), "\n"))
   return(ccresOverlapping)
 }

@@ -6,10 +6,11 @@
 #'
 #' @param metaData Dataframe indicating the paths to the ChIP-seq experiments.
 #' More information on the format here `crupR::normalize
-#' @param replicate: The number of replicates of the ChIP-seq experiments
+#' @param replicate The number of replicates of the ChIP-seq experiments
 #' that need to be normalized.
-#' @param input.free: Boolean value indicating whether a Control/Input ChIP-seq
-#' experiment is provided to go with the Histone Modification ChIP-seq experiments.
+#' @param input.free Boolean value indicating whether a Control/Input ChIP-seq
+#' experiment is provided to go with the Histone Modification ChIP-seq
+#' experiments.
 #' If the parameter is set to FALSE the normalization of ChIP-seq experiments
 #' will be run in input.free mode.
 #' @param cores Number of cores to compute the CRUP score features
@@ -28,10 +29,10 @@
 #' @return
 #' A table containting the following computed features :
 #'* CRUP enhancer score for enhancer region, promoter region and the region
-#'between the enhancer and the promoter
+#'between the enhancer and the promoter.
 #'* CRUP promoter score for enhancer region, promoter region and the region
-#'between the enhancer and the promoter
-#'* RNA-seq TPM values
+#'between the enhancer and the promoter.
+#'* TPM values from the RNA-seq experiment given.
 #'
 #'
 #' @examples
@@ -46,23 +47,28 @@
 #' generic_features <- CENTRE::computeGenericFeatures(pairs)
 #'
 #' #Compute Cell-type features
-#' files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
-#' system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
-#' system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam", package = "CENTRE"))
+#' files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam",
+#'            package = "CENTRE"),
+#' system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam",
+#'             package = "CENTRE"),
+#' system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam",
+#'             package = "CENTRE"))
 #' # Control ChIP-seq experiment to go with the rest of ChIP-seqs
-#' inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam", package = "CENTRE")
+#' inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam",
+#'           package = "CENTRE")
 #' metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
 #'                      condition = c(1, 1, 1), replicate = c(1, 1, 1),
 #'                       bamFile = files, inputFile = rep(inputs, 3))
-#'tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
-#'                       sep = "", stringsAsFactors = F, header = T)
+#'tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv",
+#'                      package = "CENTRE"),
+#'                      sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 #'celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
 #'                                                     replicate = 1,
 #'                                                     input.free = FALSE,
 #'                                                     cores = 1,
 #'                                                     sequencing = "single",
 #'                                                     tpmfile = tpmfile,
-#'                                                     pairs = generic_features)
+#'                                                     pairs = pairs)
 #'
 #'@export
 #'@importFrom crupR normalize getEnhancers
@@ -96,6 +102,7 @@ computeCellTypeFeatures <- function(metaData,
   crupScores <- crupR::getEnhancers(data = normalized, C = cores, all = TRUE)
   crupScores <- crupScores$D
   ## check what parts of this are necessary
+  colnames(pairs) <- c("gene_id2", "enhancer_id")
   listEnh <- as.data.frame(unique(pairs$enhancer_id))
   colnames(listEnh) <- c("enhancer_id")
   listProm <- as.data.frame(unique(pairs$gene_id2))
@@ -134,7 +141,7 @@ computeCellTypeFeatures <- function(metaData,
   # Compute the promoter probability from probA and probE
   # In CRUP probA is the probability of a region being an active reg. element
   # probE is the probability of a region being an active enhancer
-  crupScores$probP <- crupScores$probA *(1 - crupScores$probE)
+  crupScores$probP <- crupScores$probA * (1 - crupScores$probE)
 
   cat("Getting the CRUP-PP scores for enhancer")
 
@@ -170,7 +177,6 @@ computeCellTypeFeatures <- function(metaData,
   features_table_all <- get_rnaseq(crupFeatures, tpmfile)
 
   features_table_all[is.na(features_table_all)] <- 0
-
   features_table_all <- features_table_all[, c("gene_id2",
                                                "enhancer_id",
                                                "EP_prob_enh.1",
@@ -199,7 +205,7 @@ computeCellTypeFeatures <- function(metaData,
                                                "norm_reg_dist_prom",
                                                "TPM")]
 
-  cat(paste0('time: ', format(Sys.time() - startTime), "\n"))
+  cat(paste0("time: ", format(Sys.time() - startTime), "\n"))
   endPart()
   return(features_table_all)
 

@@ -22,12 +22,13 @@ Imports:
     RSQLite,
     GenomicRanges,
     IRanges,
+    regioneR,
     utils,
     stats
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Depends: 
-    R (>= 4.0)
+    R (>= 4.2.0)
 Suggests: 
     knitr,
     testthat (>= 3.0.0),

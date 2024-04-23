@@ -2,20 +2,24 @@
 % Please edit documentation in R/downloadPrecomputedData.R
 \name{downloadPrecomputedData}
 \alias{downloadPrecomputedData}
-\title{Download PrecomputedData.db}
+\title{Download PrecomputedDataLight.db}
 \usage{
-downloadPrecomputedData(method)
+downloadPrecomputedData(method, all = FALSE)
 }
 \arguments{
 \item{method}{Method to be used for downloading files. Check download.file()
 manuals to see the current available methods}
+
+\item{all}{Boolean value. When set to true, the PrecomputedDataAllTests.db database
+will be downloaded too. This database holds all of the p-values which are
+combined in "combined_tests" column.}
 }
 \value{
 Integer code 0 if download was succesful and the file was saved in the
 correct directory. In the case of failure errors will be raised.
 }
 \description{
-Downloads the PrecomputedData.db database that is needed for the
+Downloads the PrecomputedDataLight.db database that is needed for the
 computeGenericFeatures() function. This databased contains the values
 of the Wilcoxon Rank tests and the CRUP correlations.
 }

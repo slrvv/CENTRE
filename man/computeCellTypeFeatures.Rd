@@ -11,12 +11,21 @@ computeCellTypeFeatures(
   cores,
   sequencing = "single",
   tpmfile,
-  featuresGeneric
+  chr = NULL,
+  pairs
 )
 }
 \arguments{
 \item{metaData}{Dataframe indicating the paths to the ChIP-seq experiments.
 More information on the format here `crupR::normalize}
+
+\item{replicate}{The number of replicates of the ChIP-seq experiments
+that need to be normalized.}
+
+\item{input.free}{Boolean value indicating whether a Control/Input ChIP-seq
+experiment is provided to go with the Histone Modification ChIP-seq experiments.
+If the parameter is set to FALSE the normalization of ChIP-seq experiments
+will be run in input.free mode.}
 
 \item{cores}{Number of cores to compute the CRUP score features}
 
@@ -26,24 +35,22 @@ More information on the format here `crupR::normalize}
 \item{tpmfile}{Dataframe of two columns one with the RNA-seq TPM values,
 one with the names of the genes given as ENSEMBLE ID's}
 
-\item{featuresGeneric}{The output of \code{CENTRE::computeGenericFeatures()}}
+\item{chr}{NULL or a vector of chromosomes. Use only if the crupR
+normalization should be done for certain chromosomes. If this parameter is
+not used crupR normalization is done for all chromosomes.
+Using only certain chromosomes for normalization might change results
+and is not the intented used of crupR or CENTRE.}
 
-\item{replicate:}{The number of replicates of the ChIP-seq experiments
-that need to be normalized.}
-
-\item{input.free:}{Boolean value indicating whether a Control/Input ChIP-seq
-experiment is provided to go with the Histone Modification ChIP-seq experiments.
-If the parameter is set to FALSE the normalization of ChIP-seq experiments
-will be run in input.free mode.}
+\item{pairs}{The output of \code{CENTRE::createPairs()}}
 }
 \value{
 A table containting the following computed features :
 \itemize{
 \item CRUP enhancer score for enhancer region, promoter region and the region
-between the enhancer and the promoter
+between the enhancer and the promoter.
 \item CRUP promoter score for enhancer region, promoter region and the region
-between the enhancer and the promoter
-\item RNA-seq TPM values
+between the enhancer and the promoter.
+\item TPM values from the RNA-seq experiment given.
 }
 }
 \description{
@@ -71,13 +78,13 @@ metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
                      condition = c(1, 1, 1), replicate = c(1, 1, 1),
                       bamFile = files, inputFile = rep(inputs, 3))
 tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
-                      sep = "", stringsAsFactors = F, header = T)
+                      sep = "\t", stringsAsFactors = FALSE, header = TRUE)
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                                     replicate = 1,
                                                     input.free = FALSE,
                                                     cores = 1,
                                                     sequencing = "single",
                                                     tpmfile = tpmfile,
-                                                    featuresGeneric = generic_features)
+                                                    pairs = pairs)
 
 }

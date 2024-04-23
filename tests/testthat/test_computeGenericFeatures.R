@@ -39,7 +39,7 @@ test_that("compute generic feature function runs as expected", {
   testthat::expect_equal(dim(pred), c(19,6))
 
   testthat::expect_equal(pred$crup_cor, expected$crup_cor[,1])
-  testthat::expect_equal(pred$distance, expected$distance)
+  testthat::expect_equal(pred$distance, abs(expected$distance))
   testthat::expect_equal(pred$combined_tests,
                          expected$combined_tests,
                          tolerance =1e-5)

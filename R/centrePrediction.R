@@ -24,37 +24,43 @@
 #' generic_features <- CENTRE::computeGenericFeatures(pairs)
 #'
 #' #Compute Cell-type features
-#' files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
-#' system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
-#' system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam", package = "CENTRE"))
+#' files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam",
+#'            package = "CENTRE"),
+#'            system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam",
+#'            package = "CENTRE"),
+#'            system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam",
+#'            package = "CENTRE"))
 #' # Control ChIP-seq experiment to go with the rest of ChIP-seqs
-#' inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam", package = "CENTRE")
+#' inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam",
+#'           package = "CENTRE")
 #' metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
 #'                      condition = c(1, 1, 1), replicate = c(1, 1, 1),
 #'                       bamFile = files, inputFile = rep(inputs, 3))
-#'tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
-#'                       sep = "", stringsAsFactors = F, header = T)
+#'tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv",
+#'                     package = "CENTRE"),
+#'                       sep = "", stringsAsFactors = FALSE, header = TRUE)
 #'celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
 #'                                                     replicate = 1,
 #'                                                     input.free = FALSE,
 #'                                                     cores = 1,
 #'                                                     sequencing = "single",
 #'                                                     tpmfile = tpmfile,
-#'                                                     featuresGeneric = generic_features)
+#'                                                     pairs = pairs)
 
 #'# Finally compute the predictions
-#'predictions <- centrePrediction(celltype_features,
-#'generic_features)
+#'predictions <- centrePrediction(celltype_features, generic_features)
 #' @export
 #' @importFrom stats predict
 #' @import utils
 #' @importFrom xgboost xgb.load xgb.DMatrix
 #'
-centrePrediction <- function(features_celltype,features_generic, model = NULL){
+centrePrediction <- function(features_celltype,
+                             features_generic,
+                             model = NULL) {
   #Merge the generic features and the cell type features
 
   start_time <- Sys.time()
-  features_generic$distance <- abs(features_generic$distance) # make distance absolute distance
+  features_generic$distance <- abs(features_generic$distance)
   #generate the pair id to merge both feature sets
   features_generic$pair <- paste(features_generic$enhancer_id,
                                  features_generic$gene_id2,
@@ -74,8 +80,10 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
                         features_generic, by.x = "pair", by.y = "pair")
 
   ##Loading the xgboost model
-  if (is.null(model)){
-    model <- system.file("extdata", "centre2_final_model.txt", package = "CENTRE")
+  if (is.null(model)) {
+    model <- system.file("extdata",
+                         "centre2_final_model.txt",
+                         package = "CENTRE")
   } else {
     check_file(model)
   }
@@ -85,14 +93,13 @@ centrePrediction <- function(features_celltype,features_generic, model = NULL){
   pairs <- features_all[, 1]
   features_all <- features_all[, -1]
 
-  feature_matrix <- xgb.DMatrix(data.matrix(features_all))
-  #test <- xgboost::xgb.DMatrix(data = feature_matrix)
+  feature_matrix <- xgboost::xgb.DMatrix(data.matrix(features_all))
   ##Predicting
   score <- predict(xgb_model, feature_matrix)
   label <- as.numeric(score > 0.5)
   #Add the gene and enhancer id's
   predictions <- cbind(pairs, score, label)
   predictions <- as.data.frame(predictions)
-  cat(paste0('time: ', format(Sys.time() - start_time), "\n"))
+  cat(paste0("time: ", format(Sys.time() - start_time), "\n"))
   return(predictions)
 }

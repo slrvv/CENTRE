@@ -39,6 +39,7 @@ getPrecomputedValues <- function(table, feature, x, conn) {
 # First you need to create all posible pairs based on the GENCODE database
 
 devtools::load_all() ## use createPairs function from here
+library(dplyr)
 
 conn <- RSQLite::dbConnect(RSQLite::SQLite(),
                            system.file("extdata",
@@ -95,7 +96,6 @@ RSQLite::dbDisconnect(conn)
 
 cageDf$pair <- rownames(cageDf)
 rownames(cageDf) <- NULL
-
 pValuedata <- merge(pairs, cageDf, by.x = "pair", by.y="pair", all.x = T )
 
 dhsexpDf$pair <- rownames(dhsexpDf)
@@ -119,21 +119,22 @@ pValuedata <- merge(pValuedata, dhsdhsDf, by.x = "pair", by.y= "pair", all.x = T
 pValuedata[pValuedata$pair=="EH38E3350767_ENSG00000059728",]
 #check pValues are the correct ones for this particular pair
 
+
 pValue <- list(pValuedata$wilcoxtest_cage, pValuedata$wilcoxtest_dhs_exp,
                pValuedata$wilcoxtest_crup_exp, pValuedata$wilcoxtest_dhs_dhs)
 
 ## Combining the values of the Wilcoxon tests
 combinedtests <- metapod::combineParallelPValues(pValue, method="fisher")
 
-
-
 pValuedata$combined_tests <- -log(combinedtests$p.value) ## at this point there is a mixing up of the ids
 
 
 
+
 rownames(pValuedata) <- pValuedata$pair
-
 pValuedata <- pValuedata[, - 1]
-
+print(head(pValuedata))
 saveRDS(pValuedata,
         file = "/project/CRUP_scores/CENTRE/inst/extdata/combinedTestData.rds" )
+
+

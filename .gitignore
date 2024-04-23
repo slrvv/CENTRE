@@ -32,3 +32,8 @@ inst/extdata/plots.R
 inst/extdata/replacenawith0.txt
 inst/extdata/testPrecomputedDataNA.R
 vignettes/CENTRE_vignette.html
+inst/extdata/PrecomputedDataAllTests.db
+inst/extdata/PrecomputedDataLight.db
+inst/extdata/createCombinedTestData.out
+inst/extdata/example/HeLa-S3.rds
+

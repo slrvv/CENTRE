@@ -5,6 +5,9 @@ ChIP-seq data for three histone modifications for the cell type of interest.
  CENTRE uses various available datasets and extracts cell-type agnostic 
 statistics to complement the cell-type specific information.
 
+This repository holds the development version of CENTRE. For the paper version, 
+go to https://github.com/slrvv/CENTRE_paper_version
+
 ![title](Images/Figure1-export.png)
 
 ### Contact

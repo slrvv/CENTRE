@@ -4,10 +4,10 @@
 \alias{computeGenericFeatures}
 \title{Compute generic features}
 \usage{
-computeGenericFeatures(x)
+computeGenericFeatures(pairs)
 }
 \arguments{
-\item{x}{Dataframe with the gene-enhancer pairs of interest}
+\item{pairs}{Dataframe with the gene-enhancer pairs of interest}
 }
 \value{
 A table containting the following computed features :

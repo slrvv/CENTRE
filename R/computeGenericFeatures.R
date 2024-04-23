@@ -36,7 +36,7 @@ computeGenericFeatures <- function(pairs) {
   featuresDistances <- computeDistances(pairs)
 
   cat("Removing pairs with distance over 500 Kb")
-  featuresDistances <- featuresDistances[abs(featuresDistances$distance)
+  featuresDistances <- featuresDistances[featuresDistances$distance
                                            <= 500000, ]
   endPart()
 
@@ -49,7 +49,7 @@ computeGenericFeatures <- function(pairs) {
 
   conn <- RSQLite::dbConnect(RSQLite::SQLite(),
                              system.file("extdata",
-                                         "PrecomputedData2.db",
+                                         "PrecomputedDataLight.db",
                                          package = "CENTRE"))
 
   combinedTestDf <- getPrecomputedValues("combinedTestData",
@@ -71,6 +71,6 @@ computeGenericFeatures <- function(pairs) {
                                          "combined_tests")]
 
   featuresGeneric[is.na(featuresGeneric)] <- 0 ##NA values
-  cat(paste0('time: ', format(Sys.time() - startTime), "\n"))
+  cat(paste0("time: ", format(Sys.time() - startTime), "\n"))
   return(featuresGeneric)
 }

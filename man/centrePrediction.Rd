@@ -44,14 +44,14 @@ metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
                      condition = c(1, 1, 1), replicate = c(1, 1, 1),
                       bamFile = files, inputFile = rep(inputs, 3))
 tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
-                      sep = "", stringsAsFactors = F, header = T)
+                      sep = "", stringsAsFactors = FALSE, header = TRUE)
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                                     replicate = 1,
                                                     input.free = FALSE,
                                                     cores = 1,
                                                     sequencing = "single",
                                                     tpmfile = tpmfile,
-                                                    featuresGeneric = generic_features)
+                                                    pairs = pairs)
 # Finally compute the predictions
 predictions <- centrePrediction(celltype_features,
 generic_features)

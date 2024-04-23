@@ -42,32 +42,6 @@ unfactorize <- function(df) {
   return(df)
 }
 
-###############################################################################
-# function: extend 500Kbp
-###############################################################################
-extend <- function(gene){
-  ##extend 500 kb to the left of tts
-  if (gene$transcription_start[i] <= 500000) {
-    ##We check that the extension doesnt fall outside of the chromosome
-    start_tts[i] <- 1
-  } else{
-    start_tts[i] <- gene$transcription_start[i] - 500000
-  }
-
-  ##extend 500kb to the right of tts
-
-  chr_size <- chromosomes[chromosomes[, 1] %in% gene$chr[i], 2]
-
-  if (gene$transcription_start[i] + 500000 >= chr_size) {
-    ##We check that the extension doesnt fall outside of the chromosome
-    end_tts[i] <- chr_size
-  } else {
-
-    end_tts[i] <- gene$transcription_start[i] + 500000
-  }
-
-
-}
 
 ###############################################################################
 # function: check if file exists
@@ -91,11 +65,11 @@ computeDistances <- function(x) {
                              package = "CENTRE"))
   #get chromosome and tts of our genes
   query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
-  paste0(sprintf("'%s'", x$gene_id2), collapse = ", "),")",sep="" )
+  paste0(sprintf("'%s'", x$gene_id2), collapse = ", "), ")", sep = "")
   gencode <- RSQLite::dbGetQuery(conn, query)
   #get chr and middle point of enhancers
   query_enh <-  paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
-  paste0(sprintf("'%s'", x$enhancer_id), collapse = ", "),")",sep="" )
+  paste0(sprintf("'%s'", x$enhancer_id), collapse = ", "), ")", sep = "")
   ccres_enhancer <- RSQLite::dbGetQuery(conn, query_enh)
   RSQLite::dbDisconnect(conn)
   #Get the chr gene_id and transcription_start from gencode annotation
@@ -112,7 +86,7 @@ computeDistances <- function(x) {
 
   cat("Removing all gene enhancer pairs that are not in the same chromosome.\n")
   result <- result[(result$V1 == result$chr), ]
-  result$distance <- result$middle_point - result$transcription_start
+  result$distance <- abs(result$middle_point - result$transcription_start)
   return(result)
 }
 
@@ -142,7 +116,7 @@ compute_crup_enhancer <- function(regions_enhancer,
     cres_EP$enhancer_id <- factor(cres_EP$enhancer_id)
     cres_EP$bin <- rep(1:5, times = length(enhancer_ranges))
 
-    trial <- stats::reshape(cres_EP[,3:5],
+    trial <- stats::reshape(cres_EP[, 3:5],
                    idvar = "enhancer_id",
                    timevar = "bin",
                    direction = "wide",
@@ -153,7 +127,7 @@ compute_crup_enhancer <- function(regions_enhancer,
     cres_EP$enhancer_id <- factor(cres_EP$enhancer_id)
     cres_EP$bin <- rep(1:5, times = length(enhancer_ranges))
 
-    trial <-stats::reshape(cres_EP[,3:5],
+    trial <- stats::reshape(cres_EP[, 3:5],
                    idvar = "enhancer_id",
                    timevar = "bin",
                    direction = "wide",
@@ -186,7 +160,7 @@ compute_crup_promoter <- function(regions_prom,
     cres_EP$gene_id2 <- factor(cres_EP$gene_id2)
     cres_EP$bin <- rep(1:5, length(gene_ranges))
 
-    trial <- stats::reshape(cres_EP[,3:5],
+    trial <- stats::reshape(cres_EP[, 3:5],
                    idvar = "gene_id2",
                    timevar = "bin",
                    direction = "wide",
@@ -196,7 +170,7 @@ compute_crup_promoter <- function(regions_prom,
     cres_EP$gene_id2 <- factor(cres_EP$gene_id2)
     cres_EP$bin <- rep(1:5, length(gene_ranges))
 
-    trial <- stats::reshape(cres_EP[,3:5],
+    trial <- stats::reshape(cres_EP[, 3:5],
                    idvar = "gene_id2",
                    timevar = "bin",
                    direction = "wide",
@@ -209,7 +183,7 @@ compute_crup_promoter <- function(regions_prom,
 ###############################################################################
 # function: make between_ranges GRanges object for reg distance calculations
 ###############################################################################
-createBetweenRanges <- function(regions){
+createBetweenRanges <- function(regions) {
   ##Check if the distances are negative and flip the start and end around
   ##compute distance as middle point - tss so if distance is negative it means
   ## tss > middle point.
@@ -331,7 +305,7 @@ getPrecomputedValues <- function(table, feature, x, conn) {
 
 get_rnaseq <- function(x, tpmfile) {
   tpmfile$gene_id2 <- gsub("\\..*", "", tpmfile[, 1])
-  x <- merge(x, tpmfile[,c(3,4)],by.x = "gene_id2", by.y = "gene_id2" )
+  x <- merge(x, tpmfile[, c(3, 4)], by.x = "gene_id2", by.y = "gene_id2")
   return(x)
 }
 
@@ -340,7 +314,7 @@ get_rnaseq <- function(x, tpmfile) {
 # features function
 ################################################################################
 
-createRegionsDf <- function(listProm, listEnh, pairs){
+createRegionsDf <- function(listProm, listEnh, pairs) {
 
   conn <- RSQLite::dbConnect(RSQLite::SQLite(),
                              system.file("extdata",
@@ -348,11 +322,14 @@ createRegionsDf <- function(listProm, listEnh, pairs){
                                          package = "CENTRE"))
   #get chromosome tts new_start and new_end of input genes
   query <- paste("SELECT  gene_id1, chr, transcription_start, new_start, new_end FROM gencode WHERE gene_id1 in (",
-                 paste0(sprintf("'%s'", listProm$gene_id2), collapse = ", "),")",sep="" )
+                 paste0(sprintf("'%s'", listProm$gene_id2), collapse = ", "),
+                 ")", sep = "")
   regionsProm <- RSQLite::dbGetQuery(conn, query)
   #get chr middle new_start new_end point of input enhancers
   queryEnh <-  paste("SELECT  V5, V1, middle_point, new_start, new_end FROM ccres_enhancer WHERE V5 in (",
-                     paste0(sprintf("'%s'", listEnh$enhancer_id), collapse = ", "),")",sep="" )
+                     paste0(sprintf("'%s'", listEnh$enhancer_id),
+                            collapse = ", "),
+                     ")", sep = "")
   regionsEnhancer <- RSQLite::dbGetQuery(conn, queryEnh)
   RSQLite::dbDisconnect(conn)
 
@@ -373,5 +350,30 @@ createRegionsDf <- function(listProm, listEnh, pairs){
   #add distance value to sort start and end for regulatory distance calculations.
   regions$distance <- regions$middle_point - regions$transcription_start
   return(regions)
+}
+
+################################################################################
+# function : helper function to download the files needed after install
+################################################################################
+
+downloader <- function(file, method) {
+  url <- paste0("http://owww.molgen.mpg.de/~CENTRE_data/", file)
+  cat(paste0("Downloading ", file, "\n"))
+  exit <- download.file(url,
+                        destfile = paste(system.file("extdata",
+                                                     package = "CENTRE")
+                                       , file,
+                                       sep = "/") ,
+                        method = method)
+  if (exit != 0) {
+    stop(paste0("Download of ",
+                file, " failed. Non-zero exit status."))
+  }
+
+  f <- system.file("extdata", file, package = "CENTRE")
+  if (!file.exists(f)) {
+    stop(paste0("Download of ", file,
+                " failed or file was saved in the wrong directory."))
+  }
 }
 
