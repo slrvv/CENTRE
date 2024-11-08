@@ -9,7 +9,7 @@ author:
   email: rapakoul@molgen.mpg.de
 package: CENTRE
 output: 
-  rmarkdown::html_document
+  BiocStyle::html_document
 abstract: 
 vignette: |
   %\VignetteIndexEntry{Centre-vignette}
@@ -83,11 +83,23 @@ input genes and creates all possible enhancer gene pairs.
 It takes as input a dataframe `genes` with one column of ENSEMBL gene ID's.
 The output is a dataframe of two columns one with the gene ID's (without version
 identifier) and the corresponding ENCODE cCREs enhancer ID's.
+
+It also has a mode where pairs are computed from ENCODE cCREs enhancer ID's.
 ```{r}
-genes <- as.data.frame(c("ENSG00000130203.10",
+ids <- as.data.frame(c("ENSG00000130203.10",
                          "ENSG00000171119.3"))
-colnames(genes) <- c("gene_id") #It is important to name the column gene_id
+colnames(ids) <- c("gene_id") #It is important to name the column gene_id
+pairs <- CENTRE::createPairs(ids)
+
+ids <- as.data.frame(c("ENSG00000130203.10",
+                         "ENSG00000171119.3"))
+colnames(ids) <- c("gene_id") #It is important to name the column gene_id
 pairs <- CENTRE::createPairs(genes)
+
+#pairs computed from enhancer
+ids <- data.frame(c("EH38E3750708", "EH38E2776554"))
+colnames(ids) <- "enhancer_id"
+pairs_enh <- CENTRE::createPairs(ids, enhancerCentered = TRUE)
 ```
 
 ## Step 2: Compute Generic Features
@@ -208,3 +220,6 @@ predictions <- CENTRE::centrePrediction(celltype_features,
                                   generic_features)
 ```
 
+```{r}
+sessionInfo()
+```

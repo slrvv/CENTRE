@@ -1,12 +1,3 @@
-################################################################################
-# Testing that the pipeline works
-################################################################################
-
-
-
-
-##Testing the compute generic features function
-
 test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
   ##Defining inputs for compute features function
 

@@ -10,13 +10,13 @@ downloadPrecomputedData(method, all = FALSE)
 \item{method}{Method to be used for downloading files. Check download.file()
 manuals to see the current available methods}
 
-\item{all}{Boolean value. When set to true, the PrecomputedDataAllTests.db database
-will be downloaded too. This database holds all of the p-values which are
-combined in "combined_tests" column.}
+\item{all}{Boolean value. When set to true, the PrecomputedDataAllTests.db
+database will be downloaded too. This database holds all of the p-values
+which are combined in "combined_tests" column.}
 }
 \value{
-Integer code 0 if download was succesful and the file was saved in the
-correct directory. In the case of failure errors will be raised.
+Integer code 0 if download was succesful and the file was saved in
+the correct directory. In the case of failure errors will be raised.
 }
 \description{
 Downloads the PrecomputedDataLight.db database that is needed for the

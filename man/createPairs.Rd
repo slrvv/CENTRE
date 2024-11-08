@@ -4,24 +4,29 @@
 \alias{createPairs}
 \title{Create Pairs}
 \usage{
-createPairs(gene)
+createPairs(ids, enhancerCentered = FALSE)
 }
 \arguments{
-\item{gene}{One column dataframe with gene ENSEMBL id's}
+\item{ids}{One column dataframe with gene ENSEMBL id's or enhancer cCREs ids}
+
+\item{enhancerCentered}{Boolean value. If true the pairs are computed from
+enhancers. In the default setting (false) pairs are computed from genes.}
 }
 \value{
 dataframe with two columns the ENSEMBL id's without their version and
-the enhancer id's
+the enhancer id's (ENCODE cCREs)
 }
 \description{
 Creates all of the possible gene enhancer pairs at 500kb distance
-from the given genes
-transcription start sites.
+from the given genes transcription start sites. The pairs can be also computed
+from enhancers, in that mode we collect all gene enhancer pairs at 500kb distance
+of the enhancer middle point.
 }
 \examples{
 #Create gene enhancer pairs
-genes <- as.data.frame(c("ENSG00000130203.10",
+ids <- as.data.frame(c("ENSG00000130203.10",
 "ENSG00000171119.3"))
-colnames(genes) <- c("gene_id") #It is important to name the column gene_id
-pairs <- CENTRE::createPairs(genes)
+colnames(ids) <- c("gene_id") #It is important to name the column gene_id or 
+enhancer_id
+pairs <- CENTRE::createPairs(ids)
 }

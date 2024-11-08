@@ -14,7 +14,7 @@
 #' @examples
 #' #Create gene enhancer pairs
 #' genes <- as.data.frame(c("ENSG00000130203.10",
-#' "ENSG00000171119.3"))
+#' "ENSG00000280087.1"))
 #' colnames(genes) <- c("gene_id") #It is important to name the column gene_id
 #' pairs <- CENTRE::createPairs(genes)
 #'
@@ -25,7 +25,6 @@
 #' @import utils
 #' @importFrom metapod combineParallelPValues
 #' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
-#'
 computeGenericFeatures <- function(pairs) {
   startTime <- Sys.time()
   ## Pre-eliminary checks and computations
@@ -46,12 +45,12 @@ computeGenericFeatures <- function(pairs) {
   featuresDistances$pair <- paste(featuresDistances$enhancer_id,
                                    featuresDistances$gene_id2,
                                    sep = "_")
-
+  #connect to the precomputed values database
   conn <- RSQLite::dbConnect(RSQLite::SQLite(),
                              system.file("extdata",
                                          "PrecomputedDataLight.db",
                                          package = "CENTRE"))
-
+  
   combinedTestDf <- getPrecomputedValues("combinedTestData",
                                          "combined_tests",
                                          featuresDistances,

@@ -24,7 +24,7 @@ Computes the generic features needed by CENTRE to make predictions
 \examples{
 #Create gene enhancer pairs
 genes <- as.data.frame(c("ENSG00000130203.10",
-"ENSG00000171119.3"))
+"ENSG00000280087.1"))
 colnames(genes) <- c("gene_id") #It is important to name the column gene_id
 pairs <- CENTRE::createPairs(genes)
 

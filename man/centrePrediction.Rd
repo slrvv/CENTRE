@@ -35,15 +35,20 @@ colnames(pairs) <- c("gene_id", "enhancer_id")
 generic_features <- CENTRE::computeGenericFeatures(pairs)
 
 #Compute Cell-type features
-files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
-system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
-system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam", package = "CENTRE"))
+files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam",
+           package = "CENTRE"),
+           system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam",
+           package = "CENTRE"),
+           system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam",
+           package = "CENTRE"))
 # Control ChIP-seq experiment to go with the rest of ChIP-seqs
-inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam", package = "CENTRE")
+inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam",
+          package = "CENTRE")
 metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
                      condition = c(1, 1, 1), replicate = c(1, 1, 1),
                       bamFile = files, inputFile = rep(inputs, 3))
-tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv", package = "CENTRE"),
+tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv",
+                    package = "CENTRE"),
                       sep = "", stringsAsFactors = FALSE, header = TRUE)
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                                     replicate = 1,
@@ -53,6 +58,5 @@ celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                                     tpmfile = tpmfile,
                                                     pairs = pairs)
 # Finally compute the predictions
-predictions <- centrePrediction(celltype_features,
-generic_features)
+predictions <- centrePrediction(celltype_features, generic_features)
 }

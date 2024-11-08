@@ -377,3 +377,106 @@ downloader <- function(file, method) {
   }
 }
 
+################################################################################
+# function : gene centered pairs
+################################################################################
+
+geneCenteredPairs <- function(gene){
+  ## remove the "." version id of ENSEMBL ids
+  gene$gene_id1 <- gsub("\\..*", "", gene$gene_id)
+  
+  
+  ## connect to our GENCODE v40 database to get tts of the genes
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
+                             system.file("extdata",
+                                         "Annotation.db",
+                                         package = "CENTRE"))
+  #get chromosome and tts of our genes
+  
+  query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
+                 paste0(sprintf("'%s'", gene$gene_id1), collapse = ", "), ")", sep = "")
+  gene <- RSQLite::dbGetQuery(conn, query)
+  
+  #Select all of the annotation for ccres v3
+  ccresEnhancer <- RSQLite::dbGetQuery(conn, "SELECT * FROM ccres_enhancer")
+  RSQLite::dbDisconnect(conn)
+  
+  
+  genesRange <- with(gene,
+                     GenomicRanges::GRanges(chr,
+                                            IRanges::IRanges(start = transcription_start,
+                                                             end = transcription_start),
+                                            gene_id1 = gene_id1))
+  
+  #extend the gene region 500Kb to the left of TTS and to the right
+  genesRange <- regioneR::extendRegions(genesRange,
+                                        extend.start = 500000,
+                                        extend.end = 500000)
+  
+  enhancerRange <-  with(ccresEnhancer,
+                         GenomicRanges::GRanges(V1,
+                                                IRanges::IRanges(start = new_start,
+                                                                 end = new_end),
+                                                enhancer_id = V5))
+  
+  
+  # find the enhancers that overlap the extended gene region
+  overlaps <- GenomicRanges::findOverlaps(genesRange, enhancerRange,
+                                          ignore.strand = TRUE)
+  
+  ccresOverlapping <- data.frame(gene_id1 = GenomicRanges::elementMetadata(genesRange)$gene_id1[overlaps@from],
+                                 enhancer_id = GenomicRanges::elementMetadata(enhancerRange)$enhancer_id[overlaps@to])
+  
+  return(ccresOverlapping)
+  
+}
+
+
+
+################################################################################
+# function : enhancer centered pairs
+################################################################################
+
+enhancerCenteredPairs <- function(enhancer){
+  
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
+                             system.file("extdata",
+                                         "Annotation.db",
+                                         package = "CENTRE"))
+  #get chromosome and tts of our genes
+  
+  query <- paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
+                 paste0(sprintf("'%s'", enhancer$enhancer_id), collapse = ", "), ")", sep = "")
+  enhancer <- RSQLite::dbGetQuery(conn, query)
+  
+  #Select all of the annotation for ccres v3
+  gene <- RSQLite::dbGetQuery(conn, "SELECT * FROM gencode")
+  RSQLite::dbDisconnect(conn)
+  gene$gene_id1 <- gsub("\\..*", "", gene$gene_id)
+  enhancerRange <- with(enhancer,
+                     GenomicRanges::GRanges(V1,
+                                            IRanges::IRanges(start = middle_point,
+                                                             end = middle_point),
+                                            enhancer_id = V5))
+  
+  #extend the gene region 500Kb to the left of TTS and to the right
+  enhancerRange <- regioneR::extendRegions(enhancerRange,
+                                        extend.start = 500000,
+                                        extend.end = 500000)
+  
+  genesRange <-  with(gene,
+                         GenomicRanges::GRanges(chr,
+                                                IRanges::IRanges(start = new_start,
+                                                                 end = new_end),
+                                                gene_id1 = gene_id1))
+  
+  
+  # find the enhancers that overlap the extended gene region
+  overlaps <- GenomicRanges::findOverlaps(enhancerRange,
+                                          genesRange,
+                                          ignore.strand = TRUE)
+  
+  ccresOverlapping <- data.frame(gene_id1 = GenomicRanges::elementMetadata(genesRange)$gene_id1[overlaps@to],
+                        enhancer_id = GenomicRanges::elementMetadata(enhancerRange)$enhancer_id[overlaps@from])
+  return(ccresOverlapping)
+}
