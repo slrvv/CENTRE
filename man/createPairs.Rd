@@ -27,6 +27,6 @@ of the enhancer middle point.
 ids <- as.data.frame(c("ENSG00000130203.10",
 "ENSG00000171119.3"))
 colnames(ids) <- c("gene_id") #It is important to name the column gene_id or 
-enhancer_id
+# enhancer_id
 pairs <- CENTRE::createPairs(ids)
 }

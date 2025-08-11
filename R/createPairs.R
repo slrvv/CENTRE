@@ -1,4 +1,4 @@
-#' Create Pairs
+q#' Create Pairs
 #'
 #' Creates all of the possible gene enhancer pairs at 500kb distance
 #' from the given genes transcription start sites. The pairs can be also computed

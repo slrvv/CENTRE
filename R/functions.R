@@ -352,55 +352,30 @@ createRegionsDf <- function(listProm, listEnh, pairs) {
   return(regions)
 }
 
-################################################################################
-# function : helper function to download the files needed after install
-################################################################################
 
-downloader <- function(file, method) {
-  url <- paste0("http://owww.molgen.mpg.de/~CENTRE_data/", file)
-  cat(paste0("Downloading ", file, "\n"))
-  exit <- download.file(url,
-                        destfile = paste(system.file("extdata",
-                                                     package = "CENTRE")
-                                       , file,
-                                       sep = "/") ,
-                        method = method)
-  if (exit != 0) {
-    stop(paste0("Download of ",
-                file, " failed. Non-zero exit status."))
-  }
-
-  f <- system.file("extdata", file, package = "CENTRE")
-  if (!file.exists(f)) {
-    stop(paste0("Download of ", file,
-                " failed or file was saved in the wrong directory."))
-  }
-}
 
 ################################################################################
 # function : gene centered pairs
 ################################################################################
 
 geneCenteredPairs <- function(gene){
+  
   ## remove the "." version id of ENSEMBL ids
   gene$gene_id1 <- gsub("\\..*", "", gene$gene_id)
   
   
   ## connect to our GENCODE v40 database to get tts of the genes
-  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
-                             system.file("extdata",
-                                         "Annotation.db",
-                                         package = "CENTRE"))
+  
+  ah <- AnnotationHub::AnnotationHub()
+  CENTREannotgeneDb <- ah[["AH116730"]]
+  
   #get chromosome and tts of our genes
-  
-  query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
-                 paste0(sprintf("'%s'", gene$gene_id1), collapse = ", "), ")", sep = "")
-  gene <- RSQLite::dbGetQuery(conn, query)
-  
-  #Select all of the annotation for ccres v3
-  ccresEnhancer <- RSQLite::dbGetQuery(conn, "SELECT * FROM ccres_enhancer")
-  RSQLite::dbDisconnect(conn)
-  
+  gene <- CENTREannotation::fetch_data(CENTREannotgeneDb,
+                                       columns = c("gene_id1", 
+                                                   "chr", 
+                                                   "transcription_start"), 
+                                       entries = gene$gene_id1, 
+                                       column_filter = "gene_id1")
   
   genesRange <- with(gene,
                      GenomicRanges::GRanges(chr,
@@ -413,11 +388,28 @@ geneCenteredPairs <- function(gene){
                                         extend.start = 500000,
                                         extend.end = 500000)
   
+  #Select all of the annotation for ccres v3
+  
+  CENTREannotenhDb <- ah[["AH116731"]]
+  
+  #to make the ranges that is overlapped smaller retrieve only the genes in 
+  #the same list of chromosomes as we have in the input gene dataframe
+  
+  chrList <- unique(gene$chr)
+  ccresEnhancer <- CENTREannotation::fetch_data(CENTREannotenhDb,
+                                       columns = c("enhancer_id", 
+                                                   "chr", 
+                                                   "new_start", 
+                                                   "new_end"), 
+                                       entries = chrList, 
+                                       column_filter = "chr")
+ 
+  
   enhancerRange <-  with(ccresEnhancer,
-                         GenomicRanges::GRanges(V1,
+                         GenomicRanges::GRanges(chr,
                                                 IRanges::IRanges(start = new_start,
                                                                  end = new_end),
-                                                enhancer_id = V5))
+                                                enhancer_id = enhancer_id))
   
   
   # find the enhancers that overlap the extended gene region
@@ -439,31 +431,46 @@ geneCenteredPairs <- function(gene){
 
 enhancerCenteredPairs <- function(enhancer){
   
-  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
-                             system.file("extdata",
-                                         "Annotation.db",
-                                         package = "CENTRE"))
-  #get chromosome and tts of our genes
+  #get chromosome and middle point of our enhancers
   
-  query <- paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
-                 paste0(sprintf("'%s'", enhancer$enhancer_id), collapse = ", "), ")", sep = "")
-  enhancer <- RSQLite::dbGetQuery(conn, query)
+  ah <- AnnotationHub::AnnotationHub()
+
+  CENTREannotenhDb <- ah[["AH116731"]]
   
-  #Select all of the annotation for ccres v3
-  gene <- RSQLite::dbGetQuery(conn, "SELECT * FROM gencode")
-  RSQLite::dbDisconnect(conn)
-  gene$gene_id1 <- gsub("\\..*", "", gene$gene_id)
+  enhancer <- CENTREannotation::fetch_data(CENTREannotenhDb,
+                                           columns = c("enhancer_id", "chr", "middle_point"),
+                                           entries =  enhancer$enhancer_id,
+                                           column_filter = "enhancer_id")
   enhancerRange <- with(enhancer,
-                     GenomicRanges::GRanges(V1,
-                                            IRanges::IRanges(start = middle_point,
-                                                             end = middle_point),
-                                            enhancer_id = V5))
+                        GenomicRanges::GRanges(chr,
+                                               IRanges::IRanges(start = middle_point,
+                                                                end = middle_point),
+                                               enhancer_id = enahncer_id))
   
-  #extend the gene region 500Kb to the left of TTS and to the right
+  #extend the enhancer region 500Kb to the left of middle point and to the right
   enhancerRange <- regioneR::extendRegions(enhancerRange,
-                                        extend.start = 500000,
-                                        extend.end = 500000)
+                                           extend.start = 500000,
+                                           extend.end = 500000)
   
+  #Select all of the annotation from gencode
+  CENTREannotgeneDb <- ah[["AH116730"]]
+  
+  #to make the ranges that is overlapped smaller retrieve only the genes in 
+  #the same list of chromosomes as we have in the input enhancer dataframe
+  
+  chrList <- unique(enhancer$chr)
+  gene <- CENTREannotation::fetch_data(CENTREannotgeneDb,
+                                       columns = c("gene_id", 
+                                                   "chr", 
+                                                   "new_start", 
+                                                   "new_end"), 
+                                       entries = chrList, 
+                                       column_filter = "chr")
+  
+  gene$gene_id1 <- gsub("\\..*", "", gene$gene_id)
+  
+  
+
   genesRange <-  with(gene,
                          GenomicRanges::GRanges(chr,
                                                 IRanges::IRanges(start = new_start,

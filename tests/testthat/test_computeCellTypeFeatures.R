@@ -17,7 +17,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
 
   tpmpath <- "/project/CRUP_scores/total-RNA-seq/thyroid-gland/ENCSR000AFK/thyroid-gland.tsv"
   tpmfile <-  read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
-
+  tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
   ###expected_predictions
   generic_features<- readRDS(file = system.file("extdata",
                                          "expected_generic_features.rds",
@@ -39,7 +39,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
 					                                     chr = unique(pairs$chr),
                                                pairs = pairs)
 
-
+  print(head(celltype_features))
 
   celltype_features$pair <- paste(celltype_features$enhancer_id,
                                   celltype_features$gene_id2,

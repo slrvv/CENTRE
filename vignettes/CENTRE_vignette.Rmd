@@ -15,12 +15,19 @@ vignette: |
   %\VignetteIndexEntry{Centre-vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-  
+  %\usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>")
+```
+
+
+```{r installation, eval=FALSE}
+if(!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("CENTRE")
 ```
 
 # Overview
@@ -47,8 +54,8 @@ values for all genes.
 The first time you run CENTRE you will need to download the PrecomputedData.db 
 and Annotation.db. To do this run the following: 
 
-```{r, eval=FALSE}
-CENTRE::downloadPrecomputedData(method = "wget", all = FALSE)
+```{r download-precompdata, eval=FALSE}
+downloadPrecomputedData(method = "wget", all = FALSE)
 # Make sure whatever method you use to download is available on your system
 ```
 Or download the data from http://owww.molgen.mpg.de/~CENTRE_data/PrecomputedDataLight.db
@@ -76,7 +83,7 @@ For RNA-seq data we take the mean of the TPM values over
 the replicates. 
 
 ## Step 1: Create gene enhancer pairs
-If you are in use case one you will need to use `CENTRE::createPairs()`. This
+If you are in use case one you will need to use `createPairs()`. This
 function fins all enhancers in 500kb from the transcription start site of the
 input genes and creates all possible enhancer gene pairs.
 
@@ -85,21 +92,18 @@ The output is a dataframe of two columns one with the gene ID's (without version
 identifier) and the corresponding ENCODE cCREs enhancer ID's.
 
 It also has a mode where pairs are computed from ENCODE cCREs enhancer ID's.
-```{r}
+```{r run-createpairs}
+library(CENTRE)
 ids <- as.data.frame(c("ENSG00000130203.10",
                          "ENSG00000171119.3"))
 colnames(ids) <- c("gene_id") #It is important to name the column gene_id
-pairs <- CENTRE::createPairs(ids)
-
-ids <- as.data.frame(c("ENSG00000130203.10",
-                         "ENSG00000171119.3"))
-colnames(ids) <- c("gene_id") #It is important to name the column gene_id
-pairs <- CENTRE::createPairs(genes)
-
+pairs <- createPairs(ids)
+head(pairs)
 #pairs computed from enhancer
 ids <- data.frame(c("EH38E3750708", "EH38E2776554"))
 colnames(ids) <- "enhancer_id"
-pairs_enh <- CENTRE::createPairs(ids, enhancerCentered = TRUE)
+pairs_enh <- createPairs(ids, enhancerCentered = TRUE)
+head(pairs_enh)
 ```
 
 ## Step 2: Compute Generic Features
@@ -116,9 +120,10 @@ datasets.
 - `combined_tests`: the combined p-values of all of the precomputed Wilcoxon
 tests.
 
-```{r}
+```{r computegenericfeat}
 colnames(pairs) <- c("gene_id", "enhancer_id")
-generic_features <- CENTRE::computeGenericFeatures(pairs)
+generic_features <- computeGenericFeatures(pairs)
+head(generic_features)
 ```
 
 ## Step 3: Compute Cell Type Features
@@ -175,7 +180,7 @@ Note: In this example we use data only for chromosome 19 to make it run quicker
 and make the occupy less memory. In order for CENTRE to run as intended the user
 should provide genome-wide bam files and leave `chr` parameter NULL.
 
-```{r}
+```{r computecelltypefeat}
 files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
           system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
           system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam", package = "CENTRE"))
@@ -194,13 +199,14 @@ tpmfile <- read.table(system.file("extdata/example",
                        header = TRUE, sep = "\t")
 
 
-celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
-                                    replicate = 1,
-                                    input.free = FALSE,
-                                    cores = 1,
-                                    sequencing = "single",
-                                    tpmfile = tpmfile,
-                                    pairs = pairs)
+celltype_features <- computeCellTypeFeatures(metaData,
+                                             replicate = 1,
+                                             input.free = FALSE,
+                                             cores = 1,
+                                             sequencing = "single",
+                                             tpmfile = tpmfile,
+                                             pairs = pairs)
+head(celltype_features)
 
 ```
 
@@ -216,8 +222,9 @@ by a `_` of the corresponding pair and the label and probability for each of the
 
 ```{r}
 # Finally compute the predictions
-predictions <- CENTRE::centrePrediction(celltype_features,
+predictions <- centrePrediction(celltype_features,
                                   generic_features)
+head(predictions)
 ```
 
 ```{r}
