@@ -25,6 +25,9 @@ q#' Create Pairs
 #' @importFrom IRanges IRanges
 #' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
 #' @importFrom regioneR extendRegions
+#' @importFrom AnnotationHub AnnotationHub
+#' @importFrom CENTREannotation fetch_data
+#' @importClassesFrom CENTREannotation CENTREannotDb
 createPairs <- function(ids, enhancerCentered = FALSE) {
   startTime <- Sys.time()
   

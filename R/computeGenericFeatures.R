@@ -24,7 +24,12 @@
 #' @export
 #' @import utils
 #' @importFrom metapod combineParallelPValues
-#' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
+#' @importFrom AnnotationHub AnnotationHub
+#' @importFrom CENTREannotation fetch_data
+#' @importClassesFrom CENTREannotation CENTREannotDb
+#' @importFrom ExperimentHub ExperimentHub
+#' @importFrom CENTREprecomputed fetch_data
+#' @importClassesFrom CENTREprecomputed CENTREprecompDb
 computeGenericFeatures <- function(pairs) {
   startTime <- Sys.time()
   ## Pre-eliminary checks and computations

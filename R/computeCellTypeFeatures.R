@@ -76,7 +76,9 @@
 #'@importFrom GenomicRanges GRanges findOverlaps elementMetadata
 #'@importFrom IRanges IRanges
 #'@importFrom stats reshape
-
+#'@importFrom AnnotationHub AnnotationHub
+#'@importFrom CENTREannotation fetch_data
+#'@importClassesFrom CENTREannotation CENTREannotDb
 computeCellTypeFeatures <- function(metaData,
                                     replicate,
                                     input.free = FALSE,
@@ -97,9 +99,9 @@ computeCellTypeFeatures <- function(metaData,
                                  genome = "hg38",
                                  sequencing = sequencing,
                                  chroms = chr,
-                                 C = cores)
+                                 BPPARAM = BiocParallel::MulticoreParam(workers = cores))
   #Get CRUP enhancer probabilities
-  crupScores <- crupR::getEnhancers(data = normalized, C = cores, all = TRUE)
+  crupScores <- crupR::getEnhancers(data = normalized, all = TRUE)
   crupScores <- crupScores$D
   ## check what parts of this are necessary
   colnames(pairs) <- c("gene_id2", "enhancer_id")

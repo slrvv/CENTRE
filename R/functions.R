@@ -59,33 +59,40 @@ check_file <- function(f) {
 ###############################################################################
 computeDistances <- function(x) {
   # connect to annotation dataBase
-  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
-                              system.file("extdata",
-                             "Annotation.db",
-                             package = "CENTRE"))
+  ah <- AnnotationHub::AnnotationHub()
+  CENTREannotgeneDb <- ah[["AH116730"]]
+  CENTREannotenhDb <- ah[["AH116731"]]
   #get chromosome and tts of our genes
-  query <- paste("SELECT  gene_id1, chr, transcription_start FROM gencode WHERE gene_id1 in (",
-  paste0(sprintf("'%s'", x$gene_id2), collapse = ", "), ")", sep = "")
-  gencode <- RSQLite::dbGetQuery(conn, query)
+  gencode <- CENTREannotation::fetch_data(CENTREannotgeneDb,
+                                       columns = c("gene_id1", 
+                                                   "chr", 
+                                                   "transcription_start"), 
+                                       entries = x$gene_id2, 
+                                       column_filter = "gene_id1")
+
   #get chr and middle point of enhancers
-  query_enh <-  paste("SELECT  V5, V1, middle_point FROM ccres_enhancer WHERE V5 in (",
-  paste0(sprintf("'%s'", x$enhancer_id), collapse = ", "), ")", sep = "")
-  ccres_enhancer <- RSQLite::dbGetQuery(conn, query_enh)
-  RSQLite::dbDisconnect(conn)
+  ccres_enhancer <- CENTREannotation::fetch_data(CENTREannotenhDb, 
+                                                columns = c("enhancer_id", 
+                                                   "chr", 
+                                                   "middle_point"), 
+                                                entries = x$enhancer_id, 
+                                                column_filter = "enhancer_id")
   #Get the chr gene_id and transcription_start from gencode annotation
   #Getting the chrosomes and the middle points for the provided enhancers
   result <- merge(x,
-                  ccres_enhancer[, c("V1", "V5", "middle_point")],
+                  ccres_enhancer[, c("chr", "enhancer_id", "middle_point")],
                    by.x = "enhancer_id",
-                   by.y = "V5") #change V1 and V5 to more meaningful names
+                   by.y = "enhancer_id") 
+
   #Getting the chrosomes and transcription start sites for the provided genes
   result <- merge(result,
                   gencode[, c("chr", "gene_id1", "transcription_start")],
                   by.x = "gene_id2",
                   by.y = "gene_id1")
+  
 
   cat("Removing all gene enhancer pairs that are not in the same chromosome.\n")
-  result <- result[(result$V1 == result$chr), ]
+  result <- result[(result$chr.x == result$chr.y), ]
   result$distance <- abs(result$middle_point - result$transcription_start)
   return(result)
 }
@@ -273,15 +280,6 @@ compute_crup_reg_distance_prom <- function(input, prediction, between_ranges) {
   return(input)
 }
 
-################################################################################
-# function: Makes the query for Precomputed.db
-################################################################################
-
-queryMaker <- function(table, feature, x) {
-  query <- paste("SELECT ", feature, ", pair FROM ", table, " WHERE pair in (",
-                paste0(sprintf("'%s'", x$pair), collapse = ", "), ")", sep = "")
-  return(query)
-}
 
 ################################################################################
 # function: gets the precomputed values of the Wilcoxon tests from
@@ -290,10 +288,13 @@ queryMaker <- function(table, feature, x) {
 
 getPrecomputedValues <- function(table, feature, x, conn) {
 
-  query <- queryMaker(table, feature, x)
-
-
-  df_return <- RSQLite::dbGetQuery(conn, query)
+  eh <- ExperimentHub::ExperimentHub()
+  precompDb <- eh[["EH9540"]]
+  df_return <- CENTREprecomputed::fetch_data(precompDb, 
+                                            table = table, 
+                                            columns = c("pair", feature), 
+                                            entries = x$pair, 
+                                            column_filter = "pair")
   rownames(df_return) <- df_return$pair
   df_return$pair <- NULL
   return(df_return)
@@ -316,29 +317,38 @@ get_rnaseq <- function(x, tpmfile) {
 
 createRegionsDf <- function(listProm, listEnh, pairs) {
 
-  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
-                             system.file("extdata",
-                                         "Annotation.db",
-                                         package = "CENTRE"))
-  #get chromosome tts new_start and new_end of input genes
-  query <- paste("SELECT  gene_id1, chr, transcription_start, new_start, new_end FROM gencode WHERE gene_id1 in (",
-                 paste0(sprintf("'%s'", listProm$gene_id2), collapse = ", "),
-                 ")", sep = "")
-  regionsProm <- RSQLite::dbGetQuery(conn, query)
+  ah <- AnnotationHub::AnnotationHub
+  CENTREannotgeneDb <- ah[["AH116730"]]
+  CENTREannotenhDb <- ah[["AH116731"]]
+
+  regionsProm <- CENTREannotation::fetch_data(CENTREannotgeneDb,
+                                       columns = c("gene_id1", 
+                                                   "chr", 
+                                                   "transcription_start", 
+                                                   "new_start", 
+                                                   "new_end"), 
+                                       entries = listProm$gene_id2, 
+                                       column_filter = "gene_id1")
   #get chr middle new_start new_end point of input enhancers
   queryEnh <-  paste("SELECT  V5, V1, middle_point, new_start, new_end FROM ccres_enhancer WHERE V5 in (",
                      paste0(sprintf("'%s'", listEnh$enhancer_id),
                             collapse = ", "),
                      ")", sep = "")
-  regionsEnhancer <- RSQLite::dbGetQuery(conn, queryEnh)
-  RSQLite::dbDisconnect(conn)
+  regionsEnhancer <- CENTREannotation::fetch_data(CENTREannotenhDb,
+                                       columns = c("enhancer_id", 
+                                                   "chr", 
+                                                   "middle_point", 
+                                                   "new_start", 
+                                                   "new_end"), 
+                                       entries = listEnh$enhancer_id, 
+                                       column_filter = "enhancer_id")
 
   ##create a dataframe with the middle point newstart and newend for each of the
   ##pairs
   regions <- merge(pairs,
                    regionsEnhancer,
                    by.x = "enhancer_id",
-                   by.y = "V5",
+                   by.y = "enhancer_id",
                    all.x = TRUE)
 
   regions <- merge(regions,
@@ -367,6 +377,7 @@ geneCenteredPairs <- function(gene){
   ## connect to our GENCODE v40 database to get tts of the genes
   
   ah <- AnnotationHub::AnnotationHub()
+  
   CENTREannotgeneDb <- ah[["AH116730"]]
   
   #get chromosome and tts of our genes
@@ -441,11 +452,12 @@ enhancerCenteredPairs <- function(enhancer){
                                            columns = c("enhancer_id", "chr", "middle_point"),
                                            entries =  enhancer$enhancer_id,
                                            column_filter = "enhancer_id")
+
   enhancerRange <- with(enhancer,
                         GenomicRanges::GRanges(chr,
                                                IRanges::IRanges(start = middle_point,
                                                                 end = middle_point),
-                                               enhancer_id = enahncer_id))
+                                               enhancer_id = enhancer_id))
   
   #extend the enhancer region 500Kb to the left of middle point and to the right
   enhancerRange <- regioneR::extendRegions(enhancerRange,

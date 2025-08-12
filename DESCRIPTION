@@ -21,6 +21,8 @@ LazyData: false
 Imports: 
     xgboost,
     crupR,
+    CENTREprecomputed, 
+    CENTREannotation,
     metapod,
     RSQLite,
     GenomicRanges,
@@ -29,7 +31,7 @@ Imports:
     utils,
     stats
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 4.4.0)
 Suggests: 
