@@ -5,7 +5,7 @@ q#' Create Pairs
 #' from enhancers, in that mode we collect all gene enhancer pairs at 500kb distance
 #' of the enhancer middle point.
 #'
-#' @param ids One column dataframe with gene ENSEMBL id's or enhancer cCREs ids
+#' @param ids Vector with gene ENSEMBL id's or enhancer cCREs ids
 #' @param enhancerCentered Boolean value. If true the pairs are computed from 
 #' enhancers. In the default setting (false) pairs are computed from genes.
 #' @return dataframe with two columns the ENSEMBL id's without their version and
@@ -14,34 +14,32 @@ q#' Create Pairs
 #'
 #' @examples
 #' #Create gene enhancer pairs
-#' ids <- as.data.frame(c("ENSG00000130203.10",
-#' "ENSG00000171119.3"))
-#' colnames(ids) <- c("gene_id") #It is important to name the column gene_id or 
-#' # enhancer_id
+#' ids <- c("ENSG00000130203.10",
+#' "ENSG00000171119.3")
 #' pairs <- CENTRE::createPairs(ids)
 #' @export
 #' @import utils
 #' @importFrom GenomicRanges GRanges findOverlaps
 #' @importFrom IRanges IRanges
-#' @importFrom RSQLite dbConnect dbGetQuery dbDisconnect
 #' @importFrom regioneR extendRegions
 #' @importFrom AnnotationHub AnnotationHub
 #' @importFrom CENTREannotation fetch_data
 #' @importClassesFrom CENTREannotation CENTREannotDb
 createPairs <- function(ids, enhancerCentered = FALSE) {
   startTime <- Sys.time()
-  
+
+  if(missing(ids)){
+    stop("Need to provide a vector of SCREEN or ENSEMBL ID's")
+  }
   if (enhancerCentered == TRUE){
-    stopifnot("The column needs to be named enhancer_id" =
-                any(names(ids) == "enhancer_id"))
-    cat("Pairs are computed from the enhancer IDs\n")
+    cat("Pairs are being computed from the enhancer IDs\n")
+    ids <- data.frame(enhancer_id = ids)
     ccresOverlapping <- enhancerCenteredPairs(ids)
    
   } else {
     #check that the user named the column correctly
-    stopifnot("The column needs to be named gene_id" =
-                any(names(ids) == "gene_id"))
-    cat("Pairs are computed from the gene IDs\n")
+    cat("Pairs are being computed from the gene IDs\n")
+    ids <- data.frame(gene_id = ids)
     ccresOverlapping <- geneCenteredPairs(ids)
     
   }

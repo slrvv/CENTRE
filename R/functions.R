@@ -16,45 +16,6 @@ endPart <- function() {
 }
 
 ###############################################################################
-# lookup table: end position of the chromosomes in hg38 of human genome
-###############################################################################
-
-chromosomes <- data.frame(
-  chr = c("chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8",
-         "chr9", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15",
-         "chr16", "chr17", "chr18", "chr19", "chr20", "chr21", "chr22",
-         "chrX", "chrY"),
-  position = c(248956422, 242193529, 198295559, 190214555, 181538259, 170805979,
-               159345973, 145138636, 138394717, 133797422, 135086622, 133275309,
-               114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
-               58617616, 64444167, 46709983, 50818468, 156040895, 57227415)
-)
-
-
-###############################################################################
-# function: convert factor type columns into character type
-###############################################################################
-unfactorize <- function(df) {
-  for (i in which(vapply(df, class) == "factor")) {
-    df[[i]] <- as.character(df[[i]])
-  }
-
-  return(df)
-}
-
-
-###############################################################################
-# function: check if file exists
-###############################################################################
-
-check_file <- function(f) {
-  if (!(file.exists(f))) {
-    message <- paste0("File ", f, " does not exist.\n")
-    stop(message)
-  }
-}
-
-###############################################################################
 # function: get the distance from gene to enhancer
 ###############################################################################
 computeDistances <- function(x) {
@@ -67,9 +28,8 @@ computeDistances <- function(x) {
                                        columns = c("gene_id1", 
                                                    "chr", 
                                                    "transcription_start"), 
-                                       entries = x$gene_id2, 
+                                       entries = x$gene_id1, 
                                        column_filter = "gene_id1")
-
   #get chr and middle point of enhancers
   ccres_enhancer <- CENTREannotation::fetch_data(CENTREannotenhDb, 
                                                 columns = c("enhancer_id", 
@@ -77,22 +37,22 @@ computeDistances <- function(x) {
                                                    "middle_point"), 
                                                 entries = x$enhancer_id, 
                                                 column_filter = "enhancer_id")
+  
   #Get the chr gene_id and transcription_start from gencode annotation
   #Getting the chrosomes and the middle points for the provided enhancers
-  result <- merge(x,
-                  ccres_enhancer[, c("chr", "enhancer_id", "middle_point")],
-                   by.x = "enhancer_id",
-                   by.y = "enhancer_id") 
+  result <- dplyr::inner_join(x = x,
+                  y = ccres_enhancer[, c("chr", "enhancer_id", "middle_point")],
+                  by = dplyr::join_by("enhancer_id" == "enhancer_id")) 
 
   #Getting the chrosomes and transcription start sites for the provided genes
-  result <- merge(result,
-                  gencode[, c("chr", "gene_id1", "transcription_start")],
-                  by.x = "gene_id2",
-                  by.y = "gene_id1")
+  result <- dplyr::inner_join(x = result,
+                  y = gencode[, c("chr", "gene_id1", "transcription_start")],
+                  by = dplyr::join_by("gene_id1" == "gene_id1"),
+                  suffix = c(".enh", ".gene")) 
   
 
-  cat("Removing all gene enhancer pairs that are not in the same chromosome.\n")
-  result <- result[(result$chr.x == result$chr.y), ]
+  message("Removing all gene enhancer pairs that are not in the same chromosome.\n")
+  result <- result[(result$chr.enh == result$chr.gene), ]
   result$distance <- abs(result$middle_point - result$transcription_start)
   return(result)
 }
@@ -286,7 +246,7 @@ compute_crup_reg_distance_prom <- function(input, prediction, between_ranges) {
 # PrecomputedData.db
 ################################################################################
 
-getPrecomputedValues <- function(table, feature, x, conn) {
+getPrecomputedValues <- function(table, feature, x) {
 
   eh <- ExperimentHub::ExperimentHub()
   precompDb <- eh[["EH9540"]]
@@ -295,8 +255,6 @@ getPrecomputedValues <- function(table, feature, x, conn) {
                                             columns = c("pair", feature), 
                                             entries = x$pair, 
                                             column_filter = "pair")
-  rownames(df_return) <- df_return$pair
-  df_return$pair <- NULL
   return(df_return)
 }
 
@@ -345,17 +303,14 @@ createRegionsDf <- function(listProm, listEnh, pairs) {
 
   ##create a dataframe with the middle point newstart and newend for each of the
   ##pairs
-  regions <- merge(pairs,
-                   regionsEnhancer,
-                   by.x = "enhancer_id",
-                   by.y = "enhancer_id",
-                   all.x = TRUE)
+  regions <- dplyr::left_join(x = pairs,
+                   y = regionsEnhancer,
+                   by = c("enhancer_id" == "enhancer_id"))
 
-  regions <- merge(regions,
-                   regionsProm,
-                   by.x = "gene_id2",
-                   by.y = "gene_id1",
-                   all.x = TRUE)
+  regions <- dplyr::left_join(x = regions,
+                   y = regionsProm,
+                   by = c("gene_id2" == "gene_id1"),
+                   suffix = c(".enh", ".gene"))
 
   #add distance value to sort start and end for regulatory distance calculations.
   regions$distance <- regions$middle_point - regions$transcription_start

@@ -5,76 +5,83 @@
 #' @param pairs Dataframe with the gene-enhancer pairs of interest
 #'
 #' @return
-#' A table containting the following computed features :
+#' A data frame containting the following computed features :
 #'* distance: Distance between gene and enhancer
 #'* combined_tests: Combined value of the Wilcoxon tests (CAGE, DNase
 #'expression, CRUP expression and DNase DNase)
-#'* crup_COR: CRUP correlation scores
+#'* crup_cor: CRUP correlation scores
 #'
 #' @examples
 #' #Create gene enhancer pairs
-#' genes <- as.data.frame(c("ENSG00000130203.10",
-#' "ENSG00000280087.1"))
-#' colnames(genes) <- c("gene_id") #It is important to name the column gene_id
+#' genes <-c("ENSG00000130203.10",
+#' "ENSG00000280087.1") 
 #' pairs <- CENTRE::createPairs(genes)
-#'
-#' #Compute generic features
-#' colnames(pairs) <- c("gene_id", "enhancer_id")
 #' generic_features <- CENTRE::computeGenericFeatures(pairs)
 #' @export
 #' @import utils
-#' @importFrom metapod combineParallelPValues
 #' @importFrom AnnotationHub AnnotationHub
 #' @importFrom CENTREannotation fetch_data
 #' @importClassesFrom CENTREannotation CENTREannotDb
 #' @importFrom ExperimentHub ExperimentHub
 #' @importFrom CENTREprecomputed fetch_data
 #' @importClassesFrom CENTREprecomputed CENTREprecompDb
+#' @importFrom dplyr inner_join left_join join_by %>% rename select
 computeGenericFeatures <- function(pairs) {
   startTime <- Sys.time()
-  ## Pre-eliminary checks and computations
-  pairs$gene_id2 <- gsub("\\..*", "", pairs[, 1])
+  message("Computing CENTRE generic features")
+  # Pre-eliminary checks and computations
+  if(missing(pairs)){
+    stop("Need to provide a dataframe of enhancer and gene pairs")
+  }
+
+  needed_names <- c("gene_id1", "enhancer_id")
+  if (!all(needed_names %in% colnames(pairs))) {
+    missing_cols <- setdiff(needed_names, colnames(pairs))
+    stop("Error: The following expected columns are missing: ",
+    paste(missing_cols, collapse = ", "))
+
+  }
+
+  ## remove version identifier just in case user provided it.
+  pairs$gene_id1 <- gsub("\\..*", "", pairs$gene_id1)
   ## Computing the distance features
-  startPart("Computing distance features")
-  colnames(pairs) <- c("gene_id", "enhancer_id", "gene_id2")
+  message("Computing distance features")
+
   featuresDistances <- computeDistances(pairs)
 
-  cat("Removing pairs with distance over 500 Kb")
+  message("Removing pairs with distance over 500 Kb")
   featuresDistances <- featuresDistances[featuresDistances$distance
                                            <= 500000, ]
-  endPart()
-
   ## Getting the values for the Wilcoxon tests and the CRUP correlations
-  startPart("Get Wilcoxon tests and CRUP correlations")
+  message("Get Wilcoxon tests and CRUP correlations")
 
   featuresDistances$pair <- paste(featuresDistances$enhancer_id,
-                                   featuresDistances$gene_id2,
+                                   featuresDistances$gene_id1,
                                    sep = "_")
   #connect to the precomputed values database
-  conn <- RSQLite::dbConnect(RSQLite::SQLite(),
-                             system.file("extdata",
-                                         "PrecomputedDataLight.db",
-                                         package = "CENTRE"))
-  
+
   combinedTestDf <- getPrecomputedValues("combinedTestData",
                                          "combined_tests",
-                                         featuresDistances,
-                                         conn)
+                                         featuresDistances)
   crupCorDf <- getPrecomputedValues("crup_cor",
                                     "cor_CRUP",
-                                    featuresDistances,
-                                    conn)
-  RSQLite::dbDisconnect(conn)
-  featuresDistances$combined_tests <- combinedTestDf[featuresDistances$pair, 1]
-
-  featuresDistances$crup_cor <- crupCorDf[featuresDistances$pair, 1]
-
-  ## Return the table of features
-  featuresGeneric <- featuresDistances[, c("gene_id2", "enhancer_id",
-                                         "distance", "crup_cor",
-                                         "combined_tests")]
+                                    featuresDistances)
+  
+  # join all the data into one dataframe
+  featuresGeneric <- dplyr::left_join(x = featuresDistances,
+                                      y = combinedTestDf, 
+                                      by = dplyr::join_by(pair)
+  )
+  featuresGeneric <- dplyr::left_join(x = featuresGeneric,
+                                      y = crupCorDf, 
+                                      by = dplyr::join_by(pair)
+  ) %>% dplyr::rename(crup_cor = cor_CRUP) %>% dplyr::select(gene_id1, 
+                                              enhancer_id, 
+                                              distance, 
+                                              crup_cor, 
+                                              combined_tests)
 
   featuresGeneric[is.na(featuresGeneric)] <- 0 ##NA values
-  cat(paste0("time: ", format(Sys.time() - startTime), "\n"))
+  message(paste0("time: ", format(Sys.time() - startTime), "\n"))
   return(featuresGeneric)
 }
