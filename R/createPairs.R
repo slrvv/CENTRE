@@ -32,18 +32,18 @@ createPairs <- function(ids, enhancerCentered = FALSE) {
     stop("Need to provide a vector of SCREEN or ENSEMBL ID's")
   }
   if (enhancerCentered == TRUE){
-    cat("Pairs are being computed from the enhancer IDs\n")
+    message("Computing pairs from the enhancer IDs\n")
     ids <- data.frame(enhancer_id = ids)
     ccresOverlapping <- enhancerCenteredPairs(ids)
    
   } else {
     #check that the user named the column correctly
-    cat("Pairs are being computed from the gene IDs\n")
+    message("Computing Pairs from gene IDs...")
     ids <- data.frame(gene_id = ids)
     ccresOverlapping <- geneCenteredPairs(ids)
     
   }
   
-  cat(paste0("time: ", format(Sys.time() - startTime), "\n"))
+  message(paste0("time: ", format(Sys.time() - startTime), "\n"))
   return(ccresOverlapping)
 }

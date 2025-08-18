@@ -10,12 +10,12 @@ computeGenericFeatures(pairs)
 \item{pairs}{Dataframe with the gene-enhancer pairs of interest}
 }
 \value{
-A table containting the following computed features :
+A data frame containting the following computed features :
 \itemize{
 \item distance: Distance between gene and enhancer
 \item combined_tests: Combined value of the Wilcoxon tests (CAGE, DNase
 expression, CRUP expression and DNase DNase)
-\item crup_COR: CRUP correlation scores
+\item crup_cor: CRUP correlation scores
 }
 }
 \description{
@@ -23,12 +23,8 @@ Computes the generic features needed by CENTRE to make predictions
 }
 \examples{
 #Create gene enhancer pairs
-genes <- as.data.frame(c("ENSG00000130203.10",
-"ENSG00000280087.1"))
-colnames(genes) <- c("gene_id") #It is important to name the column gene_id
+genes <-c("ENSG00000130203.10",
+"ENSG00000280087.1") 
 pairs <- CENTRE::createPairs(genes)
-
-#Compute generic features
-colnames(pairs) <- c("gene_id", "enhancer_id")
 generic_features <- CENTRE::computeGenericFeatures(pairs)
 }

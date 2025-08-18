@@ -2,6 +2,7 @@
 test_that("compute generic feature function runs as expected", {
   ##test errors are raised
   testthat::expect_error(computeGenericFeatures())
+  
   error_dat <- data.frame(gene_id = c("ENSG00000059728.6"), 
                           enh_id = c("EH38E3350767"))
   testthat::expect_error(computeGenericFeatures(error_dat))
@@ -10,14 +11,17 @@ test_that("compute generic feature function runs as expected", {
   input <- readRDS(file = system.file("extdata",
                                       "input_generic_features.rds",
                                       package = "CENTRE"))
+  #rename the same dataframe used for createPairs for the sake of storing less
+  #data
+  colnames(input) <- c("gene_id1", "enhancer_id")
 
   ##Expected result for this function
   expected <- readRDS(file = system.file("extdata",
                                          "expected_generic_features.rds",
                                          package = "CENTRE"))
 
-  ## gen features with all of the input
-  colnames(input) <- c("gene_id1", "enhancer_id")
+  ## generate features with all of the input
+  
   pred <- computeGenericFeatures(input)
 
   pred$pair <- paste(pred$enhancer_id,
@@ -29,11 +33,13 @@ test_that("compute generic feature function runs as expected", {
   ##ordered for comparison
   expected <- expected[order(expected$pair), ]
   pred <- pred[order(pred$pair), ]
+  
   ## pairs are unique and the dimensions ob the returned dataset are the expected ones
   testthat::expect_equal(length(unique(pred$pair)), nrow(pred))
   testthat::expect_equal(dim(pred), c(19,6))
   #columns return expected values
-  testthat::expect_equal(pred$crup_cor, expected$crup_cor[,1])
+  
+  testthat::expect_equal(pred$crup_cor, expected$crup_cor)
   testthat::expect_equal(pred$distance, abs(expected$distance))
   testthat::expect_equal(pred$combined_tests,
                          expected$combined_tests,
@@ -60,7 +66,7 @@ test_that("compute generic feature function runs as expected", {
                           dplyr::filter(gene_id1 == "ENSG00000059728") %>% 
                           dplyr::select(crup_cor)
   crup_cor_expected <- expected %>% 
-                          dplyr::filter(gene_id2 == "ENSG00000059728") %>% 
+                          dplyr::filter(gene_id1 == "ENSG00000059728") %>% 
                           dplyr::select(crup_cor) 
   combined_test_pred1 <- pred1 %>% 
                           dplyr::filter(gene_id1 == "ENSG00000059728") %>% 
@@ -69,17 +75,17 @@ test_that("compute generic feature function runs as expected", {
                           dplyr::filter(gene_id1 == "ENSG00000059728") %>% 
                           dplyr::select(combined_tests)
   combined_test_expected <- expected %>% 
-                          dplyr::filter(gene_id2 == "ENSG00000059728") %>% 
+                          dplyr::filter(gene_id1 == "ENSG00000059728") %>% 
                           dplyr::select(combined_tests)
 
   testthat::expect_equal(crup_cor_pred1$crup_cor,
-                         crup_cor_expected$crup_cor[,1])
+                         crup_cor_expected$crup_cor)
 
   testthat::expect_equal(combined_test_pred1,
                          combined_test_expected)
 
   testthat::expect_equal(crup_cor_pred2$crup_cor,
-                         crup_cor_expected$crup_cor[,1])
+                         crup_cor_expected$crup_cor)
 
   testthat::expect_equal(combined_test_pred2, 
                         combined_test_expected)

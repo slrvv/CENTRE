@@ -79,6 +79,8 @@
 #'@importFrom AnnotationHub AnnotationHub
 #'@importFrom CENTREannotation fetch_data
 #'@importClassesFrom CENTREannotation CENTREannotDb
+#'@importFrom dplyr left_join join_by inner_join
+#'@importFrom BiocParallel MulticoreParam
 computeCellTypeFeatures <- function(metaData,
                                     replicate,
                                     input.free = FALSE,
@@ -89,7 +91,7 @@ computeCellTypeFeatures <- function(metaData,
                                     pairs) {
   startTime <- Sys.time()
   ## Computing the crup scores
-  startPart("Computing CRUP score features")
+  message("Computing CRUP score features")
   ## Calling normalization step only on the chromosomes we have
   normalized <- crupR::normalize(metaData = metaData,
                                  condition = 1,
@@ -102,113 +104,36 @@ computeCellTypeFeatures <- function(metaData,
                                  BPPARAM = BiocParallel::MulticoreParam(workers = cores))
   #Get CRUP enhancer probabilities
   crupScores <- crupR::getEnhancers(data = normalized, all = TRUE)
-  crupScores <- crupScores$D
-  ## check what parts of this are necessary
-  colnames(pairs) <- c("gene_id2", "enhancer_id")
-  listEnh <- as.data.frame(unique(pairs$enhancer_id))
-  colnames(listEnh) <- c("enhancer_id")
-  listProm <- as.data.frame(unique(pairs$gene_id2))
-  colnames(listProm) <- c("gene_id2")
+  listEnh <- unique(pairs$enhancer_id)
+  listProm <- unique(pairs$gene_id1)
   #Get Gencode and CCRes anntotations for the input genes and enhancers
   regions <- createRegionsDf(listProm, listEnh, pairs)
-  pairs$pair <- paste(pairs$enhancer_id, pairs$gene_id2, sep = "_")
+  pairs$pair <- paste(pairs$enhancer_id, pairs$gene_id1, sep = "_")
 
-  cat("Getting the CRUP-EP scores for enhancer, promoter and the regulatory
-      distance\n")
-  #Crup enhancer scores for enhancer
-  crupEPenh <- compute_crup_enhancer(regions,
-                                     crupScores)
-  crupFeatures <- merge(pairs,
-                        crupEPenh,
-                        by.x = "enhancer_id",
-                        by.y = "enhancer_id",
-                        all.x = TRUE)
+  message(paste0("Getting the CRUP-EP scores for enhancer, promoter and the",
+                 "\n",
+                 "regulatory distance..."))
 
-  #CRUP enhancer scores for promoter
-  crupEPprom <- compute_crup_promoter(regions,
-                                      crupScores)
-  crupFeatures <- merge(crupFeatures,
-                        crupEPprom,
-                        by.x = "gene_id2",
-                        by.y = "gene_id2",
-                        all.x = TRUE)
+  crupEPFeatures <- getEPFeatures(regions, crupScores, pairs)
 
-  #create the between_ranges objects that is used for the distance calculations
-  betweenRanges <- createBetweenRanges(regions)
-  crupFeatures <- compute_crup_reg_distance_enh(crupFeatures,
-                                                crupScores,
-                                                betweenRanges)
-  ##Get CRUP promoter probabilities
+  
+  message(paste0("Getting the CRUP-PP scores for enhancer, promoter and the",
+                 "\n",
+                 "regulatory distance..."))
 
+  #Crup promoter scores for distance
   # Compute the promoter probability from probA and probE
   # In CRUP probA is the probability of a region being an active reg. element
   # probE is the probability of a region being an active enhancer
   crupScores$probP <- crupScores$probA * (1 - crupScores$probE)
+  crupFeatures <- getPPFeatures(regions, crupScores, crupEPFeatures)
 
-  cat("Getting the CRUP-PP scores for enhancer")
+  message("Getting the TPM values")
+  featuresTableAll <- getRNAseq(crupFeatures, tpmfile)
 
-  #Crup promoter scores for enhancer
-  crupPPenh <- compute_crup_enhancer(regions,
-                                       crupScores,
-                                       promprob = TRUE)
+  featuresTableAll <- reformatDf(featuresTableAll)
 
-  crupFeatures <- merge(crupFeatures,
-                        crupPPenh,
-                        by.x = "enhancer_id",
-                        by.y = "enhancer_id",
-                        all.x = TRUE)
-
-  #Crup promoter scores for promoter
-  crupPPprom <- compute_crup_promoter(regions,
-                                      crupScores,
-                                      promprob = TRUE)
-  crupFeatures <- merge(crupFeatures,
-                        crupPPprom,
-                        by.x = "gene_id2",
-                        by.y = "gene_id2",
-                        all.x = TRUE)
-
-  #Crup promoter scores for distance
-  crupFeatures <- compute_crup_reg_distance_prom(crupFeatures,
-                                                 crupScores,
-                                                 betweenRanges)
-
-  endPart()
-
-  startPart("Getting the TPM values")
-  features_table_all <- get_rnaseq(crupFeatures, tpmfile)
-
-  features_table_all[is.na(features_table_all)] <- 0
-  features_table_all <- features_table_all[, c("gene_id2",
-                                               "enhancer_id",
-                                               "EP_prob_enh.1",
-                                               "EP_prob_enh.2",
-                                               "EP_prob_enh.3",
-                                               "EP_prob_enh.4",
-                                               "EP_prob_enh.5",
-                                               "EP_prob_gene.1",
-                                               "EP_prob_gene.2",
-                                               "EP_prob_gene.3",
-                                               "EP_prob_gene.4",
-                                               "EP_prob_gene.5",
-                                               "reg_dist_enh",
-                                               "norm_reg_dist_enh",
-                                               "PP_prob_enh.1",
-                                               "PP_prob_enh.2",
-                                               "PP_prob_enh.3",
-                                               "PP_prob_enh.4",
-                                               "PP_prob_enh.5",
-                                               "PP_prob_gene.1",
-                                               "PP_prob_gene.2",
-                                               "PP_prob_gene.3",
-                                               "PP_prob_gene.4",
-                                               "PP_prob_gene.5",
-                                               "reg_dist_prom",
-                                               "norm_reg_dist_prom",
-                                               "TPM")]
-
-  cat(paste0("time: ", format(Sys.time() - startTime), "\n"))
-  endPart()
-  return(features_table_all)
+  message(paste0("time: ", format(Sys.time() - startTime), "\n"))
+  return(featuresTableAll)
 
 }

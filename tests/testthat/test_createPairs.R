@@ -1,25 +1,34 @@
 #Test the createPairs function
 test_that("createPairs() runs as expected", {
-  benchmark <- readRDS(file= system.file("extdata",
+  benchmarkPairsGenes <- readRDS(file= system.file("extdata",
                                          "input_generic_features.rds",
                                          package = "CENTRE"))
-  benchmark2 <- readRDS(file= system.file("extdata",
+
+  benchmarkPairsEnh <- readRDS(file= system.file("extdata",
                                           "output_enh_pairs.rds",
                                           package = "CENTRE"))
-  genes <- benchmark[, 1]
-  pair_data <- createPairs(genes)
+  genes <- benchmarkPairsGenes$gene_id
+  
+  pairComp <- createPairs(genes)
 
-  pair_data$pair <- paste(pair_data$enhancer_id, pair_data$gene_id1, sep = "_")
-  benchmark$pair <- paste(benchmark[,2], benchmark[,1], sep = "_")
+  pairComp$pair <- paste(pairComp$enhancer_id, pairComp$gene_id1, sep = "_")
+  benchmarkPairsGenes$pair <- paste(benchmarkPairsGenes$enhancer_id, 
+                                    benchmarkPairsGenes$gene_id,
+                                    sep = "_")
 
   #checking there are no duplicate pairs being returned
-  testthat::expect_equal(length(unique(pair_data$pair)), nrow(pair_data))
+  testthat::expect_equal(length(unique(pairComp$pair)), nrow(pairComp))
+
 
   #check that the number of columns is correct
-  testthat::expect_equal(ncol(pair_data), 3)
+  testthat::expect_equal(ncol(pairComp), 3)
   
   enhancer <- c("EH38E3750708", "EH38E2776554")
-  pair_enh <- createPairs(enhancer, enhancerCentered = TRUE)
-  testthat::expect_equal(pair_enh, benchmark2)
+  pairCompEnh <- createPairs(enhancer, enhancerCentered = TRUE)
+  #ordering for comparison
+  benchmarkPairsEnh <- benchmarkPairsEnh[order(benchmarkPairsEnh$gene_id1),]
+  pairCompEnh <- pairCompEnh[order(pairCompEnh$gene_id1),]
+  testthat::expect_equal(pairCompEnh, benchmarkPairsEnh)
+  #test that it throws error when it should
   testthat::expect_error(createPairs())
 })

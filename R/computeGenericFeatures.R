@@ -20,8 +20,6 @@
 #' @export
 #' @import utils
 #' @importFrom AnnotationHub AnnotationHub
-#' @importFrom CENTREannotation fetch_data
-#' @importClassesFrom CENTREannotation CENTREannotDb
 #' @importFrom ExperimentHub ExperimentHub
 #' @importFrom CENTREprecomputed fetch_data
 #' @importClassesFrom CENTREprecomputed CENTREprecompDb
