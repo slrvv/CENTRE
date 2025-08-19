@@ -7,14 +7,14 @@
 createPairs(ids, enhancerCentered = FALSE)
 }
 \arguments{
-\item{ids}{Vector with gene ENSEMBL id's or enhancer cCREs ids}
+\item{ids}{Vector with gene ENSEMBL id's or enhancer cCREs ids.}
 
 \item{enhancerCentered}{Boolean value. If true the pairs are computed from
 enhancers. In the default setting (false) pairs are computed from genes.}
 }
 \value{
 dataframe with two columns the ENSEMBL id's without their version and
-the enhancer id's (ENCODE cCREs)
+the enhancer id's (ENCODE cCREs).
 }
 \description{
 Creates all of the possible gene enhancer pairs at 500kb distance
@@ -23,8 +23,13 @@ from enhancers, in that mode we collect all gene enhancer pairs at 500kb distanc
 of the enhancer middle point.
 }
 \examples{
-#Create gene enhancer pairs
+#Create gene enhancer pairs from genes 
 ids <- c("ENSG00000130203.10",
 "ENSG00000171119.3")
 pairs <- CENTRE::createPairs(ids)
+
+#Create gene enhancer pairs from enhancers
+ids_enh <- c("EH38E3750708", "EH38E2776554")
+pairs_enh <- CENTRE::createPairs(ids_enh, enhancerCentered = TRUE)
+
 }

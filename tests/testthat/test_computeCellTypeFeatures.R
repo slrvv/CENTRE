@@ -3,7 +3,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
 
   ##testing on thyroid data (we need the input data to be smaller and contained
   ##within the package)
-  
+  message("Loading the data from ExperimentHub and the package")
   eh <- ExperimentHub::ExperimentHub()
   # ##we might need to redo this
   files <- c(system.file("extdata",
@@ -22,7 +22,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
                          condition = c(1, 1, 1), replicate = c(1, 1, 1),
                          bamFile = files, inputFile = rep(inputs, 3))
 
-  tpmpath <- unname(eh[["EH9545"]])
+  tpmpath <- suppressMessages(unname(eh[["EH9545"]]))
   tpmfile <-  read.table(tpmpath, sep = "", stringsAsFactors = F, header = T)
   tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
   
@@ -42,7 +42,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
                                                input.free = FALSE,
                                                cores = 1,
                                                sequencing = "single",
-                                               tpmfile = tpmfile,
+                                               tpmData = tpmfile,
 					                                     chr = "chr19",
                                                pairs = pairs)
 
@@ -78,7 +78,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
                                                 input.free = FALSE,
                                                 cores = 1,
                                                 sequencing = "single",
-                                                tpmfile = tpmfile,
+                                                tpmData = tpmfile,
                                                 chr = "chr19",
                                                 pairs = pairs1)
 
@@ -105,7 +105,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
                                                input.free = FALSE,
                                                cores = 2,
                                                sequencing = "single",
-                                               tpmfile = tpmfile,
+                                               tpmData = tpmfile,
                                                chr = "chr19",
                                                pairs = pairs)
   celltype_features$pair <- paste(celltype_features$enhancer_id,
@@ -130,6 +130,29 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
                          expcelltype_features$norm_reg_dist_enh,
                          tolerance = 1e-2)
   
-
+  message("Check that error messages are raised")
+  testthat::expect_error(computeCellTypeFeatures(metaData,
+                          replicate = 1,
+                          input.free = FALSE,
+                          cores = 2,
+                          sequencing = "single",
+                          tpmData = tpmfile,
+                          chr = "chr19"))
+  testthat::expect_error(computeCellTypeFeatures(metaData,
+                                                 replicate = 1,
+                                                 input.free = FALSE,
+                                                 cores = 2,
+                                                 sequencing = "single",
+                                                 chr = "chr19",
+                                                 pairs = pairs))
+  colnames(pairs) <- c("gene","enh")
+  testthat::expect_error(computeCellTypeFeatures(metaData,
+                                                 replicate = 1,
+                                                 input.free = FALSE,
+                                                 cores = 2,
+                                                 sequencing = "single",
+                                                 tpmData = tpmfile,
+                                                 chr = "chr19",
+                                                 pairs = pairs))
 
 })

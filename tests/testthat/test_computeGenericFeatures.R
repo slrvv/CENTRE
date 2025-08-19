@@ -1,5 +1,6 @@
 
 test_that("compute generic feature function runs as expected", {
+  message("Test that errors are raised as expected")
   ##test errors are raised
   testthat::expect_error(computeGenericFeatures())
   
@@ -7,21 +8,19 @@ test_that("compute generic feature function runs as expected", {
                           enh_id = c("EH38E3350767"))
   testthat::expect_error(computeGenericFeatures(error_dat))
 
-  #Defining inputs for compute features function
-  input <- readRDS(file = system.file("extdata",
-                                      "input_generic_features.rds",
-                                      package = "CENTRE"))
+  
   #rename the same dataframe used for createPairs for the sake of storing less
   #data
-  colnames(input) <- c("gene_id1", "enhancer_id")
+  
 
   ##Expected result for this function
   expected <- readRDS(file = system.file("extdata",
                                          "expected_generic_features.rds",
                                          package = "CENTRE"))
-
-  ## generate features with all of the input
   
+  input <- expected[,c("gene_id1", "enhancer_id")]
+  ## generate features with all of the input
+  message("Test computeGenericFeatures with full input")
   pred <- computeGenericFeatures(input)
 
   pred$pair <- paste(pred$enhancer_id,
@@ -44,6 +43,7 @@ test_that("compute generic feature function runs as expected", {
   testthat::expect_equal(pred$combined_tests,
                          expected$combined_tests,
                          tolerance =1e-5)
+  message("Test function with one pair and two pairs")
   ## gen features with only one pair
   input1 <- data.frame(gene_id1 = c("ENSG00000059728.6"),
                       enhancer_id = c("EH38E3350767"))

@@ -87,22 +87,20 @@ If you are in use case one you will need to use `createPairs()`. This
 function fins all enhancers in 500kb from the transcription start site of the
 input genes and creates all possible enhancer gene pairs.
 
-It takes as input a dataframe `genes` with one column of ENSEMBL gene ID's.
+It takes as input a vector `genes` with ENSEMBL gene ID's.
 The output is a dataframe of two columns one with the gene ID's (without version
 identifier) and the corresponding ENCODE cCREs enhancer ID's.
 
 It also has a mode where pairs are computed from ENCODE cCREs enhancer ID's.
 ```{r run-createpairs}
 library(CENTRE)
-ids <- as.data.frame(c("ENSG00000130203.10",
-                         "ENSG00000171119.3"))
-colnames(ids) <- c("gene_id") #It is important to name the column gene_id
+ids <- c("ENSG00000130203.10", "ENSG00000171119.3")
+
 pairs <- createPairs(ids)
 head(pairs)
 #pairs computed from enhancer
-ids <- data.frame(c("EH38E3750708", "EH38E2776554"))
-colnames(ids) <- "enhancer_id"
-pairs_enh <- createPairs(ids, enhancerCentered = TRUE)
+ids_enh <- c("EH38E3750708", "EH38E2776554")
+pairs_enh <- createPairs(ids_enh, enhancerCentered = TRUE)
 head(pairs_enh)
 ```
 
@@ -121,7 +119,6 @@ datasets.
 tests.
 
 ```{r computegenericfeat}
-colnames(pairs) <- c("gene_id", "enhancer_id")
 generic_features <- computeGenericFeatures(pairs)
 head(generic_features)
 ```
@@ -181,30 +178,47 @@ and make the occupy less memory. In order for CENTRE to run as intended the user
 should provide genome-wide bam files and leave `chr` parameter NULL.
 
 ```{r computecelltypefeat}
-files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam", package = "CENTRE"),
-          system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam", package = "CENTRE"),
-          system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam", package = "CENTRE"))
-          
-# Control ChIP-seq experiment to go with the rest of ChIP-seqs
-inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam", package = "CENTRE")
 
+#For the sake of space the BAM files in this example have been reduced to a 
+#small regions so we provide two pairs that are located in this region.
+pairs <- data.frame(gene_id1=c("ENSG00000105281", "ENSG00000105281"),
+                    enhancer_id=c("EH38E1958626", "EH38E3310851"))
+ 
+generic_features <- CENTRE::computeGenericFeatures(pairs)
+
+
+#Compute Cell-type features
+eh <- ExperimentHub::ExperimentHub()
+##we might need to redo this
+files <- c(system.file("extdata",
+                        "example/HeLa_H3K4me1.REF_chr19_reduced.bam",
+                        package = "CENTRE"),
+            system.file("extdata",
+                        "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
+                        package = "CENTRE"), 
+            system.file("extdata",
+                        "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
+                        package = "CENTRE"))
+inputs <- system.file("extdata",
+                       "example/HeLa_input.REF_chr19_reduced.bam",
+                       package = "CENTRE")
 metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
-                       condition = c(1, 1, 1), replicate = c(1, 1, 1),
-                       bamFile = files, inputFile = rep(inputs, 3))
-
-
-tpmfile <- read.table(system.file("extdata/example",
-                                   "HeLa-S3.tsv",
-                                   package = "CENTRE"), 
-                       header = TRUE, sep = "\t")
-
+                        condition = c(1, 1, 1), replicate = c(1, 1, 1),
+                        bamFile = files, inputFile = rep(inputs, 3))
+ 
+tpmpath <- unname(eh[["EH9545"]])
+tpmfile <-  read.table(tpmpath, 
+                       sep = "", 
+                       stringsAsFactors = FALSE, 
+                       header = TRUE)
+tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
 
 celltype_features <- computeCellTypeFeatures(metaData,
                                              replicate = 1,
                                              input.free = FALSE,
                                              cores = 1,
                                              sequencing = "single",
-                                             tpmfile = tpmfile,
+                                             tpmData = tpmfile,
                                              pairs = pairs)
 head(celltype_features)
 

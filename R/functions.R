@@ -13,6 +13,7 @@ geneCenteredPairs <- function(gene){
   
   ## connect to our GENCODE v40 database to get tts of the genes
   
+  message("Getting gene annotation.\n")
   ah <- AnnotationHub::AnnotationHub()
   
   CENTREannotgeneDb <- ah[["AH116730"]]
@@ -38,6 +39,7 @@ geneCenteredPairs <- function(gene){
   
   #Select all of the annotation for ccres v3
   
+  message("Getting enhancer annotation.\n")
   CENTREannotenhDb <- ah[["AH116731"]]
   
   #to make the ranges that is overlapped smaller retrieve only the genes in 
@@ -81,7 +83,7 @@ geneCenteredPairs <- function(gene){
 enhancerCenteredPairs <- function(enhancer){
   
   #get chromosome and middle point of our enhancers
-  
+  message("Getting enhancer annotation.\n")
   ah <- AnnotationHub::AnnotationHub()
 
   CENTREannotenhDb <- ah[["AH116731"]]
@@ -103,6 +105,7 @@ enhancerCenteredPairs <- function(enhancer){
                                            extend.end = 500000)
   
   #Select all of the annotation from gencode
+  message("Getting gene annotation.\n")
   CENTREannotgeneDb <- ah[["AH116730"]]
   
   #to make the ranges that is overlapped smaller retrieve only the genes in 
@@ -147,10 +150,9 @@ enhancerCenteredPairs <- function(enhancer){
 #'@param x data.frame containing column of pair identifiers.
 #'@noRd
 getPrecomputedValues <- function(table, feature, x) {
-  
   eh <- ExperimentHub::ExperimentHub()
   #connect to precomputed data through experimentHub
-  precompDb <- eh[["EH9540"]]
+  suppressMessages(precompDb <- eh[["EH9540"]])
   #fetch the needed data from the database using CENTREprecomputed package
   dfReturn <- CENTREprecomputed::fetch_data(precompDb, 
                                             table = table, 

@@ -10,7 +10,7 @@ computeCellTypeFeatures(
   input.free = FALSE,
   cores,
   sequencing = "single",
-  tpmfile,
+  tpmData,
   chr = NULL,
   pairs
 )
@@ -33,7 +33,7 @@ will be run in input.free mode.}
 \item{sequencing}{Type of sequencing of the ChIP-seq experiments "paired" or
 "single". The parameter takes single as default}
 
-\item{tpmfile}{Dataframe of two columns one with the RNA-seq TPM values,
+\item{tpmData}{Dataframe of two columns one with the RNA-seq TPM values,
 one with the names of the genes given as ENSEMBLE ID's}
 
 \item{chr}{NULL or a vector of chromosomes. Use only if the crupR
@@ -59,38 +59,41 @@ Computes the cell type specific features needed for the CENTRE classification
 step.
 }
 \examples{
-#Create gene enhancer pairs
-genes <- as.data.frame(c("ENSG00000130203.10",
-"ENSG00000171119.3"))
-colnames(genes) <- c("gene_id") #It is important to name the column gene_id
-pairs <- CENTRE::createPairs(genes)
+pairs <- data.frame(gene_id1=c("ENSG00000105281"),
+                    enhancer_id=c("EH38E1958626"))
 
-#Compute generic features
-colnames(pairs) <- c("gene_id", "enhancer_id")
 generic_features <- CENTRE::computeGenericFeatures(pairs)
 
 #Compute Cell-type features
-files <- c(system.file("extdata/example","HeLa_H3K4me1.REF_chr19.bam",
-           package = "CENTRE"),
-system.file("extdata/example","HeLa_H3K4me3.REF_chr19.bam",
-            package = "CENTRE"),
-system.file("extdata/example","HeLa_H3K27ac.REF_chr19.bam",
-            package = "CENTRE"))
-# Control ChIP-seq experiment to go with the rest of ChIP-seqs
-inputs <- system.file("extdata/example", "HeLa_input.REF_chr19.bam",
-          package = "CENTRE")
+eh <- ExperimentHub::ExperimentHub()
+
+files <- c(system.file("extdata",
+                       "example/HeLa_H3K4me1.REF_chr19_reduced.bam",
+                       package = "CENTRE"),
+           system.file("extdata",
+                       "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
+                       package = "CENTRE"), 
+           system.file("extdata",
+                       "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
+                       package = "CENTRE"))
+inputs <- system.file("extdata",
+                      "example/HeLa_input.REF_chr19_reduced.bam",
+                      package = "CENTRE")
 metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
-                     condition = c(1, 1, 1), replicate = c(1, 1, 1),
-                      bamFile = files, inputFile = rep(inputs, 3))
-tpmfile <- read.table(system.file("extdata/example", "HeLa-S3.tsv",
-                     package = "CENTRE"),
-                     sep = "\t", stringsAsFactors = FALSE, header = TRUE)
+                       condition = c(1, 1, 1), replicate = c(1, 1, 1),
+                       bamFile = files, inputFile = rep(inputs, 3))
+
+tpmpath <- unname(eh[["EH9545"]])
+tpmfile <-  read.table(tpmpath, 
+sep = "", stringsAsFactors = FALSE, 
+header = TRUE)
+tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
                                                     replicate = 1,
                                                     input.free = FALSE,
                                                     cores = 1,
                                                     sequencing = "single",
-                                                    tpmfile = tpmfile,
+                                                    tpmData = tpmfile,
                                                     pairs = pairs)
 
 }

@@ -21,21 +21,23 @@
 #' @import utils
 #' @importFrom AnnotationHub AnnotationHub
 #' @importFrom ExperimentHub ExperimentHub
+#' @importFrom CENTREannotation fetch_data
+#' @importClassesFrom CENTREannotation CENTREannotDb
 #' @importFrom CENTREprecomputed fetch_data
 #' @importClassesFrom CENTREprecomputed CENTREprecompDb
 #' @importFrom dplyr inner_join left_join join_by %>% rename select
 computeGenericFeatures <- function(pairs) {
   startTime <- Sys.time()
-  message("Computing CENTRE generic features")
+  message("Computing CENTRE generic features\n\n")
   # Pre-eliminary checks and computations
   if(missing(pairs)){
-    stop("Need to provide a dataframe of enhancer and gene pairs")
+    stop("Need to provide a dataframe of enhancer and gene pairs.")
   }
 
   needed_names <- c("gene_id1", "enhancer_id")
   if (!all(needed_names %in% colnames(pairs))) {
     missing_cols <- setdiff(needed_names, colnames(pairs))
-    stop("Error: The following expected columns are missing: ",
+    stop("The following expected columns are missing: ",
     paste(missing_cols, collapse = ", "))
 
   }
@@ -43,24 +45,26 @@ computeGenericFeatures <- function(pairs) {
   ## remove version identifier just in case user provided it.
   pairs$gene_id1 <- gsub("\\..*", "", pairs$gene_id1)
   ## Computing the distance features
-  message("Computing distance features")
+  message("Computing distance features...\n")
 
   featuresDistances <- computeDistances(pairs)
 
-  message("Removing pairs with distance over 500 Kb")
+  message("Removing pairs with distance over 500 Kb.\n")
   featuresDistances <- featuresDistances[featuresDistances$distance
                                            <= 500000, ]
   ## Getting the values for the Wilcoxon tests and the CRUP correlations
-  message("Get Wilcoxon tests and CRUP correlations")
+  message("Getting Wilcoxon tests and CRUP correlations...\n")
 
   featuresDistances$pair <- paste(featuresDistances$enhancer_id,
                                    featuresDistances$gene_id1,
                                    sep = "_")
   #connect to the precomputed values database
-
+  message("Load Wilcoxon tests from ExperimentHub.\n")
   combinedTestDf <- getPrecomputedValues("combinedTestData",
                                          "combined_tests",
                                          featuresDistances)
+  
+  message("Load CRUP correlations from ExperimentHub.\n")
   crupCorDf <- getPrecomputedValues("crup_cor",
                                     "cor_CRUP",
                                     featuresDistances)

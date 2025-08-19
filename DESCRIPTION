@@ -23,13 +23,15 @@ Imports:
     crupR,
     CENTREprecomputed, 
     CENTREannotation,
-    metapod,
-    RSQLite,
     GenomicRanges,
     IRanges,
     regioneR,
     utils,
-    stats
+    stats,
+    AnnotationHub,
+    ExperimentHub, 
+    dplyr,
+    BiocParallel
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: 
@@ -37,6 +39,7 @@ Depends:
 Suggests: 
     knitr,
     testthat (>= 3.0.0),
+    BiocStyle
 Config/testthat/edition: 3
-biocViews: BiologicalQuestion, Software
+biocViews: BiologicalQuestion, Software, GeneTarget
 VignetteBuilder: knitr

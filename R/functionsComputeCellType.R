@@ -22,6 +22,7 @@ createRegionsDf <- function(listProm, listEnh, pairs) {
                                                           "new_end"), 
                                               entries = listProm, 
                                               column_filter = "gene_id1")
+  
   #get chr middle new_start new_end point of input enhancers
   regionsEnhancer <- CENTREannotation::fetch_data(CENTREannotenhDb,
                                                   columns = c("enhancer_id", 
@@ -61,12 +62,12 @@ computeCrupEnhancer <- function(regionsEnhancer,
                                 promprob = FALSE) {
   
   #Overlapping the  enhancer ranges with the crup scores
+
   enhancerRanges <- with(regionsEnhancer,
                          GenomicRanges::GRanges(chr.enh,
                                                 IRanges::IRanges(start = new_start.enh,
                                                                  end = new_end.enh),
                                                 enhancer_id = enhancer_id))
-  
   enhancerRanges <- unique(enhancerRanges)
   hitsCrup <- GenomicRanges::findOverlaps(enhancerRanges, crupScores)
   cresEP <- data.frame(cres = hitsCrup@from, EP = hitsCrup@to)
@@ -166,13 +167,13 @@ createBetweenRanges <- function(regions) {
   regions$chr <- regions$chr.enh
   #Make the gene enhancer pairs into ranges
   regions$pair <- paste(regions$enhancer_id, regions$gene_id1, sep = "_")
-  
   betweenRanges <- with(regions,
                         GenomicRanges::GRanges(chr,
                                                IRanges::IRanges(start = bstart,
                                                                 end = bend),
                                                pair = pair))
   betweenRanges <- unique(betweenRanges)
+
   return(betweenRanges)
 }
 
