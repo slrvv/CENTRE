@@ -7,24 +7,26 @@
 computeGenericFeatures(pairs)
 }
 \arguments{
-\item{pairs}{Dataframe with the gene-enhancer pairs of interest}
+\item{pairs}{Data.frame with the gene-enhancer pairs of interest}
 }
 \value{
-A data frame containting the following computed features :
+A data frame containing the following computed features :
 \itemize{
-\item distance: Distance between gene and enhancer
+\item distance: Distance between gene and enhancer.
 \item combined_tests: Combined value of the Wilcoxon tests (CAGE, DNase
 expression, CRUP expression and DNase DNase)
-\item crup_cor: CRUP correlation scores
+\item crup_cor: CRUP correlation scores.
 }
 }
 \description{
-Computes the generic features needed by CENTRE to make predictions
+Computes the generic features needed by CENTRE to make predictions.
 }
 \examples{
-#Create gene enhancer pairs
-genes <-c("ENSG00000130203.10",
-"ENSG00000280087.1") 
+# Create gene enhancer pairs
+genes <- c(
+    "ENSG00000130203.10",
+    "ENSG00000280087.1"
+)
 pairs <- CENTRE::createPairs(genes)
 generic_features <- CENTRE::computeGenericFeatures(pairs)
 }

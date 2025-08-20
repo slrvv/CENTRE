@@ -3,8 +3,7 @@
 #' Computes the cell type specific features needed for the CENTRE classification
 #' step.
 #'
-#'
-#' @param metaData Dataframe indicating the paths to the ChIP-seq experiments.
+#' @param metaData Data.frame indicating the paths to the ChIP-seq experiments.
 #' More information on the format here `crupR::normalize
 #' @param replicate The number of replicates of the ChIP-seq experiments
 #' that need to be normalized.
@@ -23,136 +22,154 @@
 #' not used crupR normalization is done for all chromosomes.
 #' Using only certain chromosomes for normalization might change results
 #' and is not the intented used of crupR or CENTRE.
-#' @param pairs The output of `CENTRE::createPairs()`
+#' @param pairs The output of `CENTRE::createPairs()`.
 #'
 #'
 #' @return
-#' A table containting the following computed features :
+#' A table containing the following computed features :
 #'* CRUP enhancer score for enhancer region, promoter region and the region
-#'between the enhancer and the promoter.
+#' between the enhancer and the promoter.
 #'* CRUP promoter score for enhancer region, promoter region and the region
-#'between the enhancer and the promoter.
+#' between the enhancer and the promoter.
 #'* TPM values from the RNA-seq experiment given.
 #'
 #'
 #' @examples
-#' pairs <- data.frame(gene_id1=c("ENSG00000105281"),
-#'                     enhancer_id=c("EH38E1958626"))
-#' 
+#' pairs <- data.frame(
+#'     gene_id1 = c("ENSG00000105281"),
+#'     enhancer_id = c("EH38E1958626")
+#' )
+#'
 #' generic_features <- CENTRE::computeGenericFeatures(pairs)
-#' 
-#' #Compute Cell-type features
+#'
+#' # Compute Cell-type features
 #' eh <- ExperimentHub::ExperimentHub()
-#' 
-#' files <- c(system.file("extdata",
-#'                        "example/HeLa_H3K4me1.REF_chr19_reduced.bam",
-#'                        package = "CENTRE"),
-#'            system.file("extdata",
-#'                        "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
-#'                        package = "CENTRE"), 
-#'            system.file("extdata",
-#'                        "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
-#'                        package = "CENTRE"))
+#'
+#' files <- c(
+#'     system.file("extdata",
+#'         "example/HeLa_H3K4me1.REF_chr19_reduced.bam",
+#'         package = "CENTRE"
+#'     ),
+#'     system.file("extdata",
+#'         "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
+#'         package = "CENTRE"
+#'     ),
+#'     system.file("extdata",
+#'         "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
+#'         package = "CENTRE"
+#'     )
+#' )
 #' inputs <- system.file("extdata",
-#'                       "example/HeLa_input.REF_chr19_reduced.bam",
-#'                       package = "CENTRE")
-#' metaData <- data.frame(HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
-#'                        condition = c(1, 1, 1), replicate = c(1, 1, 1),
-#'                        bamFile = files, inputFile = rep(inputs, 3))
-#' 
+#'     "example/HeLa_input.REF_chr19_reduced.bam",
+#'     package = "CENTRE"
+#' )
+#' metaData <- data.frame(
+#'     HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
+#'     condition = c(1, 1, 1), replicate = c(1, 1, 1),
+#'     bamFile = files, inputFile = rep(inputs, 3)
+#' )
+#'
 #' tpmpath <- unname(eh[["EH9545"]])
-#' tpmfile <-  read.table(tpmpath, 
-#' sep = "", stringsAsFactors = FALSE, 
-#' header = TRUE)
+#' tpmfile <- read.table(tpmpath,
+#'     sep = "", stringsAsFactors = FALSE,
+#'     header = TRUE
+#' )
 #' tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
 #' celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
-#'                                                     replicate = 1,
-#'                                                     input.free = FALSE,
-#'                                                     cores = 1,
-#'                                                     sequencing = "single",
-#'                                                     tpmData = tpmfile,
-#'                                                     pairs = pairs)
+#'     replicate = 1,
+#'     input.free = FALSE,
+#'     cores = 1,
+#'     sequencing = "single",
+#'     tpmData = tpmfile,
+#'     pairs = pairs
+#' )
 #'
-#'@export
-#'@importFrom crupR normalize getEnhancers
-#'@import utils
-#'@importFrom GenomicRanges GRanges findOverlaps elementMetadata
-#'@importFrom IRanges IRanges
-#'@importFrom stats reshape
-#'@importFrom AnnotationHub AnnotationHub
-#'@importFrom CENTREannotation fetch_data
-#'@importClassesFrom CENTREannotation CENTREannotDb
-#'@importFrom dplyr left_join join_by inner_join %>% select
-#'@importFrom BiocParallel MulticoreParam
+#' @export
+#' @importFrom crupR normalize getEnhancers
+#' @import utils
+#' @importFrom GenomicRanges GRanges findOverlaps elementMetadata
+#' @importFrom IRanges IRanges
+#' @importFrom stats reshape
+#' @importFrom AnnotationHub AnnotationHub
+#' @importFrom CENTREannotation fetch_data
+#' @importClassesFrom CENTREannotation CENTREannotDb
+#' @importFrom dplyr left_join join_by inner_join %>% select
+#' @importFrom BiocParallel MulticoreParam
 computeCellTypeFeatures <- function(metaData,
-                                    replicate,
-                                    input.free = FALSE,
-                                    cores,
-                                    sequencing = "single",
-                                    tpmData,
-                                    chr = NULL,
-                                    pairs) {
-  startTime <- Sys.time()
-  ## Computing the crup scores
-  message("Computing CRUP score features...\n")
-  
-  if(missing(pairs)){
-    stop("Need to provide a dataframe of enhancer and gene pairs.")
-  }
-  
-  needed_names <- c("gene_id1", "enhancer_id")
-  if (!all(needed_names %in% colnames(pairs))) {
-    missing_cols <- setdiff(needed_names, colnames(pairs))
-    stop("Error: The following expected columns are missing: ",
-         paste(missing_cols, collapse = ", "))
-    
-  }
-  
-  if(missing(tpmData)){
-    stop("Need to provide a dataframe of RNA-seq TPM values.")
-  }
-  ## Calling normalization step only on the chromosomes we have
-  normalized <- crupR::normalize(metaData = metaData,
-                                 condition = 1,
-                                 replicate = replicate,
-                                 mapq = 10,
-                                 input.free = input.free,
-                                 genome = "hg38",
-                                 sequencing = sequencing,
-                                 chroms = chr,
-                                 BPPARAM = BiocParallel::MulticoreParam(workers = cores))
-  #Get CRUP enhancer probabilities
-  crupScores <- crupR::getEnhancers(data = normalized, all = TRUE)
-  listEnh <- unique(pairs$enhancer_id)
-  listProm <- unique(pairs$gene_id1)
-  #Get Gencode and CCRes anntotations for the input genes and enhancers
-  regions <- createRegionsDf(listProm, listEnh, pairs)
-  pairs$pair <- paste(pairs$enhancer_id, pairs$gene_id1, sep = "_")
+    replicate,
+    input.free = FALSE,
+    cores,
+    sequencing = "single",
+    tpmData,
+    chr = NULL,
+    pairs) {
+    startTime <- Sys.time()
+    ## Computing the crup scores
+    message("Computing CRUP score features...\n")
 
-  message(paste0("Getting the CRUP-EP scores for enhancer, promoter and the",
-                 "\n",
-                 "regulatory distance...\n"))
+    if (missing(pairs)) {
+        stop("Need to provide a dataframe of enhancer and gene pairs.")
+    }
 
-  crupEPFeatures <- getEPFeatures(regions, crupScores, pairs)
+    needed_names <- c("gene_id1", "enhancer_id")
+    if (!all(needed_names %in% colnames(pairs))) {
+        missing_cols <- setdiff(needed_names, colnames(pairs))
+        stop(
+            "Error: The following expected columns are missing: ",
+            paste(missing_cols, collapse = ", ")
+        )
+    }
 
-  
-  message(paste0("Getting the CRUP-PP scores for enhancer, promoter and the",
-                 "\n",
-                 "regulatory distance...\n"))
+    if (missing(tpmData)) {
+        stop("Need to provide a dataframe of RNA-seq TPM values.")
+    }
+    ## Calling normalization step only on the chromosomes we have
+    normalized <- crupR::normalize(
+        metaData = metaData,
+        condition = 1,
+        replicate = replicate,
+        mapq = 10,
+        input.free = input.free,
+        genome = "hg38",
+        sequencing = sequencing,
+        chroms = chr,
+        BPPARAM = BiocParallel::MulticoreParam(workers = cores)
+    )
+    # Get CRUP enhancer probabilities
+    crupScores <- crupR::getEnhancers(data = normalized, all = TRUE)
+    listEnh <- unique(pairs$enhancer_id)
+    listProm <- unique(pairs$gene_id1)
+    # Get Gencode and CCRes anntotations for the input genes and enhancers
+    regions <- createRegionsDf(listProm, listEnh, pairs)
+    pairs$pair <- paste(pairs$enhancer_id, pairs$gene_id1, sep = "_")
 
-  #Crup promoter scores for distance
-  # Compute the promoter probability from probA and probE
-  # In CRUP probA is the probability of a region being an active reg. element
-  # probE is the probability of a region being an active enhancer
-  crupScores$probP <- crupScores$probA * (1 - crupScores$probE)
-  crupFeatures <- getPPFeatures(regions, crupScores, crupEPFeatures)
+    message(paste0(
+        "Getting the CRUP-EP scores for enhancer, promoter and the",
+        "\n",
+        "regulatory distance...\n"
+    ))
 
-  message("Getting the TPM values.\n")
-  featuresTableAll <- getRNAseq(crupFeatures, tpmData)
+    crupEPFeatures <- getEPFeatures(regions, crupScores, pairs)
 
-  featuresTableAll <- reformatDf(featuresTableAll)
 
-  message(paste0("time: ", format(Sys.time() - startTime), "\n"))
-  return(featuresTableAll)
+    message(paste0(
+        "Getting the CRUP-PP scores for enhancer, promoter and the",
+        "\n",
+        "regulatory distance...\n"
+    ))
 
+    # Crup promoter scores for distance
+    # Compute the promoter probability from probA and probE
+    # In CRUP probA is the probability of a region being an active reg. element
+    # probE is the probability of a region being an active enhancer
+    crupScores$probP <- crupScores$probA * (1 - crupScores$probE)
+    crupFeatures <- getPPFeatures(regions, crupScores, crupEPFeatures)
+
+    message("Getting the TPM values.\n")
+    featuresTableAll <- getRNAseq(crupFeatures, tpmData)
+
+    featuresTableAll <- reformatDf(featuresTableAll)
+
+    message(paste0("time: ", format(Sys.time() - startTime), "\n"))
+    return(featuresTableAll)
 }

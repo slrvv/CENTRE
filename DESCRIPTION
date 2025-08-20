@@ -1,16 +1,17 @@
 Package: CENTRE
 Type: Package
-Title: an R package to predict tissue specific enhancer target interactions
+Title: A Bioconductor package to predict cell-type specific enhancer target interactions
 Version: 0.99.0
-Authors@R: c(person("Sara", "Lopez Ruiz de Vargas", role = c("cre"), 
+Authors@R: c(person("Sara", "Lopez Ruiz de Vargas", role = c("cre", "aut"), 
            email = "lopez_s@molgen.mpg.de", 
            comment=c(ORCID="0000-0002-1290-4774")),
-           person("Trisevgeni", "Rapakoulia", role = c("aut"), email = ""),
+           person("Trisevgeni", "Rapakoulia", role = c("aut"), 
+           email = "trisevgeni.x.rapakoulia@gsk.com"),
            person("Martin", "Vingron", role = c("aut"), 
            email = "vingron@molgen.mpg.de"))
-Description: An R package to predict Enhancer Promoter Interactions in specific
-             tissues. The package has two main use cases : the user can give a
-             file with genes of interest or enhancer target pairs of interest. 
+Description: Bioconductor package to predict cell-type specific enhancer target
+             interactions.The package has two main use cases; the user can give 
+             a file with genes of interest or enhancer target pairs of interest. 
              In the first case CENTRE will generate the enhancer target pairs
              and predict how likely they are to interact in the tissue and in
              the second case it will predict how likely the given pairs are to
@@ -35,7 +36,7 @@ Imports:
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: 
-    R (>= 4.4.0)
+    R (>= 4.5.0)
 Suggests: 
     knitr,
     testthat (>= 3.0.0),
@@ -43,3 +44,5 @@ Suggests:
 Config/testthat/edition: 3
 biocViews: BiologicalQuestion, Software, GeneTarget
 VignetteBuilder: knitr
+URL: https://github.com/slrvv/CENTRE
+BugReports: https://github.com/slrvv/CENTRE/issues

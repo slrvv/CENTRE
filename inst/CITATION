@@ -1,0 +1,18 @@
+citEntry(entry="article",
+         title = " CENTRE: a gradient boosting algorithm for Cell-type-specific ENhancer-Target pREdiction",
+         author = personList( as.person("Trisevgeni Rapakoulia"),
+                              as.person("Sara Lopez Ruiz de Vargas"),
+                              as.person("Persia Akbari Omgba"),
+                              as.person("Verena Laupert"),
+                              as.person("Igor Ulitsky"),
+                              as.person("Martin Vingron")),
+         year = 2023,
+         journal = "Bioinformatics",
+         doi = "10.1093/bioinformatics/btad687",
+         volume = 39,
+         issue = 11,
+         textVersion =
+         paste("Trisevgeni Rapakoulia, Sara Lopez Ruiz De Vargas, Persia Akbari Omgba, Verena Laupert, ",
+          "Igor Ulitsky, Martin Vingron, CENTRE: a gradient boosting algorithm for Cell-type-specific ",
+          "ENhancer-Target pREdiction, Bioinformatics, Volume 39, Issue 11, November 2023, btad687, ",
+          "https://doi.org/10.1093/bioinformatics/btad687" ) )

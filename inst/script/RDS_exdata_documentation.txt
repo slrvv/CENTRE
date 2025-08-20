@@ -1,0 +1,43 @@
+RDS files
+
+This is a documentation of how the .rds files were made and how they are used.
+
+- centre2_final_model.rds
+This is the pretrained XGBoost model. The details of the training can be seen
+in the CENTRE paper https://doi.org/10.1093/bioinformatics/btad687. The final 
+model was saved as TXT, loaded into R via xgboost::xgb.load() and saved as 
+RDS using saveRDS()
+
+- expected_gene_pairs.rds
+Expected output of createPairs() for unit tests. It was made by using 
+createPairs() on genes ENSG00000105281 and ENSG00000180458
+
+- expected_enh_pairs.rds
+Expected output of createPairs() enhancer centered for unit tests. 
+It was made by using createPairs() on enhancers EH38E3750708 and EH38E2776554.
+
+- expected_generic_features.rds
+Expected output of computeGenericFeatures() for unit tests. Created by picking 
+enhancer target pairs at random from a list of enhancer targets in Thyroid 
+validated by BENGI https://github.com/weng-lab/BENGI/tree/master/Benchmark. 
+The input used for the tests is the 1st and 2nd column of this dataset.
+
+- input_cellType_pairs.rds
+Input used for the unit tests of computeCellTypeFeatures(). First the pairs are
+created using createPairs() on gene ENSG00000105281. Then, the result is fed to 
+computeGenericFeatures(), using the output we discard all the pairs with distance
+larger than 10000 and keep the gene_id1 and enhancer_id columns. 
+The region.bed file was defined based on this output. To make sure the BAM files
+would cover the regions of these pairs we defined regions.bed by taking the smallest
+and largest coordinate of all of the enhancers and genes in the output.
+
+- expected_cellType_HeLa_reduced.rds	
+Expected ouput for unit tests of computeCellTypeFeatures(). To create the dataset
+function computeCellTypeFeatures() was run using input_cellType_pairs.rds, 
+the ChIP-seq in extdata/ and eh[["EH9545"]] as RNA-seq.
+
+- expected_predictions_hela.rds
+Expected predictions for centrePrediction() unit tests. The dataset was created 
+by taking input_cellType_pairs.rds and running computeGenericFeatures(). Then, 
+the computed generic features and the data in expected_cellType_HeLa_reduced.rds
+were fed to centrePrediction().

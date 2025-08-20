@@ -1,0 +1,19 @@
+BAM files 
+
+The BAM files in inst/extdata/example are ChIP-seq experiments on the cell line 
+HeLa-S3. The data is from ENCODE and correspond to the following experiments:
+
+| Experiment type| ENCODE experiment accession | File accession numbers|
+  | :------------  |   :------------------:      |    ----------------:  |
+  | H3K4me1        |ENCSR000APW| ENCFF712AAP, ENCFF826OLG|
+  | H3K4me3        | ENCSR340WQU|ENCFF650IXI, ENCFF760VTC |
+  | H3K27ac        |ENCSR000AOC | ENCFF609ZAE, ENCFF711QAI |
+  | ChIP-seq Control| ENCSR000AOB|ENCFF017QCL, ENCFF842IEZ|
+
+The replicate BAM files were merged using bamtools merge, separated
+by chromosome using bamtools split. Then, we further reduced the bamfiles
+to only contain the region chr19	46788301	46797200 (inst/extdata/region.bed) 
+and indexed the reduced filesby using inst/script/make_chip_smaller.sh
+
+These files are used in the examples and tests of computeCellTypeFeatures().
+The reduction of BAM files was done to avoid having large data in the package.
