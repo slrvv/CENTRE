@@ -25,7 +25,7 @@
 #' @importFrom ExperimentHub ExperimentHub
 #' @importFrom CENTREannotation fetch_data
 #' @importClassesFrom CENTREannotation CENTREannotDb
-#' @importFrom CENTREprecomputed fetch_data
+#' @importFrom CENTREprecomputed fetch_data_precomp
 #' @importClassesFrom CENTREprecomputed CENTREprecompDb
 #' @importFrom dplyr inner_join left_join join_by %>% rename select
 computeGenericFeatures <- function(pairs) {

@@ -282,7 +282,7 @@ getPrecomputedValues <- function(table, feature, x) {
     # connect to precomputed data through experimentHub
     suppressMessages(precompDb <- eh[["EH9540"]])
     # fetch the needed data from the database using CENTREprecomputed package
-    dfReturn <- CENTREprecomputed::fetch_data(precompDb,
+    dfReturn <- CENTREprecomputed::fetch_data_precomp(precompDb,
         table = table,
         columns = c("pair", feature),
         entries = x$pair,
