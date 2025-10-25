@@ -12,12 +12,12 @@
 #'* crup_cor: CRUP correlation scores.
 #'
 #' @examples
-#' # Create gene enhancer pairs
-#' genes <- c(
-#'     "ENSG00000130203.10",
-#'     "ENSG00000280087.1"
-#' )
-#' pairs <- CENTRE::createPairs(genes)
+#' # for the example we load pairs pre-computed with the createPairs()
+#' #function
+#' pairs <- readRDS(file = system.file("extdata",
+#'        "input_cellType_pairs.rds",
+#'        package = "CENTRE"
+#'    ))
 #' generic_features <- CENTRE::computeGenericFeatures(pairs)
 #' @export
 #' @import utils

@@ -35,12 +35,13 @@
 #'
 #'
 #' @examples
-#' pairs <- data.frame(
-#'     gene_id1 = c("ENSG00000105281"),
-#'     enhancer_id = c("EH38E1958626")
-#' )
-#'
-#' generic_features <- CENTRE::computeGenericFeatures(pairs)
+#' #for the sake of runtime we load pairs that
+#' #were precomputed for the example. The user should run createPairs()
+#' #to get them.
+#' pairs <- readRDS(file = system.file("extdata",
+#'        "input_cellType_pairs.rds",
+#'        package = "CENTRE"
+#'    ))
 #'
 #' # Compute Cell-type features
 #' eh <- ExperimentHub::ExperimentHub()
