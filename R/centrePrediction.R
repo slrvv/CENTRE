@@ -14,6 +14,7 @@
 #' them interacting based on CENTRE model
 #'
 #' @examples
+#'\dontrun{
 #' pairs <- readRDS(file = system.file("extdata",
 #'        "input_cellType_pairs.rds",
 #'        package = "CENTRE"
@@ -27,7 +28,7 @@
 #'    ))
 #' # Finally compute the predictions
 #' predictions <- centrePrediction(celltype_features, generic_features)
-#'
+#'}
 #' @export
 #' @importFrom stats predict
 #' @import utils

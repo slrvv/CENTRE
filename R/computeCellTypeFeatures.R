@@ -38,6 +38,7 @@
 #' #for the sake of runtime we load pairs that
 #' #were precomputed for the example. The user should run createPairs()
 #' #to get them.
+#' \dontrun{
 #' pairs <- readRDS(file = system.file("extdata",
 #'        "input_cellType_pairs.rds",
 #'        package = "CENTRE"
@@ -79,13 +80,13 @@
 #' celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
 #'     replicate = 1,
 #'     input.free = FALSE,
-#'     cores = 2,
+#'     cores = 1,
 #'     chr = "chr19",
 #'     sequencing = "single",
 #'     tpmData = tpmfile,
 #'     pairs = pairs
 #' )
-#'
+#'}
 #' @export
 #' @importFrom crupR normalize getEnhancers
 #' @import utils
