@@ -250,7 +250,7 @@ and the model (CENTRE model by default).
 Returns a dataframe with the `pairs` ID `enhancer_id` and `gene_id` concatenated
 by a `_` of the corresponding pair and the label and probability for each of the pairs.
 R
-```{r prediction}
+```{r prediction, eval = F}
 # Finally compute the predictions
 predictions <- centrePrediction(
     celltype_features,
