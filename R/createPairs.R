@@ -21,8 +21,8 @@
 #' pairs <- CENTRE::createPairs(ids)
 #'
 #' # Create gene enhancer pairs from enhancers
-#' ids_enh <- c("EH38E3750708", "EH38E2776554")
-#' pairs_enh <- CENTRE::createPairs(ids_enh, enhancerCentered = TRUE)
+#' # ids_enh <- c("EH38E3750708", "EH38E2776554")
+#' # pairs_enh <- CENTRE::createPairs(ids_enh, enhancerCentered = TRUE)
 #'
 #' @export
 #' @import utils

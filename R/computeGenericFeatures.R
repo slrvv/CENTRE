@@ -14,10 +14,10 @@
 #' @examples
 #' # for the example we load pairs pre-computed with the createPairs()
 #' #function
-#' pairs <- readRDS(file = system.file("extdata",
-#'        "input_cellType_pairs.rds",
-#'        package = "CENTRE"
-#'    ))
+#' pairs <- data.frame(
+#'    gene_id1 = c("ENSG00000105281", "ENSG00000105281"),
+#'    enhancer_id = c("EH38E1958626", "EH38E3310851")
+#')
 #' generic_features <- CENTRE::computeGenericFeatures(pairs)
 #' @export
 #' @import utils
@@ -27,9 +27,11 @@
 #' @importClassesFrom CENTREannotation CENTREannotDb
 #' @importFrom CENTREprecomputed fetch_data_precomp
 #' @importClassesFrom CENTREprecomputed CENTREprecompDb
-#' @importFrom dplyr inner_join left_join join_by %>% rename select
+#' @importFrom dplyr inner_join left_join join_by %>% rename select .data
 computeGenericFeatures <- function(pairs) {
     startTime <- Sys.time()
+    gene_id1 <- pair <- enhancer_id <- NULL
+    distance <- cor_CRUP <- crup_cor <- combined_tests <- NULL
     message("Computing CENTRE generic features\n\n")
     # Pre-eliminary checks and computations
     if (missing(pairs)) {

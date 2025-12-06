@@ -79,7 +79,8 @@
 #' celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
 #'     replicate = 1,
 #'     input.free = FALSE,
-#'     cores = 1,
+#'     cores = 2,
+#'     chr = "chr19",
 #'     sequencing = "single",
 #'     tpmData = tpmfile,
 #'     pairs = pairs
@@ -94,7 +95,7 @@
 #' @importFrom AnnotationHub AnnotationHub
 #' @importFrom CENTREannotation fetch_data
 #' @importClassesFrom CENTREannotation CENTREannotDb
-#' @importFrom dplyr left_join join_by inner_join %>% select
+#' @importFrom dplyr left_join join_by inner_join %>% select .data
 #' @importFrom BiocParallel MulticoreParam
 computeCellTypeFeatures <- function(metaData,
     replicate,

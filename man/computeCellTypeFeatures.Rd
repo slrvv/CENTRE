@@ -59,12 +59,13 @@ Computes the cell type specific features needed for the CENTRE classification
 step.
 }
 \examples{
-pairs <- data.frame(
-    gene_id1 = c("ENSG00000105281"),
-    enhancer_id = c("EH38E1958626")
-)
-
-generic_features <- CENTRE::computeGenericFeatures(pairs)
+#for the sake of runtime we load pairs that
+#were precomputed for the example. The user should run createPairs()
+#to get them.
+pairs <- readRDS(file = system.file("extdata",
+       "input_cellType_pairs.rds",
+       package = "CENTRE"
+   ))
 
 # Compute Cell-type features
 eh <- ExperimentHub::ExperimentHub()
@@ -102,7 +103,8 @@ tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
 celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
     replicate = 1,
     input.free = FALSE,
-    cores = 1,
+    cores = 2,
+    chr = "chr19",
     sequencing = "single",
     tpmData = tpmfile,
     pairs = pairs

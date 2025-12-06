@@ -1,5 +1,6 @@
 # helper functions of main package functions except for computeCellTypeFeatures
-
+#'@importFrom utils globalVariables
+utils::globalVariables(c("gene_id1", "enhancer_id", "pair"))
 #' @description Create the candidate enhancer gene pairs at 500KB from the input
 #' genes. Helper function of createPairs()
 #'

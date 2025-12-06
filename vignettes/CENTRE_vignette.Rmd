@@ -124,9 +124,8 @@ computed data sets in CENTREprecomputed.
 - `combined_tests`: The combined p-values of all of the pre-computed Wilcoxon
 tests. This is one of the pre-computed data sets in CENTREprecomputed.
 
-```{r computegenericfeat}
+```{r computegenericfeat, eval = FALSE}
 generic_features <- computeGenericFeatures(pairs)
-head(generic_features)
 ```
 
 ## Step 3: Compute Cell Type Features
@@ -185,7 +184,7 @@ faster and make the BAM files occupy less memory. In order for CENTRE to run as
 intended the user should provide genome-wide BAM files and leave `chr` parameter 
 as NULL.
 
-```{r computecelltypefeat}
+```{r computecelltypefeat, eval = FALSE}
 # For the sake of space the BAM files in this example have been reduced to a
 # small regions so we provide two pairs that are located in this region.
 pairs <- data.frame(
@@ -234,13 +233,12 @@ tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
 celltype_features <- computeCellTypeFeatures(metaData,
     replicate = 1,
     input.free = FALSE,
-    cores = 1,
+    cores = 2,
     sequencing = "single",
     tpmData = tpmfile,
     chr = "chr19",
     pairs = pairs
 )
-head(celltype_features)
 ```
 
 ### Step 4: Classify Gene Enhancer Pairs
@@ -252,14 +250,13 @@ and the model (CENTRE model by default).
 
 Returns a dataframe with the `pairs` ID `enhancer_id` and `gene_id` concatenated
 by a `_` of the corresponding pair and the label and probability for each of the pairs.
-
-```{r prediction}
+R
+```{r prediction, eval = FALSE}
 # Finally compute the predictions
 predictions <- centrePrediction(
     celltype_features,
     generic_features
 )
-head(predictions)
 ```
 
 ```{r session}

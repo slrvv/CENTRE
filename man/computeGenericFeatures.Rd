@@ -22,11 +22,11 @@ expression, CRUP expression and DNase DNase)
 Computes the generic features needed by CENTRE to make predictions.
 }
 \examples{
-# Create gene enhancer pairs
-genes <- c(
-    "ENSG00000130203.10",
-    "ENSG00000280087.1"
+# for the example we load pairs pre-computed with the createPairs()
+#function
+pairs <- data.frame(
+   gene_id1 = c("ENSG00000105281", "ENSG00000105281"),
+   enhancer_id = c("EH38E1958626", "EH38E3310851")
 )
-pairs <- CENTRE::createPairs(genes)
 generic_features <- CENTRE::computeGenericFeatures(pairs)
 }

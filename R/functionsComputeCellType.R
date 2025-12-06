@@ -1,6 +1,32 @@
 # helper functions of the computeCellTypeFeatures function
-
-
+#'@importFrom utils globalVariables
+utils::globalVariables(c("gene_id1",
+            "enhancer_id",
+            "EP_prob_enh.1",
+            "EP_prob_enh.2",
+            "EP_prob_enh.3",
+            "EP_prob_enh.4",
+            "EP_prob_enh.5",
+            "EP_prob_gene.1",
+            "EP_prob_gene.2",
+            "EP_prob_gene.3",
+            "EP_prob_gene.4",
+            "EP_prob_gene.5",
+            "reg_dist_enh",
+            "norm_reg_dist_enh",
+            "PP_prob_enh.1",
+            "PP_prob_enh.2",
+            "PP_prob_enh.3",
+            "PP_prob_enh.4",
+            "PP_prob_enh.5",
+            "PP_prob_gene.1",
+            "PP_prob_gene.2",
+            "PP_prob_gene.3",
+            "PP_prob_gene.4",
+            "PP_prob_gene.5",
+            "reg_dist_prom",
+            "norm_reg_dist_prom",
+            "TPM"))
 #' @description Create a data.frame containing the positional information of
 #' enhancers and genes in the pairs data.frame outputted by createPairs()
 #'
@@ -221,6 +247,7 @@ createBetweenRanges <- function(regions) {
 #' @param betweenRanges GRanges of the regions between each enhancer-gene pair
 #' @noRd
 computeCrupRegDistanceEnh <- function(input, prediction, betweenRanges) {
+    Var1 <- NULL
     ## overlap the ranges objects with predictions
     hitsEnh <- GenomicRanges::findOverlaps(betweenRanges, prediction)
     betweenMetadata <- GenomicRanges::elementMetadata(betweenRanges)
@@ -239,7 +266,7 @@ computeCrupRegDistanceEnh <- function(input, prediction, betweenRanges) {
             bins,
             binsPos,
             dplyr::join_by(Var1)
-        ) %>% replace(is.na(.), 0)
+        ) %>% replace(is.na(.data), 0)
 
         ## cases in which bins_pos is 0 will have an NA value which will be 0 in the
         ## next step
@@ -269,6 +296,7 @@ computeCrupRegDistanceEnh <- function(input, prediction, betweenRanges) {
 #' @param betweenRanges GRanges of the regions between each enhancer-gene pair
 #' @noRd
 computeCrupRegDistanceProm <- function(input, prediction, betweenRanges) {
+    Var1 <- NULL
     hitsProm <- GenomicRanges::findOverlaps(betweenRanges, prediction)
     betweenMetadata <- GenomicRanges::elementMetadata(betweenRanges)
     predMetadata <- GenomicRanges::elementMetadata(prediction)
@@ -285,7 +313,7 @@ computeCrupRegDistanceProm <- function(input, prediction, betweenRanges) {
             bins,
             binsPos,
             dplyr::join_by(Var1)
-        ) %>% replace(is.na(.), 0)
+        ) %>% replace(is.na(.data), 0)
         ## cases in which bins_pos is 0 will have an NA value which will be 0 in the
         ## next step
         colnames(allBins) <- c("pair", "bins", "bins_pos")
@@ -328,6 +356,7 @@ getRNAseq <- function(x, tpmfile) {
 #' @param crupScores GRanges of CRUP scores
 #' @noRd
 getEPFeatures <- function(regions, crupScores, pairs) {
+    gene_id1 <- enhancer_id <- NULL
     # Crup enhancer scores for enhancer
     crupEPenh <- computeCrupEnhancer(
         regions,
@@ -366,6 +395,7 @@ getEPFeatures <- function(regions, crupScores, pairs) {
 #' @param crupScores GRanges of CRUP scores with Promoter Probabilities
 #' @noRd
 getPPFeatures <- function(regions, crupScores, crupEPFeatures) {
+    gene_id1 <- enhancer_id <- NULL
     # Crup enhancer scores for enhancer
     crupPPenh <- computeCrupEnhancer(regions,
         crupScores,
@@ -434,7 +464,7 @@ reformatDf <- function(featuresDf) {
             norm_reg_dist_prom,
             TPM
         ) %>%
-        replace(is.na(.), 0)
+        replace(is.na(.data), 0)
 
     return(featuresDfReformat)
 }

@@ -14,54 +14,17 @@
 #' them interacting based on CENTRE model
 #'
 #' @examples
-#' pairs <- data.frame(
-#'     gene_id1 = c("ENSG00000105281"),
-#'     enhancer_id = c("EH38E1958626")
-#' )
+#' pairs <- readRDS(file = system.file("extdata",
+#'        "input_cellType_pairs.rds",
+#'        package = "CENTRE"
+#'    ))
 #'
-#' generic_features <- CENTRE::computeGenericFeatures(pairs)
+#' generic_features <- computeGenericFeatures(pairs)
 #'
-#' # Compute Cell-type features
-#' eh <- ExperimentHub::ExperimentHub()
-#'
-#' files <- c(
-#'     system.file("extdata",
-#'         "example/HeLa_H3K4me1.REF_chr19_reduced.bam",
-#'         package = "CENTRE"
-#'     ),
-#'     system.file("extdata",
-#'         "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
-#'         package = "CENTRE"
-#'     ),
-#'     system.file("extdata",
-#'         "example/HeLa_H3K4me3.REF_chr19_reduced.bam",
-#'         package = "CENTRE"
-#'     )
-#' )
-#' inputs <- system.file("extdata",
-#'     "example/HeLa_input.REF_chr19_reduced.bam",
-#'     package = "CENTRE"
-#' )
-#' metaData <- data.frame(
-#'     HM = c("H3K4me1", "H3K4me3", "H3K27ac"),
-#'     condition = c(1, 1, 1), replicate = c(1, 1, 1),
-#'     bamFile = files, inputFile = rep(inputs, 3)
-#' )
-#'
-#' tpmpath <- unname(eh[["EH9545"]])
-#' tpmfile <- read.table(tpmpath,
-#'     sep = "",
-#'     stringsAsFactors = FALSE, header = TRUE
-#' )
-#' tpmfile <- tpmfile[grep("E", tpmfile$gene_id), ]
-#' celltype_features <- CENTRE::computeCellTypeFeatures(metaData,
-#'     replicate = 1,
-#'     input.free = FALSE,
-#'     cores = 1,
-#'     sequencing = "single",
-#'     tpmData = tpmfile,
-#'     pairs = pairs
-#' )
+#' celltype_features <- readRDS(file = system.file("extdata",
+#'        "expected_cellType_HeLa_reduced.rds",
+#'        package = "CENTRE"
+#'    ))
 #' # Finally compute the predictions
 #' predictions <- centrePrediction(celltype_features, generic_features)
 #'
@@ -69,10 +32,12 @@
 #' @importFrom stats predict
 #' @import utils
 #' @importFrom xgboost xgb.load xgb.DMatrix
-#' @importFrom dplyr select inner_join %>%
+#' @importFrom dplyr select inner_join %>% .data
 centrePrediction <- function(features_celltype,
     features_generic,
     model = NULL) {
+    pair <- enhancer_id <- gene_id1 <- NULL
+    distance <- crup_cor <- combined_tests <- NULL
     # Merge the generic features and the cell type features
 
     start_time <- Sys.time()

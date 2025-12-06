@@ -1,4 +1,4 @@
-test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
+test_that("computeCellTypeFeatures functions runs as expected for HeLa", {
     ## Defining inputs for compute features function
 
     ## testing on thyroid data (we need the input data to be smaller and contained
@@ -50,7 +50,7 @@ test_that("computeCellTypeFeatures functions runs as expected for thyroid", {
     celltype_features <- computeCellTypeFeatures(metaData,
         replicate = 1,
         input.free = FALSE,
-        cores = 1,
+        cores = 2,
         sequencing = "single",
         tpmData = tpmfile,
         chr = "chr19",
