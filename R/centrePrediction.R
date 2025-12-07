@@ -34,6 +34,7 @@
 #' @import utils
 #' @importFrom xgboost xgb.load xgb.DMatrix
 #' @importFrom dplyr select inner_join %>% .data
+#' @importFrom R.utils gunzip
 centrePrediction <- function(features_celltype,
     features_generic,
     model = NULL) {
@@ -73,13 +74,16 @@ centrePrediction <- function(features_celltype,
 
     ## Loading the xgboost model
     if (is.null(model)) {
-        xgb_model <- readRDS(system.file("extdata",
-            "centre2_final_model.rds",
+        gz_file <- system.file("extdata",
+            "centre2_final_model.json.gz",
             package = "CENTRE"
-        ))
-    } else {
-        xgb_model <- xgboost::xgb.load(model)
+            )
+        tmp_model_file <- tempfile(fileext = ".json")
+        R.utils::gunzip(gz_file, destname=tmp_model_file, remove = FALSE)
+        model <- tmp_model_file
     }
+    xgb_model <- xgboost::xgb.load(model)
+
 
     ## Transforming data
     pairs <- features_all$pair

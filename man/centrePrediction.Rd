@@ -25,6 +25,7 @@ Predicts if the enhancer gene pairs are interacting from the generic
 features and cell type features.
 }
 \examples{
+\dontrun{
 pairs <- readRDS(file = system.file("extdata",
        "input_cellType_pairs.rds",
        package = "CENTRE"
@@ -38,5 +39,5 @@ celltype_features <- readRDS(file = system.file("extdata",
    ))
 # Finally compute the predictions
 predictions <- centrePrediction(celltype_features, generic_features)
-
+}
 }

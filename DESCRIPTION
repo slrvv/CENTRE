@@ -1,7 +1,7 @@
 Package: CENTRE
 Type: Package
 Title: A Bioconductor package to predict cell-type specific enhancer target interactions
-Version: 0.99.4
+Version: 0.99.5
 Authors@R: c(person("Sara", "Lopez Ruiz de Vargas", role = c("cre", "aut"), 
            email = "lopez_s@molgen.mpg.de", 
            comment=c(ORCID="0000-0002-1290-4774")),
@@ -32,7 +32,8 @@ Imports:
     AnnotationHub,
     ExperimentHub, 
     dplyr,
-    BiocParallel
+    BiocParallel, 
+    R.utils
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: 
